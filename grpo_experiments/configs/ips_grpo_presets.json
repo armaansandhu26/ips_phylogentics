@@ -1,0 +1,73 @@
+{
+  "_comment": "IPS-GRPO experiment presets. Load with: --preset <name>. CLI flags override preset values.",
+  "_outcome_levels": {
+    "topology": "p_hat uses tree_topology_id (unrooted shape only; default for mode-collapse)",
+    "signature": "p_hat uses topology_id + log_score (3 dp); finer than topology, coarser than full trajectory"
+  },
+  "topology_sanity": {
+    "run_name": "ips_topology_sanity",
+    "outcome_level": "topology",
+    "epochs": 5,
+    "steps_per_epoch": 10,
+    "on_policy_batch_size": 64,
+    "replay_batch_size": 0,
+    "disable_replay": true,
+    "seed": 0
+  },
+  "signature_sanity": {
+    "run_name": "ips_signature_sanity",
+    "outcome_level": "signature",
+    "epochs": 5,
+    "steps_per_epoch": 10,
+    "on_policy_batch_size": 64,
+    "replay_batch_size": 0,
+    "disable_replay": true,
+    "seed": 0
+  },
+  "topology_ds1": {
+    "run_name": "ips_topology_ds1",
+    "outcome_level": "topology",
+    "dataset_path": "dataset/benchmark_datasets/DS1_reduced.pickle",
+    "epochs": 500,
+    "steps_per_epoch": 20,
+    "on_policy_batch_size": 512,
+    "replay_batch_size": 0,
+    "disable_replay": true,
+    "seed": 0
+  },
+  "signature_ds1": {
+    "run_name": "ips_signature_ds1",
+    "outcome_level": "signature",
+    "dataset_path": "dataset/benchmark_datasets/DS1_reduced.pickle",
+    "epochs": 500,
+    "steps_per_epoch": 20,
+    "on_policy_batch_size": 512,
+    "replay_batch_size": 0,
+    "disable_replay": true,
+    "seed": 0
+  },
+  "topology_replay_ds1": {
+    "run_name": "ips_topology_replay_ds1",
+    "outcome_level": "topology",
+    "dataset_path": "dataset/benchmark_datasets/DS1_reduced.pickle",
+    "epochs": 500,
+    "steps_per_epoch": 20,
+    "on_policy_batch_size": 512,
+    "replay_batch_size": 512,
+    "replay_buffer_size": 512,
+    "disable_replay": false,
+    "seed": 0
+  },
+  "signature_replay_ds1": {
+    "run_name": "ips_signature_replay_ds1",
+    "outcome_level": "signature",
+    "dataset_path": "dataset/benchmark_datasets/DS1_reduced.pickle",
+    "epochs": 500,
+    "steps_per_epoch": 20,
+    "on_policy_batch_size": 512,
+    "replay_batch_size": 512,
+    "replay_buffer_size": 512,
+    "disable_replay": false,
+    "seed": 0
+  }
+}

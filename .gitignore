@@ -1,1 +1,9 @@
 .idea/
+.venv/
+.vscode/
+__pycache__/
+*.pyc
+
+# Local experiment outputs and archived work — not for the repo
+archive/
+grpo_experiments/runs/

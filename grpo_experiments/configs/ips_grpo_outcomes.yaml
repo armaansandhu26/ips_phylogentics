@@ -1,0 +1,72 @@
+# IPS-GRPO outcome-level comparison presets (reference + loadable via --preset).
+#
+# Outcome levels for p_hat(o):
+#   topology  — tree_topology_id (ete3 MD5 of unrooted shape; ignores branch lengths)
+#   signature — topology_id + "_" + log_score (3 decimals)
+#
+# List presets:  python -m grpo_experiments.ips_grpo.train --list-presets
+# Quick compare:  run topology_sanity and signature_sanity with the same seed
+
+topology_sanity:
+  run_name: ips_topology_sanity
+  outcome_level: topology
+  epochs: 5
+  steps_per_epoch: 10
+  on_policy_batch_size: 64
+  replay_batch_size: 0
+  disable_replay: true
+  seed: 0
+
+signature_sanity:
+  run_name: ips_signature_sanity
+  outcome_level: signature
+  epochs: 5
+  steps_per_epoch: 10
+  on_policy_batch_size: 64
+  replay_batch_size: 0
+  disable_replay: true
+  seed: 0
+
+topology_ds1:
+  run_name: ips_topology_ds1
+  outcome_level: topology
+  dataset: dataset/benchmark_datasets/DS1_reduced.pickle
+  epochs: 500
+  steps_per_epoch: 20
+  on_policy_batch_size: 512
+  replay_batch_size: 0
+  disable_replay: true
+  seed: 0
+
+signature_ds1:
+  run_name: ips_signature_ds1
+  outcome_level: signature
+  dataset: dataset/benchmark_datasets/DS1_reduced.pickle
+  epochs: 500
+  steps_per_epoch: 20
+  on_policy_batch_size: 512
+  replay_batch_size: 0
+  disable_replay: true
+  seed: 0
+
+topology_replay_ds1:
+  run_name: ips_topology_replay_ds1
+  outcome_level: topology
+  dataset: dataset/benchmark_datasets/DS1_reduced.pickle
+  epochs: 500
+  steps_per_epoch: 20
+  on_policy_batch_size: 512
+  replay_batch_size: 512
+  replay_buffer_size: 512
+  seed: 0
+
+signature_replay_ds1:
+  run_name: ips_signature_replay_ds1
+  outcome_level: signature
+  dataset: dataset/benchmark_datasets/DS1_reduced.pickle
+  epochs: 500
+  steps_per_epoch: 20
+  on_policy_batch_size: 512
+  replay_batch_size: 512
+  replay_buffer_size: 512
+  seed: 0

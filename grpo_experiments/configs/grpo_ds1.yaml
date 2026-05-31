@@ -1,0 +1,43 @@
+# Example experiment presets for PhyloGFN vs GRPO comparison.
+# These mirror CLI flags — use as reference or pass via shell scripts.
+
+# --- quick sanity (5 min on CPU/GPU) ---
+# python -m grpo_experiments.train --method grpo  --run-name sanity --epochs 5  --steps-per-epoch 10 --on-policy-batch-size 32
+# python -m grpo_experiments.train --method phylgfn --run-name sanity --epochs 5  --steps-per-epoch 10 --on-policy-batch-size 32
+
+# --- DS1 reduced, pure on-policy GRPO (G=512) ---
+grpo_on_policy:
+  method: grpo
+  run_name: ds1_grpo_g512
+  dataset: dataset/benchmark_datasets/DS1_reduced.pickle
+  cfg: src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4.yaml
+  epochs: 500
+  steps_per_epoch: 20
+  on_policy_batch_size: 512      # GRPO group size G (no replay)
+  replay_batch_size: 0
+  disable_replay: true
+  grpo_lr: 1.0e-4
+  outcome_level: topology          # track topology diversity (recommended)
+
+# --- PhyloGFN TB baseline (matched batch size) ---
+phylgfn_baseline:
+  method: phylgfn
+  run_name: ds1_phylgfn
+  dataset: dataset/benchmark_datasets/DS1_reduced.pickle
+  cfg: src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4.yaml
+  epochs: 500
+  steps_per_epoch: 20
+  on_policy_batch_size: 512
+  replay_batch_size: 512           # PhyloGFN also uses best-tree replay by default
+  replay_buffer_size: 512
+  outcome_level: topology
+
+# --- GRPO with replay (G = 512 + 512 = 1024) ---
+grpo_with_replay:
+  method: grpo
+  run_name: ds1_grpo_replay
+  on_policy_batch_size: 512
+  replay_batch_size: 512
+  replay_buffer_size: 512
+  epochs: 500
+  steps_per_epoch: 20
