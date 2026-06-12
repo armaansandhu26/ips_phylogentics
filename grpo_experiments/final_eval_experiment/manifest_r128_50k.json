@@ -1,0 +1,33 @@
+{
+  "experiment": "final_eval_group_run",
+  "group": "r128",
+  "config_path": "/home/armaan/phylogfn/grpo_experiments/final_eval_experiment/config_r128_50k.json",
+  "gpu": "cuda:7",
+  "runs": [
+    {
+      "id": "finaleval50k_phylgfn_r128_b512",
+      "method": "phylgfn",
+      "run_dir": "/home/armaan/phylogfn/grpo_experiments/final_eval_experiment/topo/20260611_200403_finaleval50k_phylgfn_r128_b512_phylgfn",
+      "group": "r128",
+      "outcome": "topo",
+      "gpu": "cuda:7"
+    },
+    {
+      "id": "finaleval50k_hyb_grpo_r128_b512",
+      "method": "hybrid_grpo",
+      "run_dir": "/home/armaan/phylogfn/grpo_experiments/final_eval_experiment/topo/20260611_235426_finaleval50k_hyb_grpo_r128_b512_hybrid_grpo",
+      "group": "r128",
+      "outcome": "topo",
+      "gpu": "cuda:7"
+    },
+    {
+      "id": "finaleval50k_hyb_ips_pfloor_002_r128_b512",
+      "method": "hybrid_ips_grpo",
+      "run_dir": "/home/armaan/phylogfn/grpo_experiments/final_eval_experiment/topo/20260612_033520_finaleval50k_hyb_ips_pfloor_002_r128_b512_hybrid_ips_grpo",
+      "group": "r128",
+      "outcome": "topo",
+      "gpu": "cuda:7",
+      "ips_prob_floor": 0.002
+    }
+  ]
+}

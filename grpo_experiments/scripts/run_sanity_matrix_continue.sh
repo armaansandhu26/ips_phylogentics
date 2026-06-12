@@ -97,7 +97,12 @@ run_new exp4_grpo_is "GRPO + policy IS" grpo \
   --dataset "$DS" --cfg "$CFG" \
   --epochs "$EPOCHS" --steps-per-epoch "$STEPS" --seed "$SEED" --device "$DEVICE" \
   --on-policy-batch-size "$BUFFER" --buffer-size "$BUFFER" --disable-replay \
-  --grpo-lr "$GRPO_LR" \
+  --grpo-lr "${POLICY_IS_LR:-5e-5}" \
+  --resample-rounds "${RESAMPLE_ROUNDS:-25}" \
+  --update-cycles "${UPDATE_CYCLES:-2}" \
+  --is-ratio-clip "${IS_RATIO_CLIP:-0.2}" \
+  --is-ratio-max "${IS_RATIO_MAX:-5.0}" \
+  --is-log-ratio-max "${IS_LOG_RATIO_MAX:-2.0}" \
   --checkpoint-every "$CHECKPOINT_EVERY"
 
 run_new exp5_ips_replay "IPS-GRPO + replay" ips_grpo \
@@ -120,7 +125,13 @@ run_new exp6_ips_is "IPS-GRPO + policy IS" ips_grpo \
   --epochs "$EPOCHS" --steps-per-epoch "$STEPS" --seed "$SEED" --device "$DEVICE" \
   --on-policy-batch-size "$BUFFER" --buffer-size "$BUFFER" --disable-replay \
   --outcome-level topology \
-  --grpo-lr "$GRPO_LR" \
+  --grpo-lr "${POLICY_IS_LR:-5e-5}" \
+  --ips-prob-floor "${IPS_PROB_FLOOR:-0.05}" \
+  --resample-rounds "${RESAMPLE_ROUNDS:-25}" \
+  --update-cycles "${UPDATE_CYCLES:-2}" \
+  --is-ratio-clip "${IS_RATIO_CLIP:-0.2}" \
+  --is-ratio-max "${IS_RATIO_MAX:-5.0}" \
+  --is-log-ratio-max "${IS_LOG_RATIO_MAX:-2.0}" \
   --checkpoint-every "$CHECKPOINT_EVERY"
 
 write_manifest

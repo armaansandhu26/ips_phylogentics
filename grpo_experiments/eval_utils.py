@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -109,6 +110,15 @@ def resolve_checkpoint(run_dir: Path, checkpoint_name: str | None = None) -> Pat
         path = run_dir / name
         if path.exists():
             return path
+
+    epoch_ckpts = sorted(run_dir.glob("checkpoint_epoch*.pt"))
+    if epoch_ckpts:
+        return epoch_ckpts[-1]
+
+    round_ckpts = sorted(run_dir.glob("checkpoint_round*.pt"))
+    if round_ckpts:
+        return round_ckpts[-1]
+
     raise FileNotFoundError(f"no checkpoint found in {run_dir}")
 
 
@@ -168,6 +178,107 @@ def load_generator(artifacts: RunArtifacts, device: str):
     return cfg, env, generator
 
 
+def logmeanexp(values: torch.Tensor) -> torch.Tensor:
+    """Stable log(mean(exp(values))) for a 1D tensor."""
+    if values.ndim != 1:
+        raise ValueError(f"logmeanexp expects shape (N,), got {tuple(values.shape)}")
+    return torch.logsumexp(values, dim=0) - math.log(values.shape[0])
+
+
+def check_finite_tensor(name: str, tensor: torch.Tensor) -> None:
+    """Raise if a tensor contains nan/inf values."""
+    if not torch.isfinite(tensor).all():
+        bad = int((~torch.isfinite(tensor)).sum().item())
+        raise ValueError(f"{name} contains {bad} non-finite values.")
+
+
+def sample_trees_from_generator(
+    rollout_worker: RolloutWorker,
+    generator,
+    *,
+    sample_trees: int,
+    batch_size: int,
+) -> list[Any]:
+    """Sample final trees from a trained generator."""
+    trees: list[Any] = []
+    generated = 0
+    while generated < sample_trees:
+        current_batch = min(batch_size, sample_trees - generated)
+        _, trajectories = rollout_worker.rollout(
+            generator,
+            current_batch,
+            generate_full_trajectories=True,
+        )
+        batch_trees = [traj.current_state.subtrees[0] for traj in trajectories]
+        trees.extend(batch_trees)
+        generated += len(batch_trees)
+    return trees
+
+
+def estimate_tree_logq(
+    env,
+    rollout_worker: RolloutWorker,
+    generator,
+    tree,
+    *,
+    n_backward_trajectories: int,
+) -> dict[str, Any]:
+    """Estimate tree-level log q(tree) via backward-sampled trajectories."""
+    input_actions_set = []
+    backward_lengths = []
+    for _ in range(n_backward_trajectories):
+        actions_list, _ = env.sample_backward_from_tree(tree)
+        input_actions_set.append(actions_list)
+        backward_lengths.append(len(actions_list))
+
+    with torch.no_grad():
+        data, _ = rollout_worker.rollout(
+            generator,
+            n_backward_trajectories,
+            generate_full_trajectories=False,
+            input_actions_set=input_actions_set,
+        )
+
+    log_paths_pf = data["log_paths_pf"]
+    log_paths_pb = data["log_paths_pb"]
+    log_rewards = data["log_rewards"]
+    log_scores = data["log_scores"]
+
+    check_finite_tensor("log_paths_pf", log_paths_pf)
+    check_finite_tensor("log_paths_pb", log_paths_pb)
+    check_finite_tensor("log_rewards", log_rewards)
+    check_finite_tensor("log_scores", log_scores)
+
+    log_pf = log_paths_pf.sum(dim=-1)
+    log_pb = log_paths_pb.sum(dim=-1)
+    check_finite_tensor("log_pf", log_pf)
+    check_finite_tensor("log_pb", log_pb)
+
+    importance_terms = log_pf - log_pb
+    check_finite_tensor("log_pf - log_pb", importance_terms)
+
+    log_q_tree = logmeanexp(importance_terms)
+    check_finite_tensor("log_q_tree", log_q_tree.unsqueeze(0))
+
+    return {
+        "log_q_tree": float(log_q_tree.item()),
+        "tree_log_score": float(tree.log_score),
+        "tree_log_reward_replayed": float(log_rewards[0].item()),
+        "importance_term_mean": float(importance_terms.mean().item()),
+        "importance_term_std": float(importance_terms.std().item()),
+        "importance_term_min": float(importance_terms.min().item()),
+        "importance_term_max": float(importance_terms.max().item()),
+        "log_pf_mean": float(log_pf.mean().item()),
+        "log_pb_mean": float(log_pb.mean().item()),
+        "num_backward_trajectories": int(n_backward_trajectories),
+        "trajectory_length_mean": float(np.mean(backward_lengths)),
+        "trajectory_length_min": int(min(backward_lengths)),
+        "trajectory_length_max": int(max(backward_lengths)),
+        "replayed_log_score_mean": float(log_scores.mean().item()),
+        "replayed_log_score_std": float(log_scores.std().item()),
+    }
+
+
 def moving_average(values: list[float], window: int) -> list[float]:
     if window <= 1:
         return values[:]
@@ -183,23 +294,149 @@ def moving_average(values: list[float], window: int) -> list[float]:
     return smoothed
 
 
+def effective_stride(num_rows: int, stride: int | None, max_points: int) -> int:
+    """Pick a stride so plotted points stay near max_points (always >= 1)."""
+    if num_rows <= 0:
+        return 1
+    if stride is None or stride < 1:
+        return max(1, (num_rows + max_points - 1) // max_points)
+    min_stride = max(1, (num_rows + max_points - 1) // max_points)
+    return max(stride, min_stride)
+
+
 def sample_series(
     rows: list[dict],
     key: str,
     smoothing_window: int,
-    stride: int,
+    stride: int | None,
+    *,
+    max_points: int = 2500,
 ) -> tuple[list[int], list[float]]:
     if key not in rows[0]:
         raise KeyError(f"metric key not found in metrics.jsonl: {key}")
     steps = [int(row["global_step"]) for row in rows]
     values = [float(row[key]) for row in rows]
     smoothed = moving_average(values, smoothing_window)
-    sampled_steps = steps[::stride]
-    sampled_values = smoothed[::stride]
+    step_stride = effective_stride(len(rows), stride, max_points)
+    sampled_steps = steps[::step_stride]
+    sampled_values = smoothed[::step_stride]
     if sampled_steps and sampled_steps[-1] != steps[-1]:
         sampled_steps.append(steps[-1])
         sampled_values.append(smoothed[-1])
     return sampled_steps, sampled_values
+
+
+def raw_series(rows: list[dict], key: str) -> tuple[list[int], list[float]]:
+    return (
+        [int(row["global_step"]) for row in rows],
+        [float(row[key]) for row in rows],
+    )
+
+
+def subsample_xy(
+    steps: list[int],
+    values: list[float],
+    max_points: int,
+) -> tuple[list[int], list[float]]:
+    stride = effective_stride(len(steps), None, max_points)
+    out_steps = steps[::stride]
+    out_values = values[::stride]
+    if out_steps and out_steps[-1] != steps[-1]:
+        out_steps.append(steps[-1])
+        out_values.append(values[-1])
+    return out_steps, out_values
+
+
+def sanitize_importance_ratio(value: float, cap: float) -> float:
+    """Map inf/nan to nan (breaks lines) and cap huge ratios for display."""
+    import math
+
+    if not math.isfinite(value):
+        return float("nan")
+    return min(max(value, 0.0), cap)
+
+
+def auto_smoothing_window(num_rows: int, requested: int) -> int:
+    """Scale rolling window with run length (25 <= w <= 500)."""
+    if requested > 0:
+        return max(1, min(requested, num_rows))
+    return max(25, min(500, num_rows // 400))
+
+
+def rolling_quantiles(
+    values: list[float],
+    window: int,
+    quantiles: tuple[float, ...] = (0.25, 0.5, 0.75),
+) -> dict[float, list[float]]:
+    arr = np.asarray(values, dtype=np.float64)
+    n = len(arr)
+    half = max(window // 2, 1)
+    out: dict[float, list[float]] = {q: [] for q in quantiles}
+    for idx in range(n):
+        sl = arr[max(0, idx - half) : min(n, idx + half + 1)]
+        finite = sl[np.isfinite(sl)]
+        if finite.size == 0:
+            for q in quantiles:
+                out[q].append(float("nan"))
+        else:
+            qs = np.quantile(finite, quantiles)
+            for q, val in zip(quantiles, qs):
+                out[q].append(float(val))
+    return out
+
+
+def rolling_finite_mean(
+    values: list[float],
+    window: int,
+    *,
+    cap: float | None = None,
+) -> list[float]:
+    arr = np.asarray(values, dtype=np.float64)
+    n = len(arr)
+    half = max(window // 2, 1)
+    out: list[float] = []
+    for idx in range(n):
+        sl = arr[max(0, idx - half) : min(n, idx + half + 1)]
+        finite = sl[np.isfinite(sl)]
+        if finite.size == 0:
+            out.append(float("nan"))
+            continue
+        if cap is not None:
+            finite = np.clip(finite, 0.0, cap)
+        out.append(float(finite.mean()))
+    return out
+
+
+def rolling_nonfinite_fraction(values: list[float], window: int) -> list[float]:
+    arr = np.asarray(values, dtype=np.float64)
+    n = len(arr)
+    half = max(window // 2, 1)
+    out: list[float] = []
+    for idx in range(n):
+        sl = arr[max(0, idx - half) : min(n, idx + half + 1)]
+        out.append(float(np.mean(~np.isfinite(sl))))
+    return out
+
+
+def percentile_ylim(
+    values: list[float],
+    *,
+    lo: float = 5.0,
+    hi: float = 95.0,
+    pad_frac: float = 0.08,
+    include_zero: bool = False,
+) -> tuple[float, float] | None:
+    finite = np.asarray([v for v in values if np.isfinite(v)], dtype=np.float64)
+    if finite.size == 0:
+        return None
+    ymin = float(np.percentile(finite, lo))
+    ymax = float(np.percentile(finite, hi))
+    if include_zero:
+        ymin = min(ymin, 0.0)
+        ymax = max(ymax, 0.0)
+    span = max(ymax - ymin, 1e-6)
+    pad = span * pad_frac
+    return ymin - pad, ymax + pad
 
 
 def entropy_from_counts(counts: dict[str, int]) -> float:

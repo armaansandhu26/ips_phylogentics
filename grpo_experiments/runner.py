@@ -40,9 +40,11 @@ import os
 import numpy as np
 
 from grpo_experiments.config import ExperimentConfig
-from grpo_experiments.grpo import GRPOTrainer
+from grpo_experiments.core.build_trainer import build_grpo_trainer
+from grpo_experiments.core.on_policy_buffer import run_on_policy_grpo_step, run_policy_is_grpo_cycles
+from grpo_experiments.core.trainer import GRPOTrainer
+from grpo_experiments.core.policy_replay import sample_replay_buffer
 from grpo_experiments.metrics import OutcomeTracker, batch_diversity_stats, extract_outcome_ids
-from grpo_experiments.policy_replay import reevaluate_log_paths_pf, sample_replay_buffer
 from grpo_experiments.resume import (
     load_epoch_summaries,
     load_generator_checkpoint,
@@ -81,11 +83,32 @@ def _train_phylgfn_step(generator, batch, mini_batch_splits: int) -> dict:
     }
 
 
-def _train_grpo_step(grpo_trainer: GRPOTrainer, batch: dict) -> dict:
-    return grpo_trainer.update_on_policy(batch)
+def _train_grpo_step(
+    grpo_trainer: GRPOTrainer,
+    rollout_worker,
+    generator,
+    batch: dict,
+    trajectories,
+    *,
+    random_spec,
+    generation_state: dict | None,
+    chunk_size: int,
+    device: str,
+) -> tuple[dict, dict]:
+    return run_on_policy_grpo_step(
+        grpo_trainer,
+        rollout_worker,
+        generator,
+        batch,
+        trajectories,
+        random_spec=random_spec,
+        generation_state=generation_state,
+        chunk_size=chunk_size,
+        device=device,
+    )
 
 
-def _build_grpo_trainer(exp_cfg: ExperimentConfig, generator) -> GRPOTrainer:
+def _build_grpo_trainer(exp_cfg: ExperimentConfig, generator, cfg) -> GRPOTrainer:
     params = get_generator_params(generator)
     if not params:
         raise RuntimeError(
@@ -93,15 +116,17 @@ def _build_grpo_trainer(exp_cfg: ExperimentConfig, generator) -> GRPOTrainer:
         )
     n_params = sum(p.numel() for p in params)
     print(f"GRPO optimizer: {len(params)} param groups, {n_params:,} parameters")
-    return GRPOTrainer(
-        params=params,
+    return build_grpo_trainer(
+        params,
         lr=exp_cfg.grpo_lr,
         clip_eps=exp_cfg.grpo_clip_eps,
-        beta=exp_cfg.grpo_beta,
+        clip_eps_high=exp_cfg.grpo_clip_eps_high,
         max_grad_norm=exp_cfg.grpo_max_grad_norm,
         advantage_eps=exp_cfg.grpo_advantage_eps,
-        is_ratio_clip=exp_cfg.is_ratio_clip,
-        is_ratio_max=exp_cfg.is_ratio_max,
+        entropy_coef=exp_cfg.grpo_entropy_coef,
+        reward_c=cfg.ENV.REWARD.C,
+        reward_scale=cfg.ENV.REWARD.SCALE,
+        num_iterations=exp_cfg.grpo_num_iterations,
     )
 
 
@@ -146,7 +171,7 @@ def _run_grpo_on_policy(exp_cfg: ExperimentConfig, device: str, output_dir: str,
 
     grpo_trainer = None
     if exp_cfg.method == "grpo":
-        grpo_trainer = _build_grpo_trainer(exp_cfg, generator)
+        grpo_trainer = _build_grpo_trainer(exp_cfg, generator, cfg)
 
     resume, metrics_path = _init_run_state(exp_cfg, output_dir, "on_policy", cfg)
     if resume is not None:
@@ -161,6 +186,7 @@ def _run_grpo_on_policy(exp_cfg: ExperimentConfig, device: str, output_dir: str,
     global_step = resume.global_step if resume else 0
     start_epoch = resume.start_epoch if resume else 0
     start_step = resume.start_step if resume else 0
+    generation_state = None
 
     for epoch in range(start_epoch, training_cfg.EPOCHS_NUM):
         exploration_specs = generate_exploration_spec(training_cfg.EXPLORATION, epoch)
@@ -186,7 +212,17 @@ def _run_grpo_on_policy(exp_cfg: ExperimentConfig, device: str, output_dir: str,
                     generator, batch, training_cfg.MINI_BATCH_SPLITS,
                 )
             else:
-                train_info = _train_grpo_step(grpo_trainer, batch)
+                train_info, generation_state = _train_grpo_step(
+                    grpo_trainer,
+                    rollout_worker,
+                    generator,
+                    batch,
+                    trajectories,
+                    random_spec=random_spec,
+                    generation_state=generation_state,
+                    chunk_size=exp_cfg.rollout_chunk_size,
+                    device=device,
+                )
 
             mean_log_reward = float(batch["log_rewards"].mean().item())
             mean_log_score = float(batch["log_scores"].mean().item())
@@ -281,7 +317,7 @@ def _run_grpo_policy_is(exp_cfg: ExperimentConfig, device: str, output_dir: str,
     generator = build_gfn(cfg, env, device, ddp=False)
     rollout_worker = RolloutWorker(env)
 
-    grpo_trainer = _build_grpo_trainer(exp_cfg, generator)
+    grpo_trainer = _build_grpo_trainer(exp_cfg, generator, cfg)
 
     resume, metrics_path = _init_run_state(exp_cfg, output_dir, "policy_is", cfg)
     if resume is not None:
@@ -317,9 +353,6 @@ def _run_grpo_policy_is(exp_cfg: ExperimentConfig, device: str, output_dir: str,
             random_spec=random_spec,
             device=device,
         )
-        log_pf_old = buffer.log_pf_old
-        advantages = grpo_trainer.compute_advantages(buffer.log_rewards)
-
         trees = reconstruct_trees(env, buffer.trajectories, buffer.log_scores)
         outcome_ids, topology_ids = extract_outcome_ids(trees, exp_cfg.outcome_level)
         tracker.update(outcome_ids, topology_ids)
@@ -338,20 +371,21 @@ def _run_grpo_policy_is(exp_cfg: ExperimentConfig, device: str, output_dir: str,
             )
             cycle_begin = 0
 
-        for cycle in range(cycle_begin, exp_cfg.effective_update_cycles):
-            log_paths_pf = reevaluate_log_paths_pf(
-                rollout_worker,
-                generator,
-                buffer,
-                chunk_size=exp_cfg.rollout_chunk_size,
-                device=device,
-            )
-            train_info = grpo_trainer.update(
-                log_paths_pf,
-                buffer.log_rewards,
-                log_pf_old=log_pf_old,
-                fixed_advantages=advantages,
-            )
+        advantages, advantage_metrics = grpo_trainer.precompute_advantages(buffer.log_scores)
+        cycle_train_infos = run_policy_is_grpo_cycles(
+            grpo_trainer,
+            rollout_worker,
+            generator,
+            buffer,
+            advantages=advantages,
+            advantage_metrics=advantage_metrics,
+            outcome_ids=None,
+            update_cycles=exp_cfg.effective_update_cycles - cycle_begin,
+            chunk_size=exp_cfg.rollout_chunk_size,
+            device=device,
+        )
+        for cycle_offset, train_info in enumerate(cycle_train_infos):
+            cycle = cycle_begin + cycle_offset
 
             mean_log_reward = float(buffer.log_rewards.mean().item())
             record = {

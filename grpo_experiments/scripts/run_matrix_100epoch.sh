@@ -32,9 +32,13 @@ GRPO_LR="${GRPO_LR:-1e-4}"
 DEVICE="${DEVICE:-cuda:0}"
 
 # Policy IS (exp4, exp6): resample often, same total updates as replay runs.
-RESAMPLE_ROUNDS="${RESAMPLE_ROUNDS:-1000}"
-UPDATE_CYCLES="${UPDATE_CYCLES:-10}"
+RESAMPLE_ROUNDS="${RESAMPLE_ROUNDS:-5000}"
+UPDATE_CYCLES="${UPDATE_CYCLES:-2}"
+POLICY_IS_LR="${POLICY_IS_LR:-5e-5}"
 IS_RATIO_CLIP="${IS_RATIO_CLIP:-0.2}"
+IS_RATIO_MAX="${IS_RATIO_MAX:-5.0}"
+IS_LOG_RATIO_MAX="${IS_LOG_RATIO_MAX:-2.0}"
+IPS_PROB_FLOOR="${IPS_PROB_FLOOR:-0.05}"
 ROLLOUT_CHUNK="${ROLLOUT_CHUNK:-128}"
 
 DS="dataset/benchmark_datasets/DS1_reduced.pickle"
@@ -158,6 +162,10 @@ payload = {
             "update_cycles": int("$UPDATE_CYCLES"),
             "total_policy_is_updates": int("$RESAMPLE_ROUNDS") * int("$UPDATE_CYCLES"),
             "is_ratio_clip": float("$IS_RATIO_CLIP"),
+            "is_ratio_max": float("$IS_RATIO_MAX"),
+            "is_log_ratio_max": float("$IS_LOG_RATIO_MAX"),
+            "ips_prob_floor": float("$IPS_PROB_FLOOR"),
+            "policy_is_lr": float("$POLICY_IS_LR"),
             "rollout_chunk_size": int("$ROLLOUT_CHUNK"),
         },
         "dataset": "$DS",
@@ -184,6 +192,8 @@ POLICY_IS_ARGS=(
   --resample-rounds "$RESAMPLE_ROUNDS"
   --update-cycles "$UPDATE_CYCLES"
   --is-ratio-clip "$IS_RATIO_CLIP"
+  --is-ratio-max "$IS_RATIO_MAX"
+  --is-log-ratio-max "$IS_LOG_RATIO_MAX"
   --rollout-chunk-size "$ROLLOUT_CHUNK"
 )
 
@@ -208,7 +218,7 @@ echo "matrix_root:  $MATRIX_ROOT"
 echo "shard:        ${SHARD:-all}"
 echo "device:       $DEVICE"
 echo "replay G:     $((ON_POLICY + REPLAY)) = ${ON_POLICY} + ${REPLAY}, heap=${REPLAY_HEAP}"
-echo "policy IS:    buffer=${BUFFER}, rounds=${RESAMPLE_ROUNDS}, cycles=${UPDATE_CYCLES}, clip=${IS_RATIO_CLIP}"
+echo "policy IS:    buffer=${BUFFER}, rounds=${RESAMPLE_ROUNDS}, cycles=${UPDATE_CYCLES}, clip=${IS_RATIO_CLIP}, max_w=${IS_RATIO_MAX}, log_clip=${IS_LOG_RATIO_MAX}, lr=${POLICY_IS_LR}"
 echo "schedule:     ${EPOCHS} epochs × ${STEPS} steps (replay) | ${RESAMPLE_ROUNDS}×${UPDATE_CYCLES} (policy IS)"
 echo "checkpoint:   every ${CHECKPOINT_EVERY} resample rounds / epochs"
 echo
@@ -258,7 +268,7 @@ run_train exp4_grpo_is \
   --dataset "$DS" --cfg "$CFG" \
   --epochs "$EPOCHS" --steps-per-epoch "$STEPS" --seed "$SEED" --device "$DEVICE" \
   --on-policy-batch-size "$BUFFER" --buffer-size "$BUFFER" --disable-replay \
-  --grpo-lr "$GRPO_LR" \
+  --grpo-lr "$POLICY_IS_LR" \
   --checkpoint-every "$CHECKPOINT_EVERY" \
   "${POLICY_IS_ARGS[@]}"
 
@@ -284,7 +294,8 @@ run_train exp6_ips_is \
   --epochs "$EPOCHS" --steps-per-epoch "$STEPS" --seed "$SEED" --device "$DEVICE" \
   --on-policy-batch-size "$BUFFER" --buffer-size "$BUFFER" --disable-replay \
   --outcome-level topology \
-  --grpo-lr "$GRPO_LR" \
+  --grpo-lr "$POLICY_IS_LR" \
+  --ips-prob-floor "$IPS_PROB_FLOOR" \
   --checkpoint-every "$CHECKPOINT_EVERY" \
   "${POLICY_IS_ARGS[@]}"
 

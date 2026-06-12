@@ -90,11 +90,17 @@ class ExperimentConfig:
     grpo_lr: float = 1e-4
     grpo_max_grad_norm: float = 1.0
     grpo_advantage_eps: float = 1e-8
-    grpo_clip_eps: float = 0.0
-    """PPO-style ratio clip. 0 = no clipping (standard REINFORCE-style GRPO)."""
+    grpo_clip_eps: float = 0.2
+    """PPO-style epsilon for TRL GRPO surrogate: clip(r, 1-eps, 1+eps). 0 disables clipping."""
 
-    grpo_beta: float = 0.0
-    """KL penalty to reference policy. 0 = disabled (recommended to start)."""
+    grpo_clip_eps_high: float | None = None
+    """Optional asymmetric upper clip; defaults to grpo_clip_eps."""
+
+    grpo_entropy_coef: float = 0.0
+    """Entropy bonus (replaces KL-to-reference in TRL). 0 = disabled."""
+
+    grpo_num_iterations: int = 1
+    """Reuse the same on-policy rollout for this many optimizer steps (TRL mu). Hybrid uses update_cycles."""
 
     enable_policy_is: bool = False
     """If True: sample buffer under behavior policy, replay with pi_new/pi_old weights."""
@@ -103,10 +109,6 @@ class ExperimentConfig:
     update_cycles: Optional[int] = None
     buffer_size: Optional[int] = None
     rollout_chunk_size: int = 64
-    is_ratio_clip: float = 0.0
-    """PPO-style symmetric clip on w = pi_new/pi_old. 0 = off."""
-    is_ratio_max: float = 0.0
-    """Hard cap on importance weight. 0 = off."""
 
     # --- diversity / outcome tracking ---
     outcome_level: OutcomeLevel = "topology"
@@ -215,8 +217,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument("--grpo-lr", type=float, default=1e-4)
     g.add_argument("--grpo-max-grad-norm", type=float, default=1.0)
     g.add_argument("--grpo-advantage-eps", type=float, default=1e-8)
-    g.add_argument("--grpo-clip-eps", type=float, default=0.0)
-    g.add_argument("--grpo-beta", type=float, default=0.0)
+    g.add_argument("--grpo-clip-eps", type=float, default=0.2)
+    g.add_argument("--grpo-clip-eps-high", type=float, default=None)
+    g.add_argument(
+        "--grpo-entropy-coef",
+        type=float,
+        default=0.0,
+        help="Entropy regularization (not TRL KL). 0 disables.",
+    )
+    g.add_argument(
+        "--grpo-num-iterations",
+        type=int,
+        default=1,
+        help="Reuse each on-policy rollout for this many updates before resampling (TRL mu).",
+    )
 
     g = p.add_argument_group("policy importance sampling (pi_new / pi_old)")
     g.add_argument(
@@ -248,18 +262,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=int,
         default=64,
         help="Rollout/replay chunk size when policy IS is on.",
-    )
-    g.add_argument(
-        "--is-ratio-clip",
-        type=float,
-        default=0.0,
-        help="Symmetric PPO clip on w=pi_new/pi_old (e.g. 0.2). 0 disables.",
-    )
-    g.add_argument(
-        "--is-ratio-max",
-        type=float,
-        default=0.0,
-        help="Cap w at this value. 0 disables.",
     )
 
     g = p.add_argument_group("tracking")
@@ -307,14 +309,14 @@ def config_from_args(args: argparse.Namespace) -> ExperimentConfig:
         grpo_max_grad_norm=args.grpo_max_grad_norm,
         grpo_advantage_eps=args.grpo_advantage_eps,
         grpo_clip_eps=args.grpo_clip_eps,
-        grpo_beta=args.grpo_beta,
+        grpo_clip_eps_high=args.grpo_clip_eps_high,
+        grpo_entropy_coef=args.grpo_entropy_coef,
+        grpo_num_iterations=args.grpo_num_iterations,
         enable_policy_is=args.enable_policy_is,
         resample_rounds=args.resample_rounds,
         update_cycles=args.update_cycles,
         buffer_size=args.buffer_size,
         rollout_chunk_size=args.rollout_chunk_size,
-        is_ratio_clip=args.is_ratio_clip,
-        is_ratio_max=args.is_ratio_max,
         outcome_level=args.outcome_level,
         print_every=args.print_every,
         checkpoint_every=args.checkpoint_every,

@@ -1,14 +1,8 @@
 """
 Inverse Probability Scaling GRPO (IPS-GRPO) + optional policy importance sampling.
 
-Outcome IPS (Sinha et al., arXiv:2601.21669):
-  p_hat(o) = count(o in batch) / G
-  r_tilde_g = r_g / max(p_hat(o_g), eps)
-  A_i from r_tilde_i
-
-Policy IS (when log_pf_old is provided):
-  w_i = exp(sum_t log pi_new - sum_t log pi_old)
-  L = -mean(w_i * A_i * log pi_new per step)
+Policy loss: TRL token-level PPO surrogate in grpo_experiments.core.trainer.
+Only reward/advantage computation differs from core GRPO.
 """
 
 from __future__ import annotations
@@ -18,14 +12,15 @@ from typing import Sequence
 
 import numpy as np
 import torch
-import torch.nn as nn
+
+from grpo_experiments.core.advantages import linear_rewards_from_log_scores
+from grpo_experiments.core.trainer import GRPOTrainer
 
 
 def compute_batch_outcome_probs(
     outcome_ids: Sequence[str],
     prob_floor: float,
 ) -> tuple[torch.Tensor, dict]:
-    """p_hat(o_g) for each tree g, clipped at prob_floor."""
     n = len(outcome_ids)
     if n == 0:
         raise ValueError("outcome_ids must be non-empty for IPS-GRPO.")
@@ -46,153 +41,143 @@ def compute_batch_outcome_probs(
 
 
 def scale_rewards_ips(
-    log_rewards: torch.Tensor,
+    log_scores: torch.Tensor,
     outcome_ids: Sequence[str],
     prob_floor: float,
+    reward_c: float,
+    reward_scale: float,
 ) -> tuple[torch.Tensor, torch.Tensor, dict]:
-    """r_tilde_g = r_g / max(p_hat(o_g), eps)  (Eq. 9)."""
     p_hat, metrics = compute_batch_outcome_probs(outcome_ids, prob_floor)
-    p_hat = p_hat.to(device=log_rewards.device, dtype=log_rewards.dtype)
-    scaled = log_rewards.detach() / p_hat
+    p_hat = p_hat.to(device=log_scores.device, dtype=log_scores.dtype)
+    rewards = linear_rewards_from_log_scores(
+        log_scores,
+        reward_c=reward_c,
+        reward_scale=reward_scale,
+        mode="exp_linear",
+    )
+    scaled = rewards / p_hat
     metrics["ips_scaled_reward_mean"] = float(scaled.mean().item())
     metrics["ips_scaled_reward_std"] = float(scaled.std().item())
     return scaled, p_hat, metrics
 
 
-class IPSGRPOTrainer:
-    """IPS-GRPO with optional pi_new/pi_old importance weights."""
+class IPSGRPOTrainer(GRPOTrainer):
+    """IPS-scaled advantages + TRL-style token-level policy loss."""
 
     def __init__(
         self,
-        params: list[nn.Parameter],
+        params: list[torch.nn.Parameter],
         lr: float = 1e-4,
         max_grad_norm: float = 1.0,
         advantage_eps: float = 1e-8,
-        ips_prob_floor: float = 0.01,
-        is_ratio_clip: float = 0.0,
-        is_ratio_max: float = 0.0,
+        ips_prob_floor: float = 1e-6,
+        clip_eps: float = 0.2,
+        clip_eps_high: float | None = None,
+        log_ratio_clamp_max: float = 2.0,
+        reward_c: float = 0.0,
+        reward_scale: float = 1.0,
+        entropy_coef: float = 0.0,
+        num_iterations: int = 1,
     ):
-        self.params = params
-        self.max_grad_norm = max_grad_norm
-        self.advantage_eps = advantage_eps
+        super().__init__(
+            params=params,
+            lr=lr,
+            clip_eps=clip_eps,
+            clip_eps_high=clip_eps_high,
+            max_grad_norm=max_grad_norm,
+            advantage_eps=advantage_eps,
+            log_ratio_clamp_max=log_ratio_clamp_max,
+            reward_c=reward_c,
+            reward_scale=reward_scale,
+            entropy_coef=entropy_coef,
+            num_iterations=num_iterations,
+        )
         self.ips_prob_floor = ips_prob_floor
-        self.is_ratio_clip = is_ratio_clip
-        self.is_ratio_max = is_ratio_max
-        self.optimizer = torch.optim.Adam(params, lr=lr)
 
-    def compute_advantages(self, rewards: torch.Tensor) -> torch.Tensor:
-        r = rewards.detach()
-        return (r - r.mean()) / (r.std() + self.advantage_eps)
+    def precompute_advantages(
+        self,
+        log_scores: torch.Tensor,
+        *,
+        outcome_ids: list[str] | None = None,
+    ) -> tuple[torch.Tensor, dict]:
+        if outcome_ids is None:
+            advantages = self.compute_advantages(log_scores)
+            return advantages, {"ips_mode": "grpo"}
+        if len(outcome_ids) != log_scores.shape[0]:
+            raise ValueError(
+                f"outcome_ids length ({len(outcome_ids)}) != batch size ({log_scores.shape[0]})."
+            )
+        scaled_rewards, p_hat, ips_metrics = scale_rewards_ips(
+            log_scores,
+            outcome_ids,
+            self.ips_prob_floor,
+            reward_c=self.reward_c,
+            reward_scale=self.reward_scale,
+        )
+        advantages = self.compute_advantages_from_rewards(scaled_rewards)
+        ips_metrics["mean_ips_prob"] = float(p_hat.mean().item())
+        ips_metrics["ips_mode"] = "ips"
+        return advantages, ips_metrics
+
+    def precompute_grpo_advantages(self, log_scores: torch.Tensor) -> tuple[torch.Tensor, dict]:
+        return self.precompute_advantages(log_scores)
 
     def precompute_ips_advantages(
         self,
-        log_rewards: torch.Tensor,
+        log_scores: torch.Tensor,
         outcome_ids: Sequence[str],
     ) -> tuple[torch.Tensor, dict]:
-        """IPS-scaled group advantages fixed for a behavior-policy buffer."""
-        if len(outcome_ids) != log_rewards.shape[0]:
-            raise ValueError(
-                f"outcome_ids length ({len(outcome_ids)}) != batch size ({log_rewards.shape[0]})."
-            )
-        scaled_rewards, p_hat, ips_metrics = scale_rewards_ips(
-            log_rewards, outcome_ids, self.ips_prob_floor,
-        )
-        advantages = self.compute_advantages(scaled_rewards)
-        ips_metrics["mean_ips_prob"] = float(p_hat.mean().item())
-        return advantages, ips_metrics
-
-    def importance_weights(
-        self,
-        log_paths_pf: torch.Tensor,
-        log_pf_old: torch.Tensor,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        log_pf_new = log_paths_pf.sum(dim=-1)
-        log_ratio = log_pf_new - log_pf_old.detach()
-        weights = log_ratio.exp()
-
-        if self.is_ratio_clip > 0:
-            weights = torch.clamp(
-                weights,
-                1.0 - self.is_ratio_clip,
-                1.0 + self.is_ratio_clip,
-            )
-        if self.is_ratio_max > 0:
-            weights = torch.clamp(weights, max=self.is_ratio_max)
-
-        return weights, log_ratio
+        return self.precompute_advantages(log_scores, outcome_ids=list(outcome_ids))
 
     def update(
         self,
         log_paths_pf: torch.Tensor,
         log_rewards: torch.Tensor,
-        outcome_ids: Sequence[str],
+        *,
+        log_scores: torch.Tensor | None = None,
+        outcome_ids: Sequence[str] | None = None,
+        log_paths_pf_old: torch.Tensor | None = None,
         log_pf_old: torch.Tensor | None = None,
         fixed_advantages: torch.Tensor | None = None,
         fixed_ips_metrics: dict | None = None,
+        paths_entropy: torch.Tensor | None = None,
+        log_paths_pf_old_for_metrics: torch.Tensor | None = None,
+        mask: torch.Tensor | None = None,
+        extra_metrics: dict | None = None,
     ) -> dict:
-        self.optimizer.zero_grad()
+        merged_metrics = dict(extra_metrics or {})
+        if fixed_ips_metrics:
+            merged_metrics.update(fixed_ips_metrics)
 
-        if fixed_advantages is not None:
-            advantages = fixed_advantages
-            ips_metrics = dict(fixed_ips_metrics or {})
-        else:
-            scaled_rewards, p_hat, ips_metrics = scale_rewards_ips(
-                log_rewards, outcome_ids, self.ips_prob_floor,
+        if fixed_advantages is None:
+            if log_scores is None:
+                raise ValueError("log_scores is required when fixed_advantages is not provided.")
+            if outcome_ids is None:
+                raise ValueError("IPS-GRPO requires outcome_ids when fixed_advantages is not provided.")
+            fixed_advantages, ips_metrics = self.precompute_advantages(
+                log_scores,
+                outcome_ids=list(outcome_ids),
             )
-            advantages = self.compute_advantages(scaled_rewards)
-            ips_metrics = {**ips_metrics, "mean_ips_prob": float(p_hat.mean().item())}
+            merged_metrics.update(ips_metrics)
 
-        if log_pf_old is not None:
-            weights, log_ratio = self.importance_weights(log_paths_pf, log_pf_old)
-        else:
-            weights = torch.ones(log_paths_pf.shape[0], device=log_paths_pf.device, dtype=log_paths_pf.dtype)
-            log_ratio = torch.zeros_like(weights)
-
-        scale = log_paths_pf.detach().abs().mean().clamp(min=1.0)
-        log_pf_scaled = log_paths_pf / scale
-        pg_loss = -(weights.detach().unsqueeze(1) * advantages.detach().unsqueeze(1) * log_pf_scaled).mean()
-
-        pg_loss.backward()
-        grad_norm = torch.nn.utils.clip_grad_norm_(self.params, self.max_grad_norm)
-        self.optimizer.step()
-
-        log_pf = log_paths_pf.sum(dim=-1).detach()
-        param_norm = sum(p.data.norm().item() ** 2 for p in self.params) ** 0.5
-        ratio = log_ratio.exp().detach()
-
-        out = {
-            "loss": float(pg_loss.item()),
-            "pg_loss": float(pg_loss.item()),
-            "grad_norm": float(grad_norm.item()) if torch.is_tensor(grad_norm) else float(grad_norm),
-            "param_norm": param_norm,
-            "mean_advantage": float(advantages.mean().item()),
-            "std_advantage": float(advantages.std().item()),
-            "mean_log_pf": float(log_pf.mean().item()),
-            "mean_step_logprob": float(log_paths_pf.detach().mean().item()),
-            "grpo_group_size": int(log_rewards.shape[0]),
-            **ips_metrics,
-        }
-        if log_pf_old is not None:
-            out.update({
-                "mean_log_importance_ratio": float(log_ratio.mean().item()),
-                "std_log_importance_ratio": float(log_ratio.std().item()),
-                "mean_importance_ratio": float(ratio.mean().item()),
-                "max_importance_ratio": float(ratio.max().item()),
-                "min_importance_ratio": float(ratio.min().item()),
-            })
-        return out
+        return super().update(
+            log_paths_pf,
+            log_rewards,
+            log_scores=log_scores,
+            log_paths_pf_old=log_paths_pf_old,
+            log_pf_old=log_pf_old,
+            fixed_advantages=fixed_advantages,
+            paths_entropy=paths_entropy,
+            log_paths_pf_old_for_metrics=log_paths_pf_old_for_metrics,
+            mask=mask,
+            extra_metrics=merged_metrics or None,
+        )
 
     def update_on_policy(self, batch: dict, outcome_ids: Sequence[str]) -> dict:
-        """One-step on-policy IPS-GRPO (no policy IS)."""
         return self.update(
             batch["log_paths_pf"],
             batch["log_rewards"],
-            outcome_ids,
-            log_pf_old=None,
+            log_scores=batch["log_scores"],
+            outcome_ids=outcome_ids,
+            log_paths_pf_old=None,
         )
-
-    def state_dict(self) -> dict:
-        return {"optimizer": self.optimizer.state_dict()}
-
-    def load_state_dict(self, state: dict) -> None:
-        self.optimizer.load_state_dict(state["optimizer"])

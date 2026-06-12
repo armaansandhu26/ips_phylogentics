@@ -14,10 +14,11 @@ import os
 
 import numpy as np
 
+from grpo_experiments.core.on_policy_buffer import run_on_policy_grpo_step, run_policy_is_grpo_cycles
+from grpo_experiments.core.policy_replay import sample_replay_buffer
 from grpo_experiments.ips_grpo.config import IPSExperimentConfig
 from grpo_experiments.ips_grpo.trainer import IPSGRPOTrainer
 from grpo_experiments.metrics import OutcomeTracker, batch_diversity_stats, extract_outcome_ids
-from grpo_experiments.policy_replay import reevaluate_log_paths_pf, sample_replay_buffer
 from grpo_experiments.resume import (
     load_epoch_summaries,
     load_generator_checkpoint,
@@ -95,8 +96,12 @@ def _run_on_policy(exp_cfg: IPSExperimentConfig, device: str, output_dir: str, c
         max_grad_norm=exp_cfg.grpo_max_grad_norm,
         advantage_eps=exp_cfg.grpo_advantage_eps,
         ips_prob_floor=exp_cfg.ips_prob_floor,
-        is_ratio_clip=exp_cfg.is_ratio_clip,
-        is_ratio_max=exp_cfg.is_ratio_max,
+        clip_eps=exp_cfg.grpo_clip_eps,
+        clip_eps_high=exp_cfg.grpo_clip_eps_high,
+        reward_c=cfg.ENV.REWARD.C,
+        reward_scale=cfg.ENV.REWARD.SCALE,
+        entropy_coef=exp_cfg.grpo_entropy_coef,
+        num_iterations=exp_cfg.grpo_num_iterations,
     )
 
     resume, metrics_path = _init_run_state(exp_cfg, output_dir, "on_policy", cfg)
@@ -112,6 +117,7 @@ def _run_on_policy(exp_cfg: IPSExperimentConfig, device: str, output_dir: str, c
     global_step = resume.global_step if resume else 0
     start_epoch = resume.start_epoch if resume else 0
     start_step = resume.start_step if resume else 0
+    generation_state = None
 
     for epoch in range(start_epoch, training_cfg.EPOCHS_NUM):
         exploration_specs = generate_exploration_spec(training_cfg.EXPLORATION, epoch)
@@ -132,7 +138,18 @@ def _run_on_policy(exp_cfg: IPSExperimentConfig, device: str, output_dir: str, c
             div["cumulative_unique_outcomes"] = float(len(seen_outcomes))
             div.update(tracker.stats())
 
-            train_info = trainer.update_on_policy(batch, outcome_ids)
+            train_info, generation_state = run_on_policy_grpo_step(
+                trainer,
+                rollout_worker,
+                generator,
+                batch,
+                trajectories,
+                random_spec=random_spec,
+                generation_state=generation_state,
+                chunk_size=exp_cfg.rollout_chunk_size,
+                device=device,
+                extra_update_kwargs={"outcome_ids": outcome_ids},
+            )
 
             mean_log_reward = float(batch["log_rewards"].mean().item())
             mean_log_score = float(batch["log_scores"].mean().item())
@@ -226,8 +243,12 @@ def _run_policy_is(exp_cfg: IPSExperimentConfig, device: str, output_dir: str, c
         max_grad_norm=exp_cfg.grpo_max_grad_norm,
         advantage_eps=exp_cfg.grpo_advantage_eps,
         ips_prob_floor=exp_cfg.ips_prob_floor,
-        is_ratio_clip=exp_cfg.is_ratio_clip,
-        is_ratio_max=exp_cfg.is_ratio_max,
+        clip_eps=exp_cfg.grpo_clip_eps,
+        clip_eps_high=exp_cfg.grpo_clip_eps_high,
+        reward_c=cfg.ENV.REWARD.C,
+        reward_scale=cfg.ENV.REWARD.SCALE,
+        entropy_coef=exp_cfg.grpo_entropy_coef,
+        num_iterations=exp_cfg.grpo_num_iterations,
     )
 
     resume, metrics_path = _init_run_state(exp_cfg, output_dir, "policy_is", cfg)
@@ -264,12 +285,11 @@ def _run_policy_is(exp_cfg: IPSExperimentConfig, device: str, output_dir: str, c
             random_spec=random_spec,
             device=device,
         )
-        log_pf_old = buffer.log_pf_old
-
         trees = reconstruct_trees(env, buffer.trajectories, buffer.log_scores)
         outcome_ids, topology_ids = extract_outcome_ids(trees, exp_cfg.outcome_level)
-        advantages, ips_metrics = trainer.precompute_ips_advantages(
-            buffer.log_rewards, outcome_ids,
+        advantages, ips_metrics = trainer.precompute_advantages(
+            buffer.log_scores,
+            outcome_ids=outcome_ids,
         )
 
         tracker.update(outcome_ids, topology_ids)
@@ -288,22 +308,20 @@ def _run_policy_is(exp_cfg: IPSExperimentConfig, device: str, output_dir: str, c
             )
             cycle_begin = 0
 
-        for cycle in range(cycle_begin, exp_cfg.effective_update_cycles):
-            log_paths_pf = reevaluate_log_paths_pf(
-                rollout_worker,
-                generator,
-                buffer,
-                chunk_size=exp_cfg.rollout_chunk_size,
-                device=device,
-            )
-            train_info = trainer.update(
-                log_paths_pf,
-                buffer.log_rewards,
-                outcome_ids,
-                log_pf_old=log_pf_old,
-                fixed_advantages=advantages,
-                fixed_ips_metrics=ips_metrics,
-            )
+        cycle_train_infos = run_policy_is_grpo_cycles(
+            trainer,
+            rollout_worker,
+            generator,
+            buffer,
+            advantages=advantages,
+            advantage_metrics=ips_metrics,
+            outcome_ids=outcome_ids,
+            update_cycles=exp_cfg.effective_update_cycles - cycle_begin,
+            chunk_size=exp_cfg.rollout_chunk_size,
+            device=device,
+        )
+        for cycle_offset, train_info in enumerate(cycle_train_infos):
+            cycle = cycle_begin + cycle_offset
 
             mean_log_reward = float(buffer.log_rewards.mean().item())
             record = {
@@ -384,7 +402,8 @@ def run_experiment(exp_cfg: IPSExperimentConfig) -> str:
     mode = "policy_is" if exp_cfg.enable_policy_is else "on_policy"
     print(
         f"method={exp_cfg.method}  mode={mode}  device={device}  "
-        f"ips_prob_floor={exp_cfg.ips_prob_floor}  outcome_level={exp_cfg.outcome_level}"
+        f"ips_prob_floor={exp_cfg.ips_prob_floor}  "
+        f"outcome_level={exp_cfg.outcome_level}"
     )
     if exp_cfg.enable_policy_is:
         print(

@@ -33,6 +33,13 @@ REPLAY="${REPLAY:-256}"
 BUFFER="${BUFFER:-512}"
 REPLAY_HEAP="${REPLAY_HEAP:-512}"
 GRPO_LR="${GRPO_LR:-1e-4}"
+POLICY_IS_LR="${POLICY_IS_LR:-5e-5}"
+UPDATE_CYCLES="${UPDATE_CYCLES:-2}"
+RESAMPLE_ROUNDS="${RESAMPLE_ROUNDS:-25}"
+IS_RATIO_CLIP="${IS_RATIO_CLIP:-0.2}"
+IS_RATIO_MAX="${IS_RATIO_MAX:-5.0}"
+IS_LOG_RATIO_MAX="${IS_LOG_RATIO_MAX:-2.0}"
+IPS_PROB_FLOOR="${IPS_PROB_FLOOR:-0.05}"
 DEVICE="${DEVICE:-cuda:0}"
 
 DS="dataset/benchmark_datasets/DS1_reduced.pickle"
@@ -147,6 +154,14 @@ echo
 MANIFEST_ROWS_FILE="$MATRIX_ROOT/manifest_rows.tsv"
 : > "$MANIFEST_ROWS_FILE"
 
+POLICY_IS_ARGS=(
+  --resample-rounds "$RESAMPLE_ROUNDS"
+  --update-cycles "$UPDATE_CYCLES"
+  --is-ratio-clip "$IS_RATIO_CLIP"
+  --is-ratio-max "$IS_RATIO_MAX"
+  --is-log-ratio-max "$IS_LOG_RATIO_MAX"
+)
+
 run_train() {
   local run_id="$1"
   shift
@@ -203,8 +218,9 @@ run_train exp4_grpo_is \
   --dataset "$DS" --cfg "$CFG" \
   --epochs "$EPOCHS" --steps-per-epoch "$STEPS" --seed "$SEED" --device "$DEVICE" \
   --on-policy-batch-size "$BUFFER" --buffer-size "$BUFFER" --disable-replay \
-  --grpo-lr "$GRPO_LR" \
-  --checkpoint-every "$CHECKPOINT_EVERY"
+  --grpo-lr "$POLICY_IS_LR" \
+  --checkpoint-every "$CHECKPOINT_EVERY" \
+  "${POLICY_IS_ARGS[@]}"
 
 # 5. IPS-GRPO + best-tree replay
 run_train exp5_ips_replay \
@@ -228,8 +244,10 @@ run_train exp6_ips_is \
   --epochs "$EPOCHS" --steps-per-epoch "$STEPS" --seed "$SEED" --device "$DEVICE" \
   --on-policy-batch-size "$BUFFER" --buffer-size "$BUFFER" --disable-replay \
   --outcome-level topology \
-  --grpo-lr "$GRPO_LR" \
-  --checkpoint-every "$CHECKPOINT_EVERY"
+  --grpo-lr "$POLICY_IS_LR" \
+  --ips-prob-floor "$IPS_PROB_FLOOR" \
+  --checkpoint-every "$CHECKPOINT_EVERY" \
+  "${POLICY_IS_ARGS[@]}"
 
 write_manifest "$MANIFEST_ROWS_FILE"
 

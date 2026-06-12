@@ -1,0 +1,32 @@
+{
+  "experiment": "final_eval_followup",
+  "outcome": "topo",
+  "seed": 0,
+  "total_batch": 1024,
+  "fresh_batch": 896,
+  "replay_batch": 128,
+  "rounds": 100000,
+  "runs": [
+    {
+      "id": "finaleval_phylgfn_r128_b1024_100k",
+      "method": "phylgfn",
+      "run_dir": "/home/armaan/phylogfn/grpo_experiments/final_eval_experiment/topo/20260610_154651_finaleval_phylgfn_r128_b1024_100k_phylgfn",
+      "outcome": "topo",
+      "rounds": 100000,
+      "fresh_batch": 896,
+      "replay_batch": 128,
+      "total_batch": 1024
+    },
+    {
+      "id": "finaleval_hyb_ips_pfloor_1em6_r128_b1024_100k",
+      "method": "hybrid_ips_grpo",
+      "run_dir": "/home/armaan/phylogfn/grpo_experiments/final_eval_experiment/topo/20260611_094133_finaleval_hyb_ips_pfloor_1em6_r128_b1024_100k_hybrid_ips_grpo",
+      "outcome": "topo",
+      "rounds": 100000,
+      "fresh_batch": 896,
+      "replay_batch": 128,
+      "total_batch": 1024,
+      "ips_prob_floor": 1e-06
+    }
+  ]
+}

@@ -2,8 +2,9 @@
 
 **Inverse Probability Scaling + GRPO** (Sinha et al., [arXiv:2601.21669](https://arxiv.org/pdf/2601.21669)).
 
-Standalone experiment package — does **not** modify `grpo.py` or `runner.py`.
-Use this alongside PhyloGFN and GRPO for three-way comparison.
+Extends `grpo_experiments.core.trainer` with outcome-frequency reward scaling before group-normalized advantages.
+
+Full GRPO + IPS flow diagrams and debugging map → [`../FLOWS.md`](../FLOWS.md).
 
 ## Quick start
 
@@ -11,36 +12,36 @@ Use this alongside PhyloGFN and GRPO for three-way comparison.
 # IPS-GRPO
 python -m grpo_experiments.ips_grpo.train --on-policy-batch-size 64 --epochs 5 --steps-per-epoch 10
 
-# Compare with (separate entry points)
+# Compare with
 python -m grpo_experiments.train --method phylgfn --on-policy-batch-size 64 --epochs 5 --steps-per-epoch 10
 python -m grpo_experiments.train --method grpo     --on-policy-batch-size 64 --epochs 5 --steps-per-epoch 10
 ```
 
 Runs → `grpo_experiments/runs/<timestamp>_ips_grpo/`.
 
+For production hybrid IPS + best-tree replay, use `python -m grpo_experiments.hybrid_ips_grpo.train`.
+
 ---
 
 ## How IPS differs from GRPO
 
-Same rollout and same policy-gradient step. **Only the reward signal changes** before advantages:
+Same rollout and same TRL-style PPO policy loss. **Only the reward signal changes** before advantages:
 
 ```
-GRPO:     A_i from log_rewards_i
-IPS-GRPO: r_tilde_i = log_rewards_i / max(p_hat(o_i), eps)
-          A_i from r_tilde_i   (then same GRPO update)
+GRPO:     A_i from group-normalized rewards
+IPS-GRPO: r_tilde_i = r_i / max(p_hat(o_i), eps)
+          A_i from group-normalized r_tilde_i
 ```
 
-where `p_hat(o) = count(o in batch) / G` (batch outcome frequency).
-
-Rare outcomes get **upweighted**; duplicated outcomes get **downweighted** — reduces outcome-level mode collapse (paper §4.4, Algorithm 1).
+where `p_hat(o) = count(o in batch) / G` and `r_i` comes from `exp(log_reward - max)` then IPS scaling (see `core/advantages.py`).
 
 ---
 
 ## Training modes
 
-### On-policy (default, presets unchanged)
+### On-policy (default)
 
-Each step: fresh rollout → IPS advantages → GRPO update (`w = 1`).
+Each step: fresh rollout → IPS advantages → GRPO update.
 
 ```bash
 python -m grpo_experiments.ips_grpo.train --preset topology_sanity
@@ -48,7 +49,7 @@ python -m grpo_experiments.ips_grpo.train --preset topology_sanity
 
 ### Policy importance sampling (`--enable-policy-is`)
 
-Same nested loop as [`is_grpo`](../is_grpo/README.md): sample buffer under behavior policy, then inner cycles replay stored actions with `w = pi_new / pi_old`. **IPS outcome scaling is frozen** from the buffer (p_hat and advantages computed once per round).
+Sample a fixed buffer under the behavior policy, then inner cycles replay stored actions with token-level `pi_new / pi_old` in the PPO surrogate. IPS outcome scaling and advantages are **frozen** per resample round.
 
 ```bash
 python -m grpo_experiments.ips_grpo.train \
@@ -56,36 +57,21 @@ python -m grpo_experiments.ips_grpo.train \
   --resample-rounds 5 --update-cycles 10 --buffer-size 1000
 ```
 
-Omit `--resample-rounds` / `--update-cycles` / `--buffer-size` to reuse `--epochs`, `--steps-per-epoch`, and `--on-policy-batch-size` from a preset.
-
 ---
 
 ## Training flow (one on-policy step)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  ROLLOUT (shared — rollout_worker_phylo.py)                 │
-│  same as GRPO → batch["log_paths_pf"] (B,T), log_rewards (B)│
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  reconstruct trees → outcome_ids (topology or signature)    │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  IPSGRPOTrainer.update (ips_grpo/trainer.py)                │
-│    p_hat(o_g) = count in batch / G,  floor at ips_prob_floor│
-│    r_tilde_g = log_rewards_g / p_hat(o_g)                   │
-│    advantages = (r_tilde - mean) / (std + eps)   detached │
-│    w = pi_new/pi_old  (if --enable-policy-is, else 1)       │
-│    pg_loss = -mean(w * A * log_paths_pf / scale)            │
-│    backward + Adam                                          │
-└─────────────────────────────────────────────────────────────┘
+ROLLOUT → outcome_ids
+       → IPSGRPOTrainer.update
+            p_hat(o) = count / G (floored)
+            r_tilde = r / p_hat
+            advantages = group-normalize(r_tilde)
+            pg_loss = TRL PPO surrogate on token log-probs (core/loss.py)
+            optional entropy bonus (not TRL KL)
 ```
 
-Policy IS replay lives in `grpo_experiments/policy_replay.py` (shared with `is_grpo`).
+Policy IS replay: `grpo_experiments/core/policy_replay.py`.
 
 ---
 
@@ -94,12 +80,9 @@ Policy IS replay lives in `grpo_experiments/policy_replay.py` (shared with `is_g
 | File | Role |
 |------|------|
 | `train.py` | CLI entry |
-| `runner.py` | Training loop → metrics.jsonl |
-| `trainer.py` | Outcome IPS + optional policy IS weights |
-| `runner.py` | On-policy loop or buffer + replay loop |
-| `config.py` | `--ips-prob-floor`, `--enable-policy-is`, buffer schedule |
-
-Shared with other methods: `grpo_experiments/utils.py`, `metrics.py`, rollout, generator.
+| `runner.py` | On-policy or policy-IS loop |
+| `trainer.py` | IPS advantage scaling + `GRPOTrainer` |
+| `config.py` | `--ips-prob-floor`, `--enable-policy-is`, presets |
 
 ---
 
@@ -107,50 +90,28 @@ Shared with other methods: `grpo_experiments/utils.py`, `metrics.py`, rollout, g
 
 | Flag | Default | Meaning |
 |------|---------|---------|
-| `--ips-prob-floor` | `0.01` | ε in `r / max(p_hat, ε)` (paper §5.4) |
-| `--enable-policy-is` | off | Fixed buffer + `w = pi_new/pi_old` replay |
-| `--resample-rounds` | `epochs` | Outer loops when policy IS on |
-| `--update-cycles` | `steps/epoch` | Inner IS updates per buffer |
-| `--buffer-size` | `on-policy batch` | Trees per behavior rollout |
-| `--outcome-level` | `topology` | What counts as outcome `o` for p_hat |
-| `--on-policy-batch-size` | `64` | Group size G |
-| `--preset` | — | Load matched settings from `configs/ips_grpo_presets.json` |
-| `--list-presets` | — | Print available preset names |
+| `--ips-prob-floor` | `1e-6` | ε in `r / max(p_hat, ε)` |
+| `--grpo-clip-eps` | `0.2` | PPO clip (TRL default) |
+| `--grpo-entropy-coef` | `0` | Entropy bonus (we use this instead of TRL `beta`/KL) |
+| `--grpo-num-iterations` | `1` | On-policy μ reuse before resampling |
+| `--enable-policy-is` | off | Fixed buffer + inner update cycles |
+| `--outcome-level` | `topology` | Outcome `o` for p_hat |
+| `--preset` | — | `configs/ips_grpo_presets.json` |
 
-Use **G ≥ 2** (same as GRPO) for meaningful batch advantages and p_hat estimates.
+Use **G ≥ 2** for meaningful advantages and p_hat estimates.
 
 ---
 
-## Comparing topology vs signature outcomes
+## Topology vs signature outcomes
 
-IPS `p_hat(o)` depends on how outcome `o` is defined:
-
-| Level | Outcome ID | Use when |
-|-------|------------|----------|
-| `topology` (default) | `tree_topology_id` — unrooted shape only | Penalize resampling the same tree hypothesis |
-| `signature` | `topology_id + "_" + log_score` (3 dp) | Finer duplicates (same shape + similar likelihood) |
-
-**Quick paired sanity runs** (same seed, batch size, steps — only outcome level differs):
+| Level | Outcome ID |
+|-------|------------|
+| `topology` | tree shape only |
+| `signature` | topology + discretized log_score |
 
 ```bash
-python -m grpo_experiments.ips_grpo.train --list-presets
-
 python -m grpo_experiments.ips_grpo.train --preset topology_sanity
 python -m grpo_experiments.ips_grpo.train --preset signature_sanity
 ```
 
-**Longer DS1 runs** (G=512, 500 epochs):
-
-```bash
-python -m grpo_experiments.ips_grpo.train --preset topology_ds1
-python -m grpo_experiments.ips_grpo.train --preset signature_ds1
-```
-
-Presets: `grpo_experiments/configs/ips_grpo_presets.json` (loadable) and
-`grpo_experiments/configs/ips_grpo_outcomes.yaml` (reference).
-CLI flags override presets, e.g. `--preset topology_sanity --seed 1`.
-
-Each run logs `outcome_level` in `metrics.jsonl` and `experiment_config.json`.
-Compare `batch_duplicate_fraction` (IPS outcome level) vs
-`batch_duplicate_topology_fraction` (always topology) to see how outcome
-granularity affects IPS scaling.
+Presets: `grpo_experiments/configs/ips_grpo_presets.json`.

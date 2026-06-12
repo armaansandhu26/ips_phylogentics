@@ -1,9 +1,52 @@
+# IDE & editor
 .idea/
-.venv/
 .vscode/
-__pycache__/
-*.pyc
+*.swp
+*.swo
+*~
+Untitled
 
-# Local experiment outputs and archived work — not for the repo
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local experiment outputs and archived work
 archive/
 grpo_experiments/runs/
+grpo_experiments/final_eval_experiment/topo/
+grpo_experiments/final_eval_experiment/eval/
+grpo_experiments/final_eval_experiment/logs/
+grpo_experiments/final_eval_experiment/training_curves/
+grpo_experiments/eval_benchmarks/
+
+# Model checkpoints & weights
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Training / eval artifacts
+*.jsonl
+logs/
+*.log
+tb_log/
+wandb/
+
+# Generated plots (keep assets/ and markdown docs)
+grpo_experiments/**/*.png
+grpo_experiments/**/*.pdf

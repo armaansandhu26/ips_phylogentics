@@ -10,6 +10,7 @@ Three **entry points** (same rollout / model, different training objective):
 | GRPO (on-policy or `--enable-policy-is`) | `python -m grpo_experiments.train --method grpo ...` |
 | IPS-GRPO | `python -m grpo_experiments.ips_grpo.train ...` |
 
+- **GRPO vs IPS-GRPO flows** (advantages, buffering, policy IS) → [`FLOWS.md`](FLOWS.md)
 - IPS-GRPO (outcome-frequency scaling) → [`ips_grpo/README.md`](ips_grpo/README.md)
 - Policy importance sampling (`w = π_new/π_old`) → `--enable-policy-is` on GRPO (formerly `is_grpo/`)
 
@@ -60,9 +61,10 @@ Runs → `grpo_experiments/runs/`. Full flags → `config.py`.
               method == grpo │
                            ▼
 ┌───────────────────────────────────────────────────────────────┐
-│  GRPOTrainer.update (grpo.py)                                 │
-│    advantages = (log_rewards - mean) / (std + eps)  detached  │
-│    pg_loss = -mean(A * log_paths_pf / scale)                  │
+│  GRPOTrainer.update (core/trainer.py)                         │
+│    advantages = group-normalized rewards (detached)           │
+│    pg_loss = TRL PPO surrogate on token log-probs (grpo_loss) │
+│    + optional entropy regularization                          │
 │    pg_loss.backward()              ←── BACKWARD               │
 │    clip_grad_norm_ + Adam step on policy params only          │
 └───────────────────────────────────────────────────────────────┘
@@ -90,7 +92,7 @@ Reward is **not** applied at each merge in the loss—only at the end. Intermedi
 
 ## Forward pass (where it runs)
 
-Not inside `grpo.py`. It runs **during rollout**, once per merge:
+Not inside the trainer. It runs **during rollout**, once per merge:
 
 1. `env.prepare_rollout_inputs(tree_features, ...)` — current forest state.
 2. `generator(input_dict)` → `tree_model` (pick pair) + `edges_model` (branch lengths).
@@ -101,25 +103,29 @@ The update step reuses the tensor `log_paths_pf` from rollout (still connected t
 
 ---
 
-## GRPO loss (grpo.py)
+## GRPO loss (`core/loss.py` + `core/trainer.py`)
 
 Group-relative advantages over the **batch** (group size G = B):
 
 ```
-A_i = (log_rewards_i - mean(log_rewards)) / (std(log_rewards) + eps)
+A_i = (reward_i - mean(reward)) / (std(reward) + eps)   # detached
 ```
 
-Policy gradient loss (mean over all trees and all steps):
+Token-level PPO clipped surrogate (TRL-style), per sequence then batch mean:
 
 ```
-scale = mean(|log_paths_pf|), clamped ≥ 1   (detached)
-pg_loss = - mean_i,t( A_i * log_paths_pf[i,t] / scale )
+r_t = exp(log π_new(a_t|s_t) - log π_old(a_t|s_t))     # in loss, not detached
+pg_loss = - mean_seq( mean_t( min(r_t A, clip(r_t) A) ) )
 ```
 
-- **One advantage per tree**, broadcast to every step `t` of that tree.
-- **`.mean()` over (B, T)** — each merge step contributes equally to the scalar loss.
-- `log_rewards` and `advantages` are **detached** — no gradient through the likelihood / ranking.
-- `clip_eps` / `beta` in config are **not used** in `update()` yet (no PPO clip / KL).
+Optional entropy bonus: `loss = pg_loss - entropy_coef * mean_entropy`.
+
+- **One advantage per tree**, broadcast to every step `t`.
+- **Per-sequence masked mean** over steps, then mean over batch (not flat mean over `(B, T)`).
+- Step log-probs use sampling temperature from the env config (`core/log_probs.py`).
+- On-policy μ reuse: `--grpo-num-iterations` + `core/on_policy_buffer.py`.
+- Hybrid / policy-IS inner loop: `--update-cycles` (not `num_iterations`).
+- `--grpo-clip-eps` / `--grpo-clip-eps-high` control asymmetric PPO clipping.
 
 ---
 
@@ -150,12 +156,17 @@ optimizer.step()   # Adam in GRPOTrainer — does not train log Z
 
 | File | Role |
 |------|------|
-| `train.py` | CLI entry |
-| `runner.py` | Loop: batch → train step → metrics.jsonl |
-| `grpo.py` | `GRPOTrainer`: advantages, loss, backward, Adam |
-| `config.py` | Experiment flags, batch / GRPO hyperparams |
-| `../src/gfn/rollout_worker_phylo.py` | Rollout + batch dict |
-| `../src/gfn/tb_gfn_phylo.py` | Generator forward, PhyloGFN TB loss |
+| `train.py` | CLI entry (PhyloGFN / GRPO) |
+| `runner.py` | On-policy + policy-IS loops |
+| `core/trainer.py` | `GRPOTrainer`: advantages, PPO loss, entropy, Adam |
+| `core/loss.py` | TRL PPO clipped surrogate |
+| `core/advantages.py` | Reward transform + group normalization |
+| `core/on_policy_buffer.py` | TRL μ buffering (on-policy only) |
+| `core/policy_replay.py` | Fixed-trajectory replay for policy IS |
+| `hybrid_grpo/` | Best-tree replay + policy IS (production eval) |
+| `hybrid_ips_grpo/` | Hybrid + IPS outcome scaling |
+| `ips_grpo/` | Standalone IPS-GRPO entry |
+| `config.py` | Main experiment flags |
 
 ---
 
@@ -163,7 +174,7 @@ optimizer.step()   # Adam in GRPOTrainer — does not train log Z
 
 | | PhyloGFN | GRPO |
 |---|----------|------|
-| Loss | MSE( log Z + Σ log P_F − log R − Σ log P_B ) | −mean( A × log P_F per step ) |
+| Loss | MSE( log Z + Σ log P_F − log R − Σ log P_B ) | −mean_seq( PPO_clip( r_t A ) ) + entropy |
 | Uses terminal reward | Yes (balance target) | Yes (advantages only) |
 | Batch comparison | No | Yes (group-relative A) |
 | Trains Z | Yes | No |

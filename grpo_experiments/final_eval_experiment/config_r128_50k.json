@@ -1,0 +1,60 @@
+{
+  "experiment": "final_eval_group_run",
+  "group": "r128",
+  "description": "50k-step topology comparison at replay128.",
+  "dataset_path": "dataset/benchmark_datasets/DS1_reduced.pickle",
+  "cfg_path": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4.yaml",
+  "output_root": "grpo_experiments/final_eval_experiment/topo",
+  "outcome": "topo",
+  "outcome_level": "topology",
+  "seed": 0,
+  "rounds": 50000,
+  "total_batch": 512,
+  "fresh_batch": 384,
+  "replay_batch": 128,
+  "buffer_size": 256,
+  "replay_warmstart_samples": 64,
+  "rollout_chunk_size": 512,
+  "grpo_lr": 1e-4,
+  "entropy_coef": 0.01,
+  "checkpoint_every": 2000,
+  "print_every": 1000,
+  "runs": [
+    {
+      "id": "finaleval50k_phylgfn_r128_b512",
+      "run_name": "finaleval50k_phylgfn_r128_b512",
+      "method": "phylgfn",
+      "epochs": 50000,
+      "steps_per_epoch": 1,
+      "checkpoint_every": 2000,
+      "on_policy_batch_size": 384,
+      "replay_batch_size": 128,
+      "replay_buffer_size": 256
+    },
+    {
+      "id": "finaleval50k_hyb_grpo_r128_b512",
+      "run_name": "finaleval50k_hyb_grpo_r128_b512",
+      "method": "hybrid_grpo",
+      "resample_rounds": 50000,
+      "update_cycles": 1,
+      "checkpoint_every": 2000,
+      "fresh_buffer_size": 384,
+      "replay_sample_size": 128,
+      "best_tree_buffer_size": 256,
+      "replay_warmstart_samples": 64
+    },
+    {
+      "id": "finaleval50k_hyb_ips_pfloor_002_r128_b512",
+      "run_name": "finaleval50k_hyb_ips_pfloor_002_r128_b512",
+      "method": "hybrid_ips_grpo",
+      "resample_rounds": 50000,
+      "update_cycles": 1,
+      "checkpoint_every": 2000,
+      "fresh_buffer_size": 384,
+      "replay_sample_size": 128,
+      "best_tree_buffer_size": 256,
+      "replay_warmstart_samples": 64,
+      "ips_prob_floor": 0.002
+    }
+  ]
+}

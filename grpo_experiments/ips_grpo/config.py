@@ -53,8 +53,12 @@ class IPSExperimentConfig:
     grpo_lr: float = 1e-4
     grpo_max_grad_norm: float = 1.0
     grpo_advantage_eps: float = 1e-8
+    grpo_clip_eps: float = 0.2
+    grpo_clip_eps_high: float | None = None
+    grpo_entropy_coef: float = 0.0
+    grpo_num_iterations: int = 1
 
-    ips_prob_floor: float = 0.01
+    ips_prob_floor: float = 1e-6
     """eps in r_tilde = r / max(p_hat(o), eps) — arXiv:2601.21669 Eq. 9."""
 
     enable_policy_is: bool = False
@@ -64,8 +68,6 @@ class IPSExperimentConfig:
     update_cycles: Optional[int] = None
     buffer_size: Optional[int] = None
     rollout_chunk_size: int = 64
-    is_ratio_clip: float = 0.0
-    is_ratio_max: float = 0.0
 
     outcome_level: OutcomeLevel = "topology"
     print_every: int = 1
@@ -202,12 +204,26 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument("--grpo-lr", type=float, default=1e-4)
     g.add_argument("--grpo-max-grad-norm", type=float, default=1.0)
     g.add_argument("--grpo-advantage-eps", type=float, default=1e-8)
+    g.add_argument(
+        "--grpo-clip-eps",
+        type=float,
+        default=0.2,
+        help="PPO clip epsilon for GRPO surrogate (TRL default 0.2). 0 disables clipping.",
+    )
+    g.add_argument("--grpo-clip-eps-high", type=float, default=None)
+    g.add_argument("--grpo-entropy-coef", type=float, default=0.0)
+    g.add_argument(
+        "--grpo-num-iterations",
+        type=int,
+        default=1,
+        help="On-policy only: reuse each rollout for this many updates (TRL mu).",
+    )
 
     g = p.add_argument_group("IPS (arXiv:2601.21669)")
     g.add_argument(
         "--ips-prob-floor",
         type=float,
-        default=0.01,
+        default=1e-6,
         help="Floor on batch outcome probability before inverting.",
     )
     g.add_argument(
@@ -234,8 +250,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument("--update-cycles", type=int, default=None)
     g.add_argument("--buffer-size", type=int, default=None)
     g.add_argument("--rollout-chunk-size", type=int, default=64)
-    g.add_argument("--is-ratio-clip", type=float, default=0.0)
-    g.add_argument("--is-ratio-max", type=float, default=0.0)
 
     g = p.add_argument_group("logging")
     g.add_argument("--print-every", type=int, default=1)
@@ -273,14 +287,16 @@ def config_from_args(args: argparse.Namespace) -> IPSExperimentConfig:
         grpo_lr=args.grpo_lr,
         grpo_max_grad_norm=args.grpo_max_grad_norm,
         grpo_advantage_eps=args.grpo_advantage_eps,
+        grpo_clip_eps=args.grpo_clip_eps,
+        grpo_clip_eps_high=args.grpo_clip_eps_high,
+        grpo_entropy_coef=args.grpo_entropy_coef,
+        grpo_num_iterations=args.grpo_num_iterations,
         ips_prob_floor=args.ips_prob_floor,
         enable_policy_is=args.enable_policy_is,
         resample_rounds=args.resample_rounds,
         update_cycles=args.update_cycles,
         buffer_size=args.buffer_size,
         rollout_chunk_size=args.rollout_chunk_size,
-        is_ratio_clip=args.is_ratio_clip,
-        is_ratio_max=args.is_ratio_max,
         outcome_level=args.outcome_level,
         print_every=args.print_every,
         checkpoint_every=args.checkpoint_every,
