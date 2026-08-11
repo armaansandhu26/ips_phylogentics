@@ -3,6 +3,8 @@ import numpy as np
 import random
 import math
 
+import torch
+
 
 class EdgeEnvContinuous(object):
 
@@ -24,6 +26,19 @@ class EdgeEnvContinuous(object):
             return float(action / 2), float(action / 2)
         else:
             return float(action[0]), float(action[1])
+
+    def actions_2_edges_batch(
+        self,
+        edge_actions: torch.Tensor,
+        *,
+        at_root: bool,
+        device: torch.device,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        edge_actions = edge_actions.to(device=device, dtype=torch.float32)
+        if at_root:
+            half = edge_actions / 2
+            return half, half
+        return edge_actions[:, 0], edge_actions[:, 1]
 
     def edges_2_actions(self, left_length, right_length, **other_input):
 

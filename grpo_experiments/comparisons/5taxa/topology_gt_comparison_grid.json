@@ -1,0 +1,54 @@
+{
+  "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/5taxa/topology_gt_comparison_grid.png",
+  "rank_output": "/home/armaan/phylogfn/grpo_experiments/comparisons/5taxa/topology_gt_comparison_rank.png",
+  "gt_reference": "/home/armaan/phylogfn/grpo_experiments/comparisons/5taxa/exact_topology_reference/exact_topology_reference_shifted_linear_1000000_seed0.json",
+  "gt_definition": "Exact enumeration of all 105 five-taxon topologies; q*(T) proportional to shifted-linear reward R(T).",
+  "gt_metadata": {
+    "run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+    "samples": 1000000,
+    "seed": 0,
+    "reward_target": "shifted_linear",
+    "target": "q*(x) proportional to (C + model_log_score(x)) / scale",
+    "model_log_score_shift": 3600.0,
+    "simulation": "one multinomial draw from the exact 105-topology target"
+  },
+  "gt_summary": {
+    "num_topologies": 105,
+    "observed_topologies": 105,
+    "unobserved_topologies": 0
+  },
+  "panels": {
+    "Plain GRPO": {
+      "samples_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_grpo_5taxa_full_sig_b4096_grpo/sampled_full_diagnostics_1000000.npz",
+      "n_samples": 1000000,
+      "n_observed_topologies": 1,
+      "tv_vs_exact": 0.9900666204349322,
+      "tv_vs_gt_empirical": 0.990021,
+      "pearson_vs_exact": NaN
+    },
+    "Original IPS": {
+      "samples_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_count_ips_5taxa_full_sig_b4096_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "n_samples": 1000000,
+      "n_observed_topologies": 3,
+      "tv_vs_exact": 0.9692198641452534,
+      "tv_vs_gt_empirical": 0.9695109999999999,
+      "pearson_vs_exact": 0.7816690182258691
+    },
+    "GFlowNet (trajectory balance)": {
+      "samples_path": "/home/armaan/phylogfn/og_code/experiments/full_model/20260703_172421_phylgfn_logreward_g4096_1m_full_replay_op3277_r819_rb4096/plots/reward_probability_eval_1000000/og_gflownet_reward_probability_samples.npz",
+      "n_samples": 1000000,
+      "n_observed_topologies": 105,
+      "tv_vs_exact": 0.014849902831022315,
+      "tv_vs_gt_empirical": 0.015553000000000004,
+      "pearson_vs_exact": 0.8371184073108262
+    },
+    "Learned reverse IPS (new proposed)": {
+      "samples_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "n_samples": 1000000,
+      "n_observed_topologies": 105,
+      "tv_vs_exact": 0.24561330351311267,
+      "tv_vs_gt_empirical": 0.245829,
+      "pearson_vs_exact": -0.21573154666504316
+    }
+  }
+}

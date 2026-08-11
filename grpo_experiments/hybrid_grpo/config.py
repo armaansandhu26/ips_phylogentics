@@ -46,7 +46,11 @@ class HybridExperimentConfig:
     replay_anneal_total_batch: int = 512
 
     # Rollout/replay execution.
-    rollout_chunk_size: int = 64
+    rollout_chunk_size: int = 2048
+
+    # Model ablations.
+    edge_rep_grad_alpha: float | None = None
+    """Override GFN.MODEL.EDGE_REP_GRAD_ALPHA; None keeps the YAML/default value."""
 
     # GRPO optimizer.
     grpo_lr: float = 1e-4
@@ -62,6 +66,9 @@ class HybridExperimentConfig:
     checkpoint_every: int = 0
     log_trajectories: bool = True
     trajectory_flush_every: int = 20
+
+    log_score_decimals: int | None = None
+    """If set, round log_scores (and log_rewards) to this many decimal places everywhere."""
 
     # Resume.
     resume_from: Optional[str] = None
@@ -191,7 +198,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="PPO clip epsilon for GRPO surrogate (TRL default 0.2). 0 disables clipping.",
     )
     g.add_argument("--grpo-clip-eps-high", type=float, default=None)
-    g.add_argument("--rollout-chunk-size", type=int, default=64)
+    g.add_argument("--rollout-chunk-size", type=int, default=2048)
+
+    g = p.add_argument_group("model ablations")
+    g.add_argument(
+        "--edge-rep-grad-alpha",
+        type=float,
+        default=None,
+        help=(
+            "Scale edge-loss gradients flowing into tree representations. "
+            "0 detaches edge inputs; 1 keeps the original coupled path."
+        ),
+    )
 
     g = p.add_argument_group("tracking / logging")
     g.add_argument("--outcome-level", choices=["signature", "topology"], default="topology")
@@ -208,6 +226,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=int,
         default=20,
         help="Flush trajectory JSONL buffers every N resample rounds.",
+    )
+    g.add_argument(
+        "--log-score-decimals",
+        type=int,
+        default=None,
+        help=(
+            "Round log_scores to this many decimal places for training, logging, and "
+            "signature outcomes. Use 3 to match signature discretization."
+        ),
     )
 
     g = p.add_argument_group("resume")
@@ -237,6 +264,7 @@ def config_from_args(args: argparse.Namespace) -> HybridExperimentConfig:
         replay_anneal_end=args.replay_anneal_end,
         replay_anneal_total_batch=args.replay_anneal_total_batch,
         rollout_chunk_size=args.rollout_chunk_size,
+        edge_rep_grad_alpha=args.edge_rep_grad_alpha,
         grpo_lr=args.grpo_lr,
         grpo_max_grad_norm=args.grpo_max_grad_norm,
         grpo_advantage_eps=args.grpo_advantage_eps,
@@ -248,7 +276,7 @@ def config_from_args(args: argparse.Namespace) -> HybridExperimentConfig:
         checkpoint_every=args.checkpoint_every,
         log_trajectories=args.log_trajectories,
         trajectory_flush_every=args.trajectory_flush_every,
+        log_score_decimals=args.log_score_decimals,
         resume_from=args.resume_from,
         resume_checkpoint=args.resume_checkpoint,
     )
-

@@ -3,6 +3,8 @@ import numpy as np
 import random
 import math
 
+import torch
+
 
 class EdgeEnvCategorical(object):
 
@@ -44,6 +46,7 @@ class EdgeEnvCategorical(object):
         self.lr_actions_pairs_indices = {
             pair: idx for idx, pair in enumerate(self.lr_actions_pairs)
         }
+        self.lr_actions_pairs_tensor = torch.tensor(self.lr_actions_pairs, dtype=torch.long)
         self.max_edge_length = float(self.categorical_bins * self.categorical_bin_size)
 
     def generate_random_perturbation(self, edge_length, is_root):
@@ -134,6 +137,39 @@ class EdgeEnvCategorical(object):
             return self.root_edge_actions_2_edges(action)
         else:
             return self.lr_actions_2_edges(action)
+
+    def actions_2_edges_batch(
+        self,
+        edge_actions: torch.Tensor,
+        *,
+        at_root: bool,
+        device: torch.device,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        edge_actions = edge_actions.to(device)
+        if self.bin_size_type == "EQUAL_BIN_SIZE":
+            if at_root:
+                edge_length = (edge_actions + 1) * self.categorical_bin_size
+                half = edge_length / 2
+                return half, half
+            if self.edges_independent:
+                left = (edge_actions[:, 0] + 1) * self.categorical_bin_size
+                right = (edge_actions[:, 1] + 1) * self.categorical_bin_size
+                return left, right
+            pairs = self.lr_actions_pairs_tensor.to(device)[edge_actions.long()]
+            left = (pairs[:, 0] + 1) * self.categorical_bin_size
+            right = (pairs[:, 1] + 1) * self.categorical_bin_size
+            return left, right
+
+        edge_actions_cpu = edge_actions.detach().cpu().tolist()
+        left_lengths = []
+        right_lengths = []
+        for action in edge_actions_cpu:
+            left, right = self.actions_2_edges(action, at_root=at_root)
+            left_lengths.append(left)
+            right_lengths.append(right)
+        left_t = torch.tensor(left_lengths, device=device, dtype=torch.float32)
+        right_t = torch.tensor(right_lengths, device=device, dtype=torch.float32)
+        return left_t, right_t
 
     def edges_2_actions(self, left_length, right_length, **other_input):
 

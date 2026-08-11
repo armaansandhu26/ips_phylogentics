@@ -17,6 +17,11 @@ TRAINING_STATE_FILE = "training_state.json"
 TRAINER_STATE_FILE = "trainer_state.pt"
 
 
+def is_on_policy_training_mode(training_mode: str) -> bool:
+    """True for on-policy loops, including replay variants like on_policy+replay."""
+    return training_mode == "on_policy" or training_mode.startswith("on_policy+")
+
+
 @dataclass
 class TrainingResumeState:
     """Loop counters and tracker state restored when resuming a run."""
@@ -39,16 +44,43 @@ class TrainingResumeState:
         return set(self.outcome_counts)
 
 
-def load_metrics_rows(metrics_path: str | Path) -> list[dict]:
+def _atomic_write_text(path: Path, text: str) -> None:
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temporary.open("w") as handle:
+        handle.write(text)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, path)
+
+
+def _write_metrics_rows(path: Path, rows: list[dict]) -> None:
+    text = "".join(json.dumps(row) + "\n" for row in rows)
+    _atomic_write_text(path, text)
+
+
+def load_metrics_rows(
+    metrics_path: str | Path,
+    *,
+    repair_trailing_record: bool = False,
+) -> list[dict]:
     path = Path(metrics_path)
     if not path.exists():
         return []
+    lines = path.read_text().splitlines()
     rows = []
-    with path.open() as handle:
-        for line in handle:
-            line = line.strip()
-            if line:
-                rows.append(json.loads(line))
+    for index, line in enumerate(lines):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            has_later_record = any(candidate.strip() for candidate in lines[index + 1 :])
+            if has_later_record or not repair_trailing_record:
+                raise
+            print(f"warning: removing partial trailing metrics record from {path}")
+            _write_metrics_rows(path, rows)
+            break
     return rows
 
 
@@ -101,14 +133,16 @@ def save_training_state(
     payload = asdict(state)
     payload.pop("grpo_trainer_state", None)
     path = Path(output_dir) / TRAINING_STATE_FILE
-    with path.open("w") as handle:
-        json.dump(payload, handle, indent=2)
 
     if grpo_trainer is not None and hasattr(grpo_trainer, "state_dict"):
-        torch.save(
-            grpo_trainer.state_dict(),
-            Path(output_dir) / TRAINER_STATE_FILE,
+        trainer_path = Path(output_dir) / TRAINER_STATE_FILE
+        trainer_temporary = trainer_path.with_name(
+            f".{trainer_path.name}.{os.getpid()}.tmp"
         )
+        torch.save(grpo_trainer.state_dict(), trainer_temporary)
+        os.replace(trainer_temporary, trainer_path)
+
+    _atomic_write_text(path, json.dumps(payload, indent=2))
 
 
 def load_training_state(output_dir: str | Path) -> TrainingResumeState | None:
@@ -209,6 +243,31 @@ def load_epoch_summaries(output_dir: str | Path) -> list[dict]:
     return data if isinstance(data, list) else []
 
 
+def _metrics_committed_by_checkpoint(
+    rows: list[dict],
+    resume: TrainingResumeState,
+) -> list[dict]:
+    if is_on_policy_training_mode(resume.training_mode):
+        return [
+            row
+            for row in rows
+            if int(row.get("epoch", -1)) < resume.start_epoch
+            or (
+                int(row.get("epoch", -1)) == resume.start_epoch
+                and int(row.get("step", -1)) < resume.start_step
+            )
+        ]
+    return [
+        row
+        for row in rows
+        if int(row.get("resample_round", -1)) < resume.start_resample_round
+        or (
+            int(row.get("resample_round", -1)) == resume.start_resample_round
+            and int(row.get("update_cycle", -1)) < resume.start_update_cycle
+        )
+    ]
+
+
 def prepare_resume(
     run_dir: str | Path,
     *,
@@ -223,16 +282,33 @@ def prepare_resume(
     if not root.is_dir():
         raise FileNotFoundError(f"resume run directory not found: {root}")
 
-    checkpoint_path = resolve_checkpoint_path(root, checkpoint_name)
     metrics_path = root / "metrics.jsonl"
-    rows = load_metrics_rows(metrics_path)
-
     saved = load_training_state(root)
+    effective_checkpoint_name = checkpoint_name
+    if (
+        effective_checkpoint_name is None
+        and saved is not None
+        and saved.checkpoint_path
+    ):
+        committed_checkpoint = root / Path(saved.checkpoint_path).name
+        if committed_checkpoint.exists():
+            effective_checkpoint_name = committed_checkpoint.name
+    checkpoint_path = resolve_checkpoint_path(root, effective_checkpoint_name)
+    rows = load_metrics_rows(metrics_path, repair_trailing_record=True)
+
     if saved is not None:
         resume = saved
         resume.checkpoint_path = str(checkpoint_path)
+        committed_rows = _metrics_committed_by_checkpoint(rows, resume)
+        if len(committed_rows) != len(rows):
+            print(
+                f"warning: removing {len(rows) - len(committed_rows)} metrics records "
+                f"newer than committed checkpoint {checkpoint_path.name}"
+            )
+            _write_metrics_rows(metrics_path, committed_rows)
+            rows = committed_rows
         # Advance start pointers from saved "last completed" counters.
-        if resume.training_mode == "on_policy":
+        if is_on_policy_training_mode(resume.training_mode):
             if resume.start_step > 0 and resume.start_step < steps_per_epoch:
                 pass
             elif resume.start_epoch >= target_epochs:
@@ -261,7 +337,7 @@ def prepare_resume(
         resume.checkpoint_path = str(checkpoint_path)
         print(f"warning: {TRAINING_STATE_FILE} not found; inferred resume from metrics.jsonl")
 
-    if resume.training_mode == "on_policy" and resume.start_epoch >= target_epochs:
+    if is_on_policy_training_mode(resume.training_mode) and resume.start_epoch >= target_epochs:
         raise ValueError(
             f"run already completed {resume.start_epoch} epochs (target={target_epochs}); "
             f"set --epochs higher than {resume.start_epoch}"
@@ -277,7 +353,7 @@ def prepare_resume(
         f"global_step={resume.global_step} "
         f"mode={resume.training_mode}"
     )
-    if resume.training_mode == "on_policy":
+    if is_on_policy_training_mode(resume.training_mode):
         print(f"  continue epochs [{resume.start_epoch}, {target_epochs})")
         if resume.start_step > 0:
             print(f"  mid-epoch resume at step={resume.start_step}")
@@ -324,7 +400,7 @@ def make_training_state(
         state.outcome_counts = dict(tracker.outcome_counts)
         state.topology_counts = dict(tracker.topology_counts)
 
-    if training_mode == "on_policy":
+    if is_on_policy_training_mode(training_mode):
         assert epoch is not None and step is not None and steps_per_epoch is not None
         if step + 1 >= steps_per_epoch:
             state.start_epoch = epoch + 1

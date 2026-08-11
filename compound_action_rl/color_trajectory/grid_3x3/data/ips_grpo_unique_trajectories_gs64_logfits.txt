@@ -1,0 +1,19 @@
+OLS fits on transformed axes
+
+log(density) vs reward
+  slope=7.481223
+  intercept=-7.848368
+  R2=0.779344
+  RMSE=0.498163
+
+density vs log(reward)
+  slope=0.022811
+  intercept=0.034746
+  R2=0.560675
+  RMSE=0.007470
+
+log(density) vs log(reward)
+  slope=2.391428
+  intercept=-2.522957
+  R2=0.695856
+  RMSE=0.584861

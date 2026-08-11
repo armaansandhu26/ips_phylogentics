@@ -44,7 +44,7 @@ from grpo_experiments.core.build_trainer import build_grpo_trainer
 from grpo_experiments.core.on_policy_buffer import run_on_policy_grpo_step, run_policy_is_grpo_cycles
 from grpo_experiments.core.trainer import GRPOTrainer
 from grpo_experiments.core.policy_replay import sample_replay_buffer
-from grpo_experiments.metrics import OutcomeTracker, batch_diversity_stats, extract_outcome_ids
+from grpo_experiments.metrics import OutcomeIdCache, OutcomeTracker, batch_diversity_stats
 from grpo_experiments.resume import (
     load_epoch_summaries,
     load_generator_checkpoint,
@@ -58,14 +58,16 @@ from grpo_experiments.resume import (
 )
 from grpo_experiments.utils import (
     append_jsonl,
+    apply_experiment_log_score_discretization,
     build_random_spec,
     choose_device,
     generate_exploration_spec,
     get_generator_params,
     load_phylogfn_cfg,
-    reconstruct_trees,
+    resolve_rollout_chunk_size,
     scalar_metric,
     set_seed,
+    apply_training_cpu_limits,
 )
 from src.env import build_env
 from src.gfn.build import build_gfn
@@ -94,6 +96,9 @@ def _train_grpo_step(
     generation_state: dict | None,
     chunk_size: int,
     device: str,
+    advantage_dump_dir: str | None = None,
+    group_meta: dict | None = None,
+    extra_update_kwargs: dict | None = None,
 ) -> tuple[dict, dict]:
     return run_on_policy_grpo_step(
         grpo_trainer,
@@ -105,6 +110,9 @@ def _train_grpo_step(
         generation_state=generation_state,
         chunk_size=chunk_size,
         device=device,
+        advantage_dump_dir=advantage_dump_dir,
+        group_meta=group_meta,
+        extra_update_kwargs=extra_update_kwargs,
     )
 
 
@@ -127,6 +135,7 @@ def _build_grpo_trainer(exp_cfg: ExperimentConfig, generator, cfg) -> GRPOTraine
         reward_c=cfg.ENV.REWARD.C,
         reward_scale=cfg.ENV.REWARD.SCALE,
         num_iterations=exp_cfg.grpo_num_iterations,
+        advantage_reward_mode=exp_cfg.advantage_reward_mode,
     )
 
 
@@ -138,7 +147,9 @@ def _save_checkpoint_bundle(
     resume_state,
 ) -> None:
     ckpt_path = os.path.join(output_dir, checkpoint_name)
-    generator.save(ckpt_path)
+    temporary_ckpt_path = f"{ckpt_path}.{os.getpid()}.tmp"
+    generator.save(temporary_ckpt_path)
+    os.replace(temporary_ckpt_path, ckpt_path)
     resume_state.checkpoint_path = ckpt_path
     save_training_state(output_dir, resume_state, grpo_trainer=trainer)
 
@@ -165,6 +176,7 @@ def _run_grpo_on_policy(exp_cfg: ExperimentConfig, device: str, output_dir: str,
     env.to(device)
     generator = build_gfn(cfg, env, device, ddp=False)
     rollout_worker = RolloutWorker(env)
+    outcome_cache = OutcomeIdCache(env)
     data_loader = TrainingDataLoader(
         cfg, env, rollout_worker, os.path.join(output_dir, "best_trees.pt"),
     )
@@ -187,6 +199,7 @@ def _run_grpo_on_policy(exp_cfg: ExperimentConfig, device: str, output_dir: str,
     start_epoch = resume.start_epoch if resume else 0
     start_step = resume.start_step if resume else 0
     generation_state = None
+    rollout_chunk = resolve_rollout_chunk_size(exp_cfg)
 
     for epoch in range(start_epoch, training_cfg.EPOCHS_NUM):
         exploration_specs = generate_exploration_spec(training_cfg.EXPLORATION, epoch)
@@ -197,9 +210,13 @@ def _run_grpo_on_policy(exp_cfg: ExperimentConfig, device: str, output_dir: str,
         for step in range(step_begin, data_loader.steps_per_epoch):
             random_spec = data_loader.generate_random_spec(exploration_specs, step)
             batch, trajectories = data_loader.generate_batch(generator, random_spec)
+            apply_experiment_log_score_discretization(batch, exp_cfg, cfg)
 
-            trees = reconstruct_trees(env, trajectories, batch["log_scores"])
-            outcome_ids, topology_ids = extract_outcome_ids(trees, exp_cfg.outcome_level)
+            outcome_ids, topology_ids = outcome_cache.ids_from_action_tensors(
+                batch["action_tensors"],
+                batch["log_scores"],
+                exp_cfg.outcome_level,
+            )
             tracker.update(outcome_ids, topology_ids)
             seen_outcomes.update(outcome_ids)
 
@@ -212,6 +229,11 @@ def _run_grpo_on_policy(exp_cfg: ExperimentConfig, device: str, output_dir: str,
                     generator, batch, training_cfg.MINI_BATCH_SPLITS,
                 )
             else:
+                adv_dump_dir = (
+                    os.path.join(output_dir, "advantage_groups")
+                    if exp_cfg.dump_advantage_groups
+                    else None
+                )
                 train_info, generation_state = _train_grpo_step(
                     grpo_trainer,
                     rollout_worker,
@@ -220,8 +242,15 @@ def _run_grpo_on_policy(exp_cfg: ExperimentConfig, device: str, output_dir: str,
                     trajectories,
                     random_spec=random_spec,
                     generation_state=generation_state,
-                    chunk_size=exp_cfg.rollout_chunk_size,
+                    chunk_size=rollout_chunk,
                     device=device,
+                    advantage_dump_dir=adv_dump_dir,
+                    group_meta={
+                        "epoch": epoch,
+                        "step": step,
+                        "global_step": global_step,
+                        "method": exp_cfg.method,
+                    },
                 )
 
             mean_log_reward = float(batch["log_rewards"].mean().item())
@@ -316,6 +345,7 @@ def _run_grpo_policy_is(exp_cfg: ExperimentConfig, device: str, output_dir: str,
     env.to(device)
     generator = build_gfn(cfg, env, device, ddp=False)
     rollout_worker = RolloutWorker(env)
+    outcome_cache = OutcomeIdCache(env)
 
     grpo_trainer = _build_grpo_trainer(exp_cfg, generator, cfg)
 
@@ -331,6 +361,7 @@ def _run_grpo_policy_is(exp_cfg: ExperimentConfig, device: str, output_dir: str,
     training_cfg = cfg.GFN.TRAINING_DATA_LOADER
     global_step = resume.global_step if resume else 0
     start_round = resume.start_resample_round if resume else 0
+    rollout_chunk = resolve_rollout_chunk_size(exp_cfg)
 
     for resample_round in range(start_round, exp_cfg.effective_resample_rounds):
         exploration_specs = generate_exploration_spec(training_cfg.EXPLORATION, resample_round)
@@ -349,12 +380,23 @@ def _run_grpo_policy_is(exp_cfg: ExperimentConfig, device: str, output_dir: str,
             rollout_worker,
             generator,
             buffer_size=exp_cfg.effective_buffer_size,
-            chunk_size=exp_cfg.rollout_chunk_size,
+            chunk_size=rollout_chunk,
             random_spec=random_spec,
             device=device,
         )
-        trees = reconstruct_trees(env, buffer.trajectories, buffer.log_scores)
-        outcome_ids, topology_ids = extract_outcome_ids(trees, exp_cfg.outcome_level)
+        apply_experiment_log_score_discretization(buffer, exp_cfg, cfg)
+        if buffer.action_tensors is not None:
+            outcome_ids, topology_ids = outcome_cache.ids_from_action_tensors(
+                buffer.action_tensors,
+                buffer.log_scores,
+                exp_cfg.outcome_level,
+            )
+        else:
+            outcome_ids, topology_ids = outcome_cache.ids_from_actions(
+                buffer.actions_set,
+                buffer.log_scores,
+                exp_cfg.outcome_level,
+            )
         tracker.update(outcome_ids, topology_ids)
         seen_outcomes.update(outcome_ids)
         div = batch_diversity_stats(outcome_ids, topology_ids)
@@ -381,7 +423,7 @@ def _run_grpo_policy_is(exp_cfg: ExperimentConfig, device: str, output_dir: str,
             advantage_metrics=advantage_metrics,
             outcome_ids=None,
             update_cycles=exp_cfg.effective_update_cycles - cycle_begin,
-            chunk_size=exp_cfg.rollout_chunk_size,
+            chunk_size=rollout_chunk,
             device=device,
         )
         for cycle_offset, train_info in enumerate(cycle_train_infos):
@@ -462,6 +504,7 @@ def _run_grpo_policy_is(exp_cfg: ExperimentConfig, device: str, output_dir: str,
 def run_experiment(exp_cfg: ExperimentConfig) -> str:
     device = choose_device(exp_cfg.device)
     set_seed(exp_cfg.seed)
+    rollout_chunk = resolve_rollout_chunk_size(exp_cfg)
     if exp_cfg.method == "grpo" and exp_cfg.enable_policy_is:
         mode = "policy_is"
         print(
@@ -469,12 +512,18 @@ def run_experiment(exp_cfg: ExperimentConfig) -> str:
             f"buffer={exp_cfg.effective_buffer_size}  "
             f"resample_rounds={exp_cfg.effective_resample_rounds}  "
             f"update_cycles={exp_cfg.effective_update_cycles}  "
-            f"chunk={exp_cfg.rollout_chunk_size}"
+            f"chunk={rollout_chunk}"
+            + (f" (from {exp_cfg.rollout_chunk_size})" if rollout_chunk != exp_cfg.rollout_chunk_size else "")
         )
     else:
-        print(f"method={exp_cfg.method}  device={device}  G={exp_cfg.grpo_group_size}")
+        chunk_note = (
+            f"  chunk={rollout_chunk}"
+            + (f" (from {exp_cfg.rollout_chunk_size})" if rollout_chunk != exp_cfg.rollout_chunk_size else "")
+        )
+        print(f"method={exp_cfg.method}  device={device}  G={exp_cfg.grpo_group_size}{chunk_note}")
 
     cfg, all_seqs = load_phylogfn_cfg(exp_cfg)
+    apply_training_cpu_limits(exp_cfg, cfg)
     output_dir = resolve_output_dir(exp_cfg)
     cfg.OUTPUT_PATH = output_dir
 

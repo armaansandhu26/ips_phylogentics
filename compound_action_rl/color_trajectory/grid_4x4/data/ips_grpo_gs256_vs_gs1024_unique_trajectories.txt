@@ -1,0 +1,59 @@
+Unique enumerated trajectories captured
+
+IPS-GRPO (group_size=256)
+  episodes_sampled=100000
+  enumerated_trajectories=1280
+  matched_episodes=99925
+  unmatched_episodes=75
+  unique_enumerated_trajectories_hit=1171
+
+  Top sampled trajectory indices (index -> count):
+    #0911  x724
+    #0527  x711
+    #0903  x675
+    #0519  x624
+    #0543  x589
+    #0927  x553
+    #0399  x543
+    #0783  x534
+    #0775  x517
+    #0839  x509
+    #0846  x504
+    #0847  x503
+    #0902  x485
+    #0838  x484
+    #0391  x482
+    #0909  x479
+    #0463  x450
+    #0910  x443
+    #0901  x442
+    #0591  x440
+
+IPS-GRPO (group_size=1024)
+  episodes_sampled=100000
+  enumerated_trajectories=1280
+  matched_episodes=99912
+  unmatched_episodes=88
+  unique_enumerated_trajectories_hit=1272
+
+  Top sampled trajectory indices (index -> count):
+    #0327  x294
+    #0710  x289
+    #0326  x269
+    #0334  x268
+    #0143  x263
+    #0135  x258
+    #0647  x253
+    #0335  x249
+    #0263  x249
+    #0199  x247
+    #0333  x244
+    #0711  x240
+    #0454  x239
+    #0455  x234
+    #0462  x231
+    #0463  x230
+    #0325  x230
+    #0259  x227
+    #0142  x227
+    #0271  x225

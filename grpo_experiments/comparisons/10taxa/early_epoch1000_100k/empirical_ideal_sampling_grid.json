@@ -1,0 +1,30 @@
+{
+  "comparison_dir": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/early_epoch1000_100k",
+  "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/early_epoch1000_100k/empirical_ideal_sampling_grid.png",
+  "plot_kind": "empirical_reward_proportional_qhat_vs_reward",
+  "ideal_definition": "On each method's observed signature support, q*(sigma) = R(sigma) / sum_{sigma'} R(sigma').",
+  "shared_axis": {
+    "x_min": -23.091723622512497,
+    "x_max": 792.8158447262625,
+    "y_min": 0.0,
+    "y_max": 2.3617834351219724e-05
+  },
+  "panels": {
+    "Learned reverse IPS": {
+      "n_samples": 100000,
+      "n_signatures": 100000,
+      "reward_sum": 33568524.23201191,
+      "ideal_slope": 2.978981122579024e-08,
+      "tv_vs_ideal": 0.11848944832588429,
+      "pearson_vs_ideal": NaN
+    },
+    "GFlowNet": {
+      "n_samples": 100000,
+      "n_signatures": 100000,
+      "reward_sum": 32819260.086590685,
+      "ideal_slope": 3.0469913013321733e-08,
+      "tv_vs_ideal": 0.1193254952611548,
+      "pearson_vs_ideal": NaN
+    }
+  }
+}

@@ -11,6 +11,9 @@ from grpo_experiments.hybrid_grpo.runner import run_experiment
 
 
 def main() -> None:
+    from src.utils.cpu_threads import apply_cpu_thread_limit
+
+    apply_cpu_thread_limit()
     parser = build_arg_parser()
     exp_cfg = config_from_args(parser.parse_args())
     run_experiment(exp_cfg)

@@ -59,6 +59,7 @@ def compute_grpo_policy_loss(
         seq_weights = seq_log_ratio.exp()
         masked_coef = coef_1 * mask
         metrics = {
+            "policy_loss_mode": "ppo",
             "mean_log_importance_ratio": float((log_ratio_raw * mask).sum().item() / mask.sum().clamp(min=1.0).item()),
             "std_log_importance_ratio": float(log_ratio_raw.std().item()),
             "mean_log_importance_ratio_raw": float(log_ratio_raw.mean().item()),

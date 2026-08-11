@@ -1,0 +1,14 @@
+{
+  "run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260804_133452_plain_grpo_10taxa_full_sig_b4096_shift5000_grpo",
+  "method": "ppo",
+  "checkpoint_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260804_133452_plain_grpo_10taxa_full_sig_b4096_shift5000_grpo/final_checkpoint.pt",
+  "device": "cuda:0",
+  "num_trees": 1000000,
+  "batch_size": 4096,
+  "seed": 0,
+  "target": "R(x) = 5000 + terminal_log_likelihood",
+  "log_score_shift": 5000.0,
+  "reverse_probability": "fixed environment P_B(tau | x)",
+  "only_train_tree_model": false,
+  "observed_topologies": 1401
+}

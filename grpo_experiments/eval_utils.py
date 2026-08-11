@@ -119,6 +119,10 @@ def resolve_checkpoint(run_dir: Path, checkpoint_name: str | None = None) -> Pat
     if round_ckpts:
         return round_ckpts[-1]
 
+    update_ckpts = sorted(run_dir.glob("checkpoint_update*.pt"))
+    if update_ckpts:
+        return update_ckpts[-1]
+
     raise FileNotFoundError(f"no checkpoint found in {run_dir}")
 
 

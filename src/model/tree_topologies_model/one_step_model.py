@@ -5,7 +5,6 @@ import torch.nn.functional as F
 from src.model.weight_init import trunc_normal_
 from src.model.transformer import TransformerEncoder
 from torch.distributions import Categorical
-import numpy as np
 
 
 class PhyloTreeModelOneStep(nn.Module):
@@ -57,17 +56,10 @@ class PhyloTreeModelOneStep(nn.Module):
             tree_actions = distribution.sample()
             if random_p > 0:
                 batch_size = tree_actions.shape[0]
-                #     B, N = logits.shape
-                #     for i in range(batch_size):
-                #         if np.random.uniform(0, 1) < random_p:
-                #             rand_action = np.random.randint(0, N)
-                #             tree_actions[i] = rand_action
-                rand_flag = (torch.empty(batch_size).uniform_(0, 1)) <= random_p
-                rand_num = rand_flag.sum().item()
                 B, N = logits.shape
-                if rand_num > 0:
-                    rand_actions = torch.randint(low=0, high=N, size=[rand_num]).to(tree_actions)
-                    tree_actions[rand_flag] = rand_actions
+                rand_flag = torch.rand(batch_size, device=tree_actions.device) <= random_p
+                rand_actions = torch.randint(low=0, high=N, size=(batch_size,), device=tree_actions.device)
+                tree_actions = torch.where(rand_flag, rand_actions, tree_actions)
         else:
             T = random_spec['T']
             distribution = Categorical(logits=logits / T)
@@ -79,7 +71,7 @@ class PhyloTreeModelOneStep(nn.Module):
         logits = ret['logits']
         batch_size = logits.shape[0]
         log_p = self.logsoftmax(logits)
-        log_paths_pf = log_p[torch.arange(batch_size), tree_actions]
+        log_paths_pf = log_p[torch.arange(batch_size, device=logits.device), tree_actions]
         return log_paths_pf
 
     def forward(self, **kwargs):
@@ -98,9 +90,10 @@ class PhyloTreeModelOneStep(nn.Module):
         batch_size, max_nb_seq, _ = batch_input.shape
 
         # batch_size, max_nb_seq, emb_size
-        x = self.seq_emb(batch_input)
+        x = self.seq_emb(batch_input)    # --> embed each subtree [B, N, m*c] -> [B, N, E]
 
-        # add summary token
+        # add summary token  #[B, N, E]--> [B, N+1, E] (placeholder for a learnable summary token which tells all info about current subtrees)
+        # after learning -> represent all N subtrees in that same episode
         B = x.shape[0]
         summary_token = self.get_head_token(scale_key)
         if self.condition_on_scale:
@@ -110,7 +103,8 @@ class PhyloTreeModelOneStep(nn.Module):
             summary_token = summary_token.expand(B, -1, -1)
         x = torch.cat((summary_token, x), dim=1)
 
-        # padding mask
+        # padding mask #[B, N+1, E] + batch padding -> self attn -> [B, N+1, E] contextual info now
+        # we start with fixed trees N(max possible = #leaves in starting) and then later on this might reduce -> so we use padding = True to ignore the subtrees that dont exist
         batch_padding_mask = torch.ones((batch_size, max_nb_seq)).to(x).cumsum(dim=1) > batch_nb_seq[:, None]
         batch_padding_mask = batch_padding_mask.bool()
         batch_padding_mask = F.pad(batch_padding_mask, (1, 0), "constant", False)
@@ -119,20 +113,28 @@ class PhyloTreeModelOneStep(nn.Module):
         summary_token = x[:, :1]
         trees_reps = x[:, 1:]
 
-        # add all pairs of embeddings
+        # add all pairs of embeddings  -> gives P merge candidates = N*(N-1)/2
         #  x[i, j]  + x[i, k] = C[i, j, k]
         #  B x N x E  =>     B x N x N x E
-        tmp = (trees_reps[:, :, None, :] + trees_reps[:, None, :, :])
+        tmp = (trees_reps[:, :, None, :] + trees_reps[:, None, :, :]) # [B, N, N, E]
         # get all distinct pairs
-        row, col = torch.triu_indices(max_nb_seq, max_nb_seq, offset=1)
-        x_pairs = tmp[:, row, col]
+        row, col = torch.triu_indices(
+            max_nb_seq,
+            max_nb_seq,
+            offset=1,
+            device=trees_reps.device,
+        ) #upper traingle
+        x_pairs = tmp[:, row, col]  # [B, P, E]
 
+        #[B, P, E] -> [B, P, 2E]
         if self.concatenate_summary_token:
             _, num_trees, _ = x_pairs.shape
-            s = summary_token.expand(-1, num_trees, -1)
-            x_pairs = torch.cat([x_pairs, s], dim=2)
+            s = summary_token.expand(-1, num_trees, -1) #copy same summary for each tree
+            x_pairs = torch.cat([x_pairs, s], dim=2) #For each possible merge pair, append global forest context to that pair’s local representation before scoring.
 
+        #[B, P, 2E] -> #[B, P] (one output score per candidate)
         logits = self.logits_head(x_pairs).squeeze(-1)
+
         if self.compute_state_flow:
             log_state_flow = self.flow_head(summary_token).reshape(-1)
             ret = {
@@ -147,14 +149,14 @@ class PhyloTreeModelOneStep(nn.Module):
             }
 
         if return_tree_reps:
-            ret['summary_reps'] = summary_token[:, 0]
-            ret['trees_reps'] = trees_reps
+            ret['summary_reps'] = summary_token[:, 0] #[B,E]
+            ret['trees_reps'] = trees_reps #[B,N,E]
 
-        tree_actions = self.sample(ret, random_spec)
+        tree_actions = self.sample(ret, random_spec) #[B] - samples one merge index per batch item from ret['logits'].
         if input_tree_actions is not None:
             tree_actions[:len(input_tree_actions)] = input_tree_actions
 
-        log_paths_pf = self.compute_log_path_pf(ret, tree_actions)
+        log_paths_pf = self.compute_log_path_pf(ret, tree_actions)#[B] - computes log-prob of chosen action under current policy
         ret['tree_actions'] = tree_actions
         ret['log_paths_pf'] = log_paths_pf
 

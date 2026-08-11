@@ -1,0 +1,32 @@
+{
+  "display_samples": 10000,
+  "methods": [
+    {
+      "method": "Count IPS",
+      "run": "/home/armaan/phylogfn/compound_action_rl/dag_toy_dataset/data/count_ips_runs/20260718_193718_b128_gs16_seed0",
+      "eval_samples": 1000000,
+      "unique_outcomes": 65,
+      "total_outcomes": 129,
+      "r2": 0.6036539817430037,
+      "tv": 0.44375546386564635
+    },
+    {
+      "method": "GFlowNet",
+      "run": "/home/armaan/phylogfn/compound_action_rl/dag_toy_dataset/data/gflownet_runs/20260727_114519_b128_gs16_seed0",
+      "eval_samples": 10000,
+      "unique_outcomes": 129,
+      "total_outcomes": 129,
+      "r2": 0.5200675990526382,
+      "tv": 0.19927677098531993
+    },
+    {
+      "method": "Learned-Reverse IPS",
+      "run": "/home/armaan/phylogfn/compound_action_rl/dag_toy_dataset/data/learned_reverse_ips_runs/20260721_173405_b128_gs16_seed0",
+      "eval_samples": 10000,
+      "unique_outcomes": 129,
+      "total_outcomes": 129,
+      "r2": 0.8411186797240653,
+      "tv": 0.0911773069707888
+    }
+  ]
+}

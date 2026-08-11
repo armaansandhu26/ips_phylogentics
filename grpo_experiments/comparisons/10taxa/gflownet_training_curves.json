@@ -1,0 +1,7 @@
+{
+  "run_dir": "/home/armaan/phylogfn/og_code/experiments/full_model/20260804_112555_20260803_124841_phylgfn_logreward_10taxa_g4096_1m_full_replay_op3277_r819_rb4096_resumed",
+  "epochs": 10000,
+  "final_loss": 0.023472899571061134,
+  "final_log_partition": 86.72514343261719,
+  "output": "grpo_experiments/comparisons/10taxa/gflownet_training_curves.png"
+}

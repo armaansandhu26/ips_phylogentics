@@ -1,0 +1,23 @@
+{
+  "samples": 1000000,
+  "plotted_samples": 1000000,
+  "unique_observed_signatures": 960850,
+  "log_probability_vs_log_reward_pearson_vs_ideal": 0.9811504473314404,
+  "probability_vs_reward_pearson_vs_ideal": 0.982055727813664,
+  "log_probability_on_log_reward_slope": 0.9162411935328776,
+  "log_probability_on_log_reward_intercept": -35.194894488407776,
+  "checkpoint_log_partition": 35.66216689774323,
+  "importance_estimated_log_partition": 35.66216689774323,
+  "checkpoint_log_partition_error": 0.0,
+  "checkpoint_balance_residual_mean": -1.3592398317996412e-15,
+  "checkpoint_balance_residual_std": 0.028084710032166168,
+  "fitted_balance_residual_std": 0.028084710032166168,
+  "importance_ess": 999226.3843948542,
+  "importance_ess_fraction": 0.9992263843948542,
+  "reference_run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+  "run_dir": "/home/armaan/phylogfn/og_code/experiments/full_model/20260703_172421_phylgfn_logreward_g4096_1m_full_replay_op3277_r819_rb4096",
+  "samples_file": "/home/armaan/phylogfn/og_code/experiments/full_model/20260703_172421_phylgfn_logreward_g4096_1m_full_replay_op3277_r819_rb4096/plots/reward_probability_eval_1000000/og_gflownet_reward_probability_samples.npz",
+  "reward_target": "R(x) = 3600 + terminal_log_likelihood",
+  "observed_topologies": 105,
+  "replot_only": true
+}

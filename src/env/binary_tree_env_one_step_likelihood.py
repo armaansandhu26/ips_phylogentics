@@ -43,6 +43,38 @@ CHARACTERS_MAPS = {
     }
 }
 
+# REVERT after phylgfn log(log_reward) ablation: set to False to restore linear TB rewards.
+TB_LOG_LINEAR_REWARD = True
+_LOG_REWARD_EPS = 1e-8
+
+
+def linear_reward_from_log_score(
+    log_score,
+    *,
+    reward_c: float,
+    reward_scale: float,
+):
+    return (reward_c + log_score) / reward_scale
+
+
+def shaped_log_reward_from_log_score(
+    log_score,
+    *,
+    reward_c: float,
+    reward_scale: float,
+):
+    """Map shifted log-scores to the scalar used on the TB backward side."""
+    linear = linear_reward_from_log_score(
+        log_score,
+        reward_c=reward_c,
+        reward_scale=reward_scale,
+    )
+    if not TB_LOG_LINEAR_REWARD:
+        return linear
+    if torch.is_tensor(linear):
+        return torch.log(linear.clamp(min=_LOG_REWARD_EPS))
+    return float(np.log(max(float(linear), _LOG_REWARD_EPS)))
+
 
 class PhyloTreeReward(object):
 
@@ -60,8 +92,11 @@ class PhyloTreeReward(object):
         :param log_score:
         :return:
         """
-        log_reward = (self.C + log_score) / self.scale
-        return log_reward
+        return shaped_log_reward_from_log_score(
+            log_score,
+            reward_c=self.C,
+            reward_scale=self.scale,
+        )
 
     def __call__(self, log_score):
         """
@@ -207,11 +242,39 @@ class PhylogenticTreeEnv(nn.Module):
         self.edge_env = build_edge_env(cfg)
 
         self.seq_length = cfg.GFN.MODEL.SEQ_LEN
+        self.log_score_shift = float(getattr(cfg.ENV, "LOG_SCORE_SHIFT", 3600.0))
+        self.only_train_tree_model = cfg.GFN.MODEL.ONLY_TRAIN_TREE_MODEL
+        self.fixed_edge_length = cfg.GFN.MODEL.FIXED_EDGE_LENGTH
         self.normalize_tree_features = cfg.GFN.NORMALIZE_LIKELIHOOD
         self.pairwise_masking_data = {}
         for n in range(2, len(self.seq_arrays) + 1):
             self.pairwise_masking_data[n] = self.build_pairs_masks_mapping(n)
+        self.tree_pairs_lookup = {
+            n: torch.tensor(pairs, dtype=torch.long)
+            for n, pairs in self.tree_pairs_dict.items()
+        }
+        self._pairwise_device_cache: dict[tuple[int, str], tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = {}
         self.type = cfg.ENV.ENVIRONMENT_TYPE
+
+    def _apply_log_score_shift(self, log_scores: torch.Tensor) -> torch.Tensor:
+        return log_scores + self.log_score_shift
+
+    def _fixed_edge_lengths(self, at_root: bool, batch_size: int, device: torch.device):
+        """
+        Fixed branch lengths for topology-only training.
+
+        Non-root merges: left and right each get FIXED_EDGE_LENGTH.
+        Final root merge: total root edge is 2 * FIXED_EDGE_LENGTH, split evenly
+        (matching root_edge_actions_2_edges which returns total/2 per child).
+        """
+        if at_root:
+            half = self.fixed_edge_length
+            left = torch.full((batch_size,), half, device=device, dtype=torch.float32)
+            right = torch.full((batch_size,), half, device=device, dtype=torch.float32)
+        else:
+            left = torch.full((batch_size,), self.fixed_edge_length, device=device, dtype=torch.float32)
+            right = torch.full((batch_size,), self.fixed_edge_length, device=device, dtype=torch.float32)
+        return left, right
 
     def build_pairs_masks_mapping(self, max_num_seqs):
         rows, cols = np.triu_indices(max_num_seqs, k=1)
@@ -286,18 +349,24 @@ class PhylogenticTreeEnv(nn.Module):
             right_features = tree_features[torch.arange(b), right_trees_indices]
 
             # retrieve edge length
-            edge_action = [x['edge_action'] for x in actions]
             at_root = n == 2
-            edges = [self.edge_env.actions_2_edges(x, at_root=at_root) for x in edge_action]
-            left_edge_lengths = [x[0] for x in edges]
-            right_edge_lengths = [x[1] for x in edges]
-            left_edge_lengths = torch.from_numpy(np.array(left_edge_lengths)).to(tree_features)
-            right_edge_lengths = torch.from_numpy(np.array(right_edge_lengths)).to(tree_features)
+            if self.only_train_tree_model:
+                left_edge_lengths, right_edge_lengths = self._fixed_edge_lengths(
+                    at_root, b, tree_features.device
+                )
+            else:
+                edge_action = [x['edge_action'] for x in actions]
+                edges = [self.edge_env.actions_2_edges(x, at_root=at_root) for x in edge_action]
+                left_edge_lengths = [x[0] for x in edges]
+                right_edge_lengths = [x[1] for x in edges]
+                left_edge_lengths = torch.from_numpy(np.array(left_edge_lengths)).to(tree_features)
+                right_edge_lengths = torch.from_numpy(np.array(right_edge_lengths)).to(tree_features)
 
             # compute the merged feature set
             data = [[left_features, left_edge_lengths], [right_features, right_edge_lengths]]
             merged_trees_features, log_scores = self.evolution_model.compute_partial_prob(data,
                                                                                           at_root)
+            log_scores = self._apply_log_score_shift(log_scores)
             log_scores = log_scores.float()
             log_rewards = self.reward_fn(log_scores)
 
@@ -324,6 +393,67 @@ class PhylogenticTreeEnv(nn.Module):
 
         return new_states, new_trees_features, log_scores, log_rewards
 
+    def batch_apply_actions_tensors(
+        self,
+        tree_actions: torch.Tensor,
+        edge_actions: torch.Tensor | None,
+        tree_features: torch.Tensor,
+        states,
+        *,
+        num_trees: int,
+    ):
+        """GPU-friendly batch env step (avoids CPU round-trips on sampled actions)."""
+        b, n, m, c = tree_features.shape
+        pairs = self.tree_pairs_lookup[num_trees].to(tree_features.device)[tree_actions.long()]
+        left_trees_indices = pairs[:, 0]
+        right_trees_indices = pairs[:, 1]
+        left_features = tree_features[torch.arange(b, device=tree_features.device), left_trees_indices]
+        right_features = tree_features[torch.arange(b, device=tree_features.device), right_trees_indices]
+
+        at_root = num_trees == 2
+        if edge_actions is None:
+            raise ValueError("edge_actions required for likelihood problems.")
+        if self.only_train_tree_model:
+            left_edge_lengths, right_edge_lengths = self._fixed_edge_lengths(
+                at_root, b, tree_features.device
+            )
+        else:
+            left_edge_lengths, right_edge_lengths = self.edge_env.actions_2_edges_batch(
+                edge_actions,
+                at_root=at_root,
+                device=tree_features.device,
+            )
+
+        data = [[left_features, left_edge_lengths], [right_features, right_edge_lengths]]
+        merged_trees_features, log_scores = self.evolution_model.compute_partial_prob(data, at_root)
+        log_scores = self._apply_log_score_shift(log_scores)
+        log_scores = log_scores.float()
+        log_rewards = self.reward_fn(log_scores)
+
+        new_states_inputs_indices = torch.ones(b, n, device=tree_features.device, dtype=torch.bool)
+        new_states_inputs_indices[torch.arange(b, device=tree_features.device), right_trees_indices] = False
+        new_trees_features = tree_features[new_states_inputs_indices]
+        new_trees_features = new_trees_features.reshape(b, -1, m, c)
+        new_trees_features[torch.arange(b, device=tree_features.device), left_trees_indices] = merged_trees_features
+
+        if states is None:
+            return None, new_trees_features, log_scores, log_rewards
+
+        log_scores_list = log_scores.detach().cpu().tolist()
+        log_rewards_list = log_rewards.detach().cpu().tolist()
+        edge_actions_cpu = edge_actions.detach().cpu().tolist()
+        tree_actions_cpu = tree_actions.detach().cpu().tolist()
+        new_states = []
+        for idx, state in enumerate(states):
+            action = {
+                "tree_action": tree_actions_cpu[idx],
+                "edge_action": edge_actions_cpu[idx],
+            }
+            new_states.append(
+                self.update_state(state, action, log_scores_list[idx], log_rewards_list[idx])
+            )
+        return new_states, new_trees_features, log_scores, log_rewards
+
     def update_state(self, state, action, log_score, log_reward):
         """
         update
@@ -334,8 +464,14 @@ class PhylogenticTreeEnv(nn.Module):
         :return:
         """
         tree_pair_action = action['tree_action']
-        edge_pair_action = action['edge_action']
-        l_length, r_length = self.edge_env.actions_2_edges(edge_pair_action, at_root=(state.num_trees == 2))
+        if self.only_train_tree_model:
+            # Root merge: each child gets FIXED_EDGE_LENGTH (total root edge = 2 * FIXED_EDGE_LENGTH).
+            l_length = r_length = self.fixed_edge_length
+        else:
+            edge_pair_action = action['edge_action']
+            l_length, r_length = self.edge_env.actions_2_edges(
+                edge_pair_action, at_root=(state.num_trees == 2)
+            )
         tree_pairs = self.tree_pairs_dict[state.num_trees]
         i, j = tree_pairs[tree_pair_action]
         l_tree, r_tree = state.subtrees[i], state.subtrees[j]
@@ -386,6 +522,11 @@ class PhylogenticTreeEnv(nn.Module):
             tree_pair = self.tree_pairs_dict[num_trees][a]
             tree_pairs.append(tree_pair)
         return tree_pairs
+
+    def retrieve_tree_pairs_tensor(self, num_trees: int, batch_action: torch.Tensor) -> torch.Tensor:
+        """Vectorized tree-pair lookup; returns (B, 2) indices on the action device."""
+        lookup = self.tree_pairs_lookup[num_trees].to(batch_action.device)
+        return lookup[batch_action.long()]
 
     def compute_tree_log_score(self, ete_tree, with_noise):
         """
@@ -507,6 +648,20 @@ class PhylogenticTreeEnv(nn.Module):
 
         return action, new_trees, len(non_leaf_idx)
 
+    def _pairwise_tensors(self, num_trees: int, device: torch.device):
+        key = (num_trees, str(device))
+        cached = self._pairwise_device_cache.get(key)
+        if cached is not None:
+            return cached
+        mask_tensor, action_mapping_tensor, actions_mapping_reverse_tensor = self.pairwise_masking_data[num_trees]
+        cached = (
+            torch.tensor(mask_tensor, device=device),
+            torch.tensor(action_mapping_tensor, device=device, dtype=torch.long),
+            torch.tensor(actions_mapping_reverse_tensor, device=device, dtype=torch.long),
+        )
+        self._pairwise_device_cache[key] = cached
+        return cached
+
     def prepare_rollout_inputs(self, tree_features, actions, random_spec):
 
         assert len(tree_features.shape) == 4
@@ -521,29 +676,36 @@ class PhylogenticTreeEnv(nn.Module):
         # flatten m x c -> mc
         b, n, _, _ = inputs.shape
         inputs = inputs.reshape(b, n, -1)
-        batch_nb_seq = np.array([n] * b)
-        mask_tensor, action_mapping_tensor, actions_mapping_reverse_tensor = self.pairwise_masking_data[n]
-        mask_tensor = torch.tensor(mask_tensor[batch_nb_seq - 2])
-        action_mapping_tensor = torch.tensor(action_mapping_tensor[batch_nb_seq - 2])
-        actions_mapping_reverse_tensor = torch.tensor(actions_mapping_reverse_tensor[batch_nb_seq - 2])
-        batch_nb_seq = torch.tensor(batch_nb_seq).long()
+        device = inputs.device
+        mask_tensor, action_mapping_tensor, actions_mapping_reverse_tensor = self._pairwise_tensors(n, device)
+        batch_nb_seq = torch.full((b,), n, device=device, dtype=torch.long)
 
         input_dict = {
             'batch_input': inputs,
-            'batch_nb_seq': batch_nb_seq.to(inputs.device),
-            'pairwise_mask_tensor': mask_tensor.to(inputs.device),
-            'pairwise_action_tensor': action_mapping_tensor.to(inputs.device),
-            'pariwise_action_reverse_tensor': actions_mapping_reverse_tensor.to(inputs.device),
+            'batch_nb_seq': batch_nb_seq,
+            'pairwise_mask_tensor': mask_tensor,
+            'pairwise_action_tensor': action_mapping_tensor,
+            'pariwise_action_reverse_tensor': actions_mapping_reverse_tensor,
             'return_tree_reps': True,
-            'batch_traj_idx': torch.arange(b).to(inputs.device),
+            'batch_traj_idx': torch.arange(b, device=device),
             'batch_size': b,
             'random_spec': random_spec
         }
         if actions is not None:
-            tree_actions = torch.tensor([x['tree_action'] for x in actions if 'tree_action' in x]).to(inputs.device)
-            edges_action = torch.tensor([x['edge_action'] for x in actions if 'edge_action' in x]).to(inputs.device)
+            tree_actions = torch.as_tensor(
+                [x['tree_action'] for x in actions if 'tree_action' in x],
+                device=device,
+                dtype=torch.long,
+            )
             input_dict['input_tree_actions'] = tree_actions
-            input_dict['input_edge_actions'] = edges_action
+            edge_values = [x['edge_action'] for x in actions if 'edge_action' in x]
+            if edge_values:
+                edges_action = torch.as_tensor(edge_values, device=device)
+                if torch.is_floating_point(edges_action):
+                    edges_action = edges_action.to(dtype=torch.float32)
+                else:
+                    edges_action = edges_action.to(dtype=torch.long)
+                input_dict['input_edge_actions'] = edges_action
 
         return input_dict
 

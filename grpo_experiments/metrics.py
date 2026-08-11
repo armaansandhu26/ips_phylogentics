@@ -3,18 +3,23 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import Literal, Sequence
+from typing import Sequence
 
-OutcomeLevel = Literal["signature", "topology"]
+from src.gfn.outcome_ids import (
+    FAST_OUTCOME_ID_CACHE_TAG,
+    OutcomeIdCache,
+    OutcomeLevel,
+    extract_outcome_ids,
+)
 
-
-def extract_outcome_ids(trees, level: OutcomeLevel = "topology") -> tuple[list[str], list[str]]:
-    """Return (outcome_ids, topology_ids) for a batch of PhylogeneticTree objects."""
-    signatures = [t.signature for t in trees]
-    topology_ids = [t.tree_topology_id for t in trees]
-    if level == "topology":
-        return topology_ids, topology_ids
-    return signatures, topology_ids
+__all__ = [
+    "FAST_OUTCOME_ID_CACHE_TAG",
+    "OutcomeIdCache",
+    "OutcomeLevel",
+    "OutcomeTracker",
+    "batch_diversity_stats",
+    "extract_outcome_ids",
+]
 
 
 def batch_diversity_stats(outcome_ids: Sequence[str], topology_ids: Sequence[str]) -> dict:

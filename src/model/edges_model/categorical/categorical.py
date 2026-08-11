@@ -25,21 +25,29 @@ class EdgesModelCategorical(nn.Module):
 
     #
     def forward(self, summary_reps, left_trees, right_trees, input_dict):
+        #summary reps - [B,E]
+        #left_trees - [B,E]
+        #right_trees- [B,E]
+        #input_dict : {
+        #   random spec: -> controls sampling like temp etc
+        #   input_edge_actions: -> forced edge actions. Force specific edge bin(s) instead of sampling.??
+        #   batch_nb_seq: [B] -> Number of subtrees currently active in each episode at this merge step.
+        #}
 
         random_spec = input_dict.get('random_spec', None)
         input_edge_actions = input_dict.get('input_edge_actions', None)
 
         # for now the representation is the concatenation of left and right tree
-        rep = torch.cat([summary_reps, left_trees, right_trees], dim=1)
+        rep = torch.cat([summary_reps, left_trees, right_trees], dim=1) #--> [B, 3E] (global forest, left tree, right tree)
         batch_nb_seq = input_dict['batch_nb_seq']
         first_edges_flag = (batch_nb_seq[0] > 2).item()
         ret = {}
         if first_edges_flag > 0:
-            if self.edges_independent:
-                l_edges_reps = torch.cat([summary_reps, left_trees], dim=1)
-                r_edges_reps = torch.cat([summary_reps, right_trees], dim=1)
-                l_edges_logits = self.lr_model(l_edges_reps)
-                r_edges_logits = self.lr_model(r_edges_reps)
+            if self.edges_independent: #separate left and right branch decisions
+                l_edges_reps = torch.cat([summary_reps, left_trees], dim=1) #[B,2E]
+                r_edges_reps = torch.cat([summary_reps, right_trees], dim=1) #[B, 2E]
+                l_edges_logits = self.lr_model(l_edges_reps) #context for left edge length, [B, bin_size]
+                r_edges_logits = self.lr_model(r_edges_reps) #context for left edge length, [B, bin_size]
                 first_edges_ret = {
                     'l_logits': l_edges_logits,
                     'r_logits': r_edges_logits
@@ -50,8 +58,8 @@ class EdgesModelCategorical(nn.Module):
                 ret['first_edges_actions'] = actions
                 edge_actions = actions
                 ret['first_edges_ret'] = first_edges_ret
-            else:
-                first_edges_logits = self.lr_model(rep)
+            else: # one decision over all (left_bin, right_bin) pairs
+                first_edges_logits = self.lr_model(rep) #[B, bin_size*bin_size]
                 first_edges_ret = {
                     'logits': first_edges_logits
                 }
@@ -59,7 +67,7 @@ class EdgesModelCategorical(nn.Module):
                 ret['first_edges_actions'] = actions
                 edge_actions = actions
                 ret['first_edges_ret'] = first_edges_ret
-        else:
+        else: #last subtrees merge -> ignore for now
             root_edges_logits = self.root_edge_model(rep)
             root_edges_ret = {
                 'logits': root_edges_logits
@@ -87,11 +95,16 @@ class EdgesModelCategorical(nn.Module):
             edge_action = distribution.sample()
             if random_p > 0:
                 batch_size = edge_action.shape[0]
-                rand_flag = (torch.empty(batch_size).uniform_(0, 1)) <= random_p
-                rand_num = rand_flag.sum().item()
-                if rand_num > 0:
-                    rand_actions = torch.tensor(np.random.choice(actions_list, rand_num)).to(edge_action)
-                    edge_action[rand_flag] = rand_actions
+                rand_flag = torch.rand(batch_size, device=edge_action.device) <= random_p
+                action_values = torch.as_tensor(actions_list, device=edge_action.device, dtype=edge_action.dtype)
+                rand_idx = torch.randint(
+                    low=0,
+                    high=action_values.numel(),
+                    size=(batch_size,),
+                    device=edge_action.device,
+                )
+                rand_actions = action_values[rand_idx]
+                edge_action = torch.where(rand_flag, rand_actions, edge_action)
         else:
             T = random_spec['T']
             distribution = Categorical(logits=logits / T)
@@ -110,22 +123,23 @@ class EdgesModelCategorical(nn.Module):
                 first_edges_actions = edge_actions[first_edges_flag]
                 log_p_l = self.logsoftmax(first_edges_ret['l_logits'])
                 log_p_r = self.logsoftmax(first_edges_ret['r_logits'])
-                pf_l = log_p_l[torch.arange(len(first_edges_actions)), first_edges_actions[:, 0]]
-                pf_r = log_p_r[torch.arange(len(first_edges_actions)), first_edges_actions[:, 1]]
+                row_idx = torch.arange(len(first_edges_actions), device=edge_actions.device)
+                pf_l = log_p_l[row_idx, first_edges_actions[:, 0]]
+                pf_r = log_p_r[row_idx, first_edges_actions[:, 1]]
                 pf = pf_r + pf_l
                 log_paths_pf[first_edges_flag] = log_paths_pf[first_edges_flag] + pf
             else:
                 first_edges_ret = ret['first_edges_ret']
                 first_edges_actions = edge_actions[first_edges_flag]
                 log_p = self.logsoftmax(first_edges_ret['logits'])
-                pf = log_p[torch.arange(len(first_edges_actions)), first_edges_actions]
+                pf = log_p[torch.arange(len(first_edges_actions), device=edge_actions.device), first_edges_actions]
                 log_paths_pf[first_edges_flag] = log_paths_pf[first_edges_flag] + pf
 
         if root_edges_flag.sum().item() > 0:
             root_edges_ret = ret['root_edges_ret']
             log_p = self.logsoftmax(root_edges_ret['logits'])
             root_edges_actions = edge_actions[root_edges_flag]
-            pf = log_p[torch.arange(len(root_edges_actions)), root_edges_actions]
+            pf = log_p[torch.arange(len(root_edges_actions), device=edge_actions.device), root_edges_actions]
             log_paths_pf[root_edges_flag] = log_paths_pf[root_edges_flag] + pf
 
         return log_paths_pf

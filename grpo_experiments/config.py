@@ -48,6 +48,7 @@ from typing import Literal, Optional
 
 TrainingMethod = Literal["phylgfn", "grpo"]
 OutcomeLevel = Literal["signature", "topology"]
+AdvantageRewardMode = Literal["exp_linear", "log_reward"]
 
 
 @dataclass
@@ -108,7 +109,15 @@ class ExperimentConfig:
     resample_rounds: Optional[int] = None
     update_cycles: Optional[int] = None
     buffer_size: Optional[int] = None
-    rollout_chunk_size: int = 64
+    rollout_chunk_size: int = 2048
+    """Forward-replay / rollout micro-batch. Auto-scales up to grpo_group_size when smaller."""
+
+    # --- model ablations ---
+    only_train_tree_model: bool | None = None
+    """If set, override GFN.MODEL.ONLY_TRAIN_TREE_MODEL (False = train tree + edges)."""
+
+    edge_rep_grad_alpha: float | None = None
+    """Override GFN.MODEL.EDGE_REP_GRAD_ALPHA; None keeps the YAML/default value."""
 
     # --- diversity / outcome tracking ---
     outcome_level: OutcomeLevel = "topology"
@@ -118,6 +127,18 @@ class ExperimentConfig:
     print_every: int = 1
     checkpoint_every: int = 0
     """Save checkpoint every N epochs. 0 = only save final checkpoint."""
+
+    dump_advantage_groups: bool = False
+    """Write per-group advantage vectors + stats to advantage_groups/ under the run dir."""
+
+    advantage_reward_mode: AdvantageRewardMode = "exp_linear"
+    """Reward transform before group norm: exp_linear or log_reward."""
+
+    log_score_decimals: int | None = None
+    """If set, round log_scores (and log_rewards) to this many decimal places everywhere."""
+
+    cpu_threads: int = 0
+    """Max CPU threads per process (0 = use YAML/env/default chain; default is 2)."""
 
     resume_from: Optional[str] = None
     """Existing run directory to continue (appends metrics, reuses best_trees.pt)."""
@@ -151,6 +172,12 @@ class ExperimentConfig:
     @property
     def effective_replay_batch_size(self) -> int:
         return 0 if self.disable_replay else self.replay_batch_size
+
+    @property
+    def effective_rollout_chunk_size(self) -> int:
+        from grpo_experiments.utils import resolve_rollout_chunk_size
+
+        return resolve_rollout_chunk_size(self)
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -260,8 +287,35 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument(
         "--rollout-chunk-size",
         type=int,
-        default=64,
-        help="Rollout/replay chunk size when policy IS is on.",
+        default=2048,
+        help=(
+            "Rollout/forward-replay micro-batch (default 2048). Values smaller than the "
+            "training batch are auto-scaled up; use 0 to match the full batch."
+        ),
+    )
+
+    g = p.add_argument_group("model ablations")
+    g.add_argument(
+        "--full-model",
+        action="store_true",
+        help=(
+            "Train tree topology and categorical edge lengths "
+            "(ONLY_TRAIN_TREE_MODEL=false). Default follows YAML (tree-only)."
+        ),
+    )
+    g.add_argument(
+        "--tree-only",
+        action="store_true",
+        help="Train topology only with fixed edge lengths (ONLY_TRAIN_TREE_MODEL=true).",
+    )
+    g.add_argument(
+        "--edge-rep-grad-alpha",
+        type=float,
+        default=None,
+        help=(
+            "Scale edge-loss gradients flowing into tree representations. "
+            "0 detaches edge inputs; 1 keeps the original coupled path."
+        ),
     )
 
     g = p.add_argument_group("tracking")
@@ -273,6 +327,35 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     g.add_argument("--print-every", type=int, default=1)
     g.add_argument("--checkpoint-every", type=int, default=0)
+    g.add_argument(
+        "--dump-advantage-groups",
+        action="store_true",
+        help="Save per-group advantage vectors and shape stats to advantage_groups/.",
+    )
+    g.add_argument(
+        "--advantage-reward-mode",
+        choices=["exp_linear", "log_reward"],
+        default="exp_linear",
+        help="exp_linear: r=exp(log_r-max); log_reward: r=log_r before group normalization.",
+    )
+    g.add_argument(
+        "--log-score-decimals",
+        type=int,
+        default=None,
+        help=(
+            "Round log_scores to this many decimal places for training, logging, and "
+            "signature outcomes. Use 3 to match signature discretization."
+        ),
+    )
+    g.add_argument(
+        "--cpu-threads",
+        type=int,
+        default=0,
+        help=(
+            "Cap PyTorch/BLAS CPU threads for this process (default: 2 via YAML/env). "
+            "0 lets the YAML MAX_CPU_THREADS / PHYLOGFN_CPU_THREADS / default apply."
+        ),
+    )
 
     g = p.add_argument_group("resume")
     g.add_argument(
@@ -290,6 +373,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def config_from_args(args: argparse.Namespace) -> ExperimentConfig:
+    if args.full_model and args.tree_only:
+        raise ValueError("Use only one of --full-model or --tree-only")
+    if args.full_model:
+        only_train_tree_model = False
+    elif args.tree_only:
+        only_train_tree_model = True
+    else:
+        only_train_tree_model = None
+
     return ExperimentConfig(
         method=args.method,
         cfg_path=args.cfg_path,
@@ -317,9 +409,15 @@ def config_from_args(args: argparse.Namespace) -> ExperimentConfig:
         update_cycles=args.update_cycles,
         buffer_size=args.buffer_size,
         rollout_chunk_size=args.rollout_chunk_size,
+        only_train_tree_model=only_train_tree_model,
+        edge_rep_grad_alpha=args.edge_rep_grad_alpha,
         outcome_level=args.outcome_level,
         print_every=args.print_every,
         checkpoint_every=args.checkpoint_every,
+        dump_advantage_groups=args.dump_advantage_groups,
+        advantage_reward_mode=args.advantage_reward_mode,
+        log_score_decimals=args.log_score_decimals,
+        cpu_threads=args.cpu_threads,
         resume_from=args.resume_from,
         resume_checkpoint=args.resume_checkpoint,
     )

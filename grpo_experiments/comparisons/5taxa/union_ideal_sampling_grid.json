@@ -1,0 +1,54 @@
+{
+  "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/5taxa/union_ideal_sampling_grid.png",
+  "plot_kind": "union_catalog_reward_proportional_qhat_vs_reward",
+  "ideal_definition": "Union over all methods' observed signatures. q*(sigma) = R(sigma) / sum_{sigma in union} R(sigma).",
+  "union_catalog": {
+    "n_signatures": 1904952,
+    "reward_sum": 515534714.7469569,
+    "ideal_slope": 1.939733584169664e-09,
+    "pairwise_signature_overlap": {
+      "Plain GRPO \u2229 Original IPS": 1,
+      "Plain GRPO \u2229 GFlowNet (trajectory balance)": 0,
+      "Plain GRPO \u2229 Learned reverse IPS (new proposed)": 0,
+      "Original IPS \u2229 GFlowNet (trajectory balance)": 17,
+      "Original IPS \u2229 Learned reverse IPS (new proposed)": 18,
+      "GFlowNet (trajectory balance) \u2229 Learned reverse IPS (new proposed)": 73067
+    }
+  },
+  "shared_axis": {
+    "x_min": 61.15003147656191,
+    "x_max": 389.4108535042855,
+    "y_min": 0.0,
+    "y_max": 0.00012978
+  },
+  "panels": {
+    "Plain GRPO": {
+      "samples_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_grpo_5taxa_full_sig_b4096_grpo/sampled_full_diagnostics_1000000.npz",
+      "n_samples": 1000000,
+      "n_observed_signatures": 1,
+      "tv_vs_union_ideal": 0.9999992966158892,
+      "pearson_vs_union_ideal": NaN
+    },
+    "Original IPS": {
+      "samples_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_count_ips_5taxa_full_sig_b4096_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "n_samples": 1000000,
+      "n_observed_signatures": 66268,
+      "tv_vs_union_ideal": 0.9532611843079503,
+      "pearson_vs_union_ideal": 0.5651072032856286
+    },
+    "GFlowNet (trajectory balance)": {
+      "samples_path": "/home/armaan/phylogfn/og_code/experiments/full_model/20260703_172421_phylgfn_logreward_g4096_1m_full_replay_op3277_r819_rb4096/plots/reward_probability_eval_1000000/og_gflownet_reward_probability_samples.npz",
+      "n_samples": 1000000,
+      "n_observed_signatures": 960609,
+      "tv_vs_union_ideal": 0.5020932882651942,
+      "pearson_vs_union_ideal": 0.015471952897236062
+    },
+    "Learned reverse IPS (new proposed)": {
+      "samples_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "n_samples": 1000000,
+      "n_observed_signatures": 951175,
+      "tv_vs_union_ideal": 0.506393613009692,
+      "pearson_vs_union_ideal": 0.01848154688400836
+    }
+  }
+}

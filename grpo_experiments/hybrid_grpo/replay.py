@@ -10,6 +10,7 @@ from typing import Any
 import torch
 
 from grpo_experiments.core.policy_replay import clean_action, sample_replay_buffer
+from src.gfn.action_tensors import TensorActionBatch, concat_tensor_action_batches
 
 
 @dataclass
@@ -23,6 +24,7 @@ class HybridReplayBatch:
     log_scores: torch.Tensor
     random_spec: dict | None
     source_tags: list[str]  # "fresh" or "replay"
+    action_tensors: TensorActionBatch | None = None
 
     @property
     def size(self) -> int:
@@ -230,6 +232,7 @@ def sample_hybrid_replay_batch(
     pf_parts: list[torch.Tensor] = []
     reward_parts: list[torch.Tensor] = []
     score_parts: list[torch.Tensor] = []
+    action_tensor_parts: list[TensorActionBatch] = []
     source_tags: list[str] = []
 
     if fresh_buffer_size > 0:
@@ -250,10 +253,13 @@ def sample_hybrid_replay_batch(
         pf_parts.append(fresh.log_paths_pf_old)
         reward_parts.append(fresh.log_rewards)
         score_parts.append(fresh.log_scores)
+        if fresh.action_tensors is not None:
+            action_tensor_parts.append(fresh.action_tensors)
         source_tags.extend(["fresh"] * fresh.size)
 
     replay_entries = replay_buffer.sample_entries(replay_sample_size)
     if replay_entries:
+        replay_actions_set = [entry.actions for entry in replay_entries]
         replay_pf = torch.stack([entry.log_path_pf_old for entry in replay_entries], dim=0).to(device)
         replay_rewards = torch.tensor(
             [entry.log_reward for entry in replay_entries],
@@ -265,11 +271,12 @@ def sample_hybrid_replay_batch(
             dtype=replay_pf.dtype,
             device=device,
         )
-        actions_set.extend([entry.actions for entry in replay_entries])
+        actions_set.extend(replay_actions_set)
         trees.extend([entry.tree for entry in replay_entries])
         pf_parts.append(replay_pf)
         reward_parts.append(replay_rewards)
         score_parts.append(replay_scores)
+        action_tensor_parts.append(TensorActionBatch.from_actions_set(replay_actions_set, device=device))
         source_tags.extend(["replay"] * len(replay_entries))
 
     if not actions_set:
@@ -285,6 +292,7 @@ def sample_hybrid_replay_batch(
         log_scores=torch.cat(score_parts, dim=0),
         random_spec=random_spec,
         source_tags=source_tags,
+        action_tensors=concat_tensor_action_batches(action_tensor_parts),
     )
 
 
@@ -301,9 +309,12 @@ def reevaluate_log_paths_pf_hybrid(
 
     pf_chunks: list[torch.Tensor] = []
     entropy_chunks: list[torch.Tensor] = []
-    actions = batch.actions_set
+    actions = batch.action_tensors if batch.action_tensors is not None else batch.actions_set
     for start in range(0, len(actions), chunk_size):
-        chunk_actions = actions[start : start + chunk_size]
+        if isinstance(actions, TensorActionBatch):
+            chunk_actions = actions.slice(start, start + chunk_size)
+        else:
+            chunk_actions = actions[start : start + chunk_size]
         log_paths_pf, paths_entropy = forward_replay_fixed_actions(
             rollout_worker,
             generator,
@@ -328,9 +339,12 @@ def hybrid_rollout_outputs_for_tb(
     """Replay fixed actions and return a rollout dict for PhyloGFN TB loss."""
     pf_chunks: list[torch.Tensor] = []
     pb_chunks: list[torch.Tensor] = []
-    actions = batch.actions_set
+    actions = batch.action_tensors if batch.action_tensors is not None else batch.actions_set
     for start in range(0, len(actions), chunk_size):
-        chunk_actions = actions[start : start + chunk_size]
+        if isinstance(actions, TensorActionBatch):
+            chunk_actions = actions.slice(start, start + chunk_size)
+        else:
+            chunk_actions = actions[start : start + chunk_size]
         data, _ = rollout_worker.rollout(
             generator,
             len(chunk_actions),
@@ -347,4 +361,3 @@ def hybrid_rollout_outputs_for_tb(
         "log_rewards": batch.log_rewards,
         "log_scores": batch.log_scores,
     }
-

@@ -1,0 +1,22 @@
+{
+  "run_dir": "grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+  "method": "learned_reverse_ips_grpo",
+  "checkpoint_path": "grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/checkpoint_epoch3999.pt",
+  "reverse_state_path": "grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/learned_reverse_epoch3999.pt",
+  "reverse_update_step": 4000,
+  "device": "cuda:0",
+  "num_trees": 100000,
+  "batch_size": 4096,
+  "seed": 0,
+  "reward_target": "shifted_linear",
+  "target": "R(x) = shifted_score = 3600 + terminal_log_likelihood",
+  "log_score_shift": 5000.0,
+  "only_train_tree_model": false,
+  "reverse_policy_type": "mlp",
+  "observed_topologies": 99559,
+  "importance_ess": 99385.78921690423,
+  "importance_ess_fraction": 0.9938578921690423,
+  "log_weight_min": 70.79956270394965,
+  "log_weight_max": 94.429319501978,
+  "log_weight_std": 0.17081484783292764
+}

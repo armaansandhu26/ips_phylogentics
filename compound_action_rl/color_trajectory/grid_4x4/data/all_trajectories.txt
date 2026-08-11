@@ -1,0 +1,484 @@
+Color Trajectory — all minimal trajectories (3x3)
+paths=6, steps=4, total=96
+reward range: [0.072565, 0.655509], mean=0.364004
+
+#0000  path=00  reward=0.369567  moves=UURR  colors=RRRR  painted=[(1,0)=R, (2,0)=R, (2,1)=R, (2,2)=R]
+. . .
+R . .
+R R R
+
+#0001  path=00  reward=0.583136  moves=UURR  colors=RRRG  painted=[(1,0)=R, (2,0)=R, (2,1)=R, (2,2)=G]
+. . .
+R . .
+R R G
+
+#0002  path=00  reward=0.441940  moves=UURR  colors=RRGR  painted=[(1,0)=R, (2,0)=R, (2,1)=G, (2,2)=R]
+. . .
+R . .
+R G R
+
+#0003  path=00  reward=0.655509  moves=UURR  colors=RRGG  painted=[(1,0)=R, (2,0)=R, (2,1)=G, (2,2)=G]
+. . .
+R . .
+R G G
+
+#0004  path=00  reward=0.291469  moves=UURR  colors=RGRR  painted=[(1,0)=R, (2,0)=G, (2,1)=R, (2,2)=R]
+. . .
+R . .
+G R R
+
+#0005  path=00  reward=0.505038  moves=UURR  colors=RGRG  painted=[(1,0)=R, (2,0)=G, (2,1)=R, (2,2)=G]
+. . .
+R . .
+G R G
+
+#0006  path=00  reward=0.363841  moves=UURR  colors=RGGR  painted=[(1,0)=R, (2,0)=G, (2,1)=G, (2,2)=R]
+. . .
+R . .
+G G R
+
+#0007  path=00  reward=0.577410  moves=UURR  colors=RGGG  painted=[(1,0)=R, (2,0)=G, (2,1)=G, (2,2)=G]
+. . .
+R . .
+G G G
+
+#0008  path=00  reward=0.208601  moves=UURR  colors=GRRR  painted=[(1,0)=G, (2,0)=R, (2,1)=R, (2,2)=R]
+. . .
+G . .
+R R R
+
+#0009  path=00  reward=0.422170  moves=UURR  colors=GRRG  painted=[(1,0)=G, (2,0)=R, (2,1)=R, (2,2)=G]
+. . .
+G . .
+R R G
+
+#0010  path=00  reward=0.280974  moves=UURR  colors=GRGR  painted=[(1,0)=G, (2,0)=R, (2,1)=G, (2,2)=R]
+. . .
+G . .
+R G R
+
+#0011  path=00  reward=0.494543  moves=UURR  colors=GRGG  painted=[(1,0)=G, (2,0)=R, (2,1)=G, (2,2)=G]
+. . .
+G . .
+R G G
+
+#0012  path=00  reward=0.130503  moves=UURR  colors=GGRR  painted=[(1,0)=G, (2,0)=G, (2,1)=R, (2,2)=R]
+. . .
+G . .
+G R R
+
+#0013  path=00  reward=0.344072  moves=UURR  colors=GGRG  painted=[(1,0)=G, (2,0)=G, (2,1)=R, (2,2)=G]
+. . .
+G . .
+G R G
+
+#0014  path=00  reward=0.202876  moves=UURR  colors=GGGR  painted=[(1,0)=G, (2,0)=G, (2,1)=G, (2,2)=R]
+. . .
+G . .
+G G R
+
+#0015  path=00  reward=0.416445  moves=UURR  colors=GGGG  painted=[(1,0)=G, (2,0)=G, (2,1)=G, (2,2)=G]
+. . .
+G . .
+G G G
+
+#0016  path=01  reward=0.369567  moves=URUR  colors=RRRR  painted=[(1,0)=R, (1,1)=R, (2,1)=R, (2,2)=R]
+. . .
+R R .
+. R R
+
+#0017  path=01  reward=0.583136  moves=URUR  colors=RRRG  painted=[(1,0)=R, (1,1)=R, (2,1)=R, (2,2)=G]
+. . .
+R R .
+. R G
+
+#0018  path=01  reward=0.441940  moves=URUR  colors=RRGR  painted=[(1,0)=R, (1,1)=R, (2,1)=G, (2,2)=R]
+. . .
+R R .
+. G R
+
+#0019  path=01  reward=0.655509  moves=URUR  colors=RRGG  painted=[(1,0)=R, (1,1)=R, (2,1)=G, (2,2)=G]
+. . .
+R R .
+. G G
+
+#0020  path=01  reward=0.344563  moves=URUR  colors=RGRR  painted=[(1,0)=R, (1,1)=G, (2,1)=R, (2,2)=R]
+. . .
+R G .
+. R R
+
+#0021  path=01  reward=0.558132  moves=URUR  colors=RGRG  painted=[(1,0)=R, (1,1)=G, (2,1)=R, (2,2)=G]
+. . .
+R G .
+. R G
+
+#0022  path=01  reward=0.416936  moves=URUR  colors=RGGR  painted=[(1,0)=R, (1,1)=G, (2,1)=G, (2,2)=R]
+. . .
+R G .
+. G R
+
+#0023  path=01  reward=0.630505  moves=URUR  colors=RGGG  painted=[(1,0)=R, (1,1)=G, (2,1)=G, (2,2)=G]
+. . .
+R G .
+. G G
+
+#0024  path=01  reward=0.208601  moves=URUR  colors=GRRR  painted=[(1,0)=G, (1,1)=R, (2,1)=R, (2,2)=R]
+. . .
+G R .
+. R R
+
+#0025  path=01  reward=0.422170  moves=URUR  colors=GRRG  painted=[(1,0)=G, (1,1)=R, (2,1)=R, (2,2)=G]
+. . .
+G R .
+. R G
+
+#0026  path=01  reward=0.280974  moves=URUR  colors=GRGR  painted=[(1,0)=G, (1,1)=R, (2,1)=G, (2,2)=R]
+. . .
+G R .
+. G R
+
+#0027  path=01  reward=0.494543  moves=URUR  colors=GRGG  painted=[(1,0)=G, (1,1)=R, (2,1)=G, (2,2)=G]
+. . .
+G R .
+. G G
+
+#0028  path=01  reward=0.183598  moves=URUR  colors=GGRR  painted=[(1,0)=G, (1,1)=G, (2,1)=R, (2,2)=R]
+. . .
+G G .
+. R R
+
+#0029  path=01  reward=0.397167  moves=URUR  colors=GGRG  painted=[(1,0)=G, (1,1)=G, (2,1)=R, (2,2)=G]
+. . .
+G G .
+. R G
+
+#0030  path=01  reward=0.255970  moves=URUR  colors=GGGR  painted=[(1,0)=G, (1,1)=G, (2,1)=G, (2,2)=R]
+. . .
+G G .
+. G R
+
+#0031  path=01  reward=0.469539  moves=URUR  colors=GGGG  painted=[(1,0)=G, (1,1)=G, (2,1)=G, (2,2)=G]
+. . .
+G G .
+. G G
+
+#0032  path=02  reward=0.327777  moves=URRU  colors=RRRR  painted=[(1,0)=R, (1,1)=R, (1,2)=R, (2,2)=R]
+. . .
+R R R
+. . R
+
+#0033  path=02  reward=0.541346  moves=URRU  colors=RRRG  painted=[(1,0)=R, (1,1)=R, (1,2)=R, (2,2)=G]
+. . .
+R R R
+. . G
+
+#0034  path=02  reward=0.441940  moves=URRU  colors=RRGR  painted=[(1,0)=R, (1,1)=R, (1,2)=G, (2,2)=R]
+. . .
+R R G
+. . R
+
+#0035  path=02  reward=0.655509  moves=URRU  colors=RRGG  painted=[(1,0)=R, (1,1)=R, (1,2)=G, (2,2)=G]
+. . .
+R R G
+. . G
+
+#0036  path=02  reward=0.302774  moves=URRU  colors=RGRR  painted=[(1,0)=R, (1,1)=G, (1,2)=R, (2,2)=R]
+. . .
+R G R
+. . R
+
+#0037  path=02  reward=0.516342  moves=URRU  colors=RGRG  painted=[(1,0)=R, (1,1)=G, (1,2)=R, (2,2)=G]
+. . .
+R G R
+. . G
+
+#0038  path=02  reward=0.416936  moves=URRU  colors=RGGR  painted=[(1,0)=R, (1,1)=G, (1,2)=G, (2,2)=R]
+. . .
+R G G
+. . R
+
+#0039  path=02  reward=0.630505  moves=URRU  colors=RGGG  painted=[(1,0)=R, (1,1)=G, (1,2)=G, (2,2)=G]
+. . .
+R G G
+. . G
+
+#0040  path=02  reward=0.166812  moves=URRU  colors=GRRR  painted=[(1,0)=G, (1,1)=R, (1,2)=R, (2,2)=R]
+. . .
+G R R
+. . R
+
+#0041  path=02  reward=0.380380  moves=URRU  colors=GRRG  painted=[(1,0)=G, (1,1)=R, (1,2)=R, (2,2)=G]
+. . .
+G R R
+. . G
+
+#0042  path=02  reward=0.280974  moves=URRU  colors=GRGR  painted=[(1,0)=G, (1,1)=R, (1,2)=G, (2,2)=R]
+. . .
+G R G
+. . R
+
+#0043  path=02  reward=0.494543  moves=URRU  colors=GRGG  painted=[(1,0)=G, (1,1)=R, (1,2)=G, (2,2)=G]
+. . .
+G R G
+. . G
+
+#0044  path=02  reward=0.141808  moves=URRU  colors=GGRR  painted=[(1,0)=G, (1,1)=G, (1,2)=R, (2,2)=R]
+. . .
+G G R
+. . R
+
+#0045  path=02  reward=0.355377  moves=URRU  colors=GGRG  painted=[(1,0)=G, (1,1)=G, (1,2)=R, (2,2)=G]
+. . .
+G G R
+. . G
+
+#0046  path=02  reward=0.255970  moves=URRU  colors=GGGR  painted=[(1,0)=G, (1,1)=G, (1,2)=G, (2,2)=R]
+. . .
+G G G
+. . R
+
+#0047  path=02  reward=0.469539  moves=URRU  colors=GGGG  painted=[(1,0)=G, (1,1)=G, (1,2)=G, (2,2)=G]
+. . .
+G G G
+. . G
+
+#0048  path=03  reward=0.255970  moves=RUUR  colors=RRRR  painted=[(0,1)=R, (1,1)=R, (2,1)=R, (2,2)=R]
+. R .
+. R .
+. R R
+
+#0049  path=03  reward=0.469539  moves=RUUR  colors=RRRG  painted=[(0,1)=R, (1,1)=R, (2,1)=R, (2,2)=G]
+. R .
+. R .
+. R G
+
+#0050  path=03  reward=0.328343  moves=RUUR  colors=RRGR  painted=[(0,1)=R, (1,1)=R, (2,1)=G, (2,2)=R]
+. R .
+. R .
+. G R
+
+#0051  path=03  reward=0.541912  moves=RUUR  colors=RRGG  painted=[(0,1)=R, (1,1)=R, (2,1)=G, (2,2)=G]
+. R .
+. R .
+. G G
+
+#0052  path=03  reward=0.230967  moves=RUUR  colors=RGRR  painted=[(0,1)=R, (1,1)=G, (2,1)=R, (2,2)=R]
+. R .
+. G .
+. R R
+
+#0053  path=03  reward=0.444536  moves=RUUR  colors=RGRG  painted=[(0,1)=R, (1,1)=G, (2,1)=R, (2,2)=G]
+. R .
+. G .
+. R G
+
+#0054  path=03  reward=0.303339  moves=RUUR  colors=RGGR  painted=[(0,1)=R, (1,1)=G, (2,1)=G, (2,2)=R]
+. R .
+. G .
+. G R
+
+#0055  path=03  reward=0.516908  moves=RUUR  colors=RGGG  painted=[(0,1)=R, (1,1)=G, (2,1)=G, (2,2)=G]
+. R .
+. G .
+. G G
+
+#0056  path=03  reward=0.208601  moves=RUUR  colors=GRRR  painted=[(0,1)=G, (1,1)=R, (2,1)=R, (2,2)=R]
+. G .
+. R .
+. R R
+
+#0057  path=03  reward=0.422170  moves=RUUR  colors=GRRG  painted=[(0,1)=G, (1,1)=R, (2,1)=R, (2,2)=G]
+. G .
+. R .
+. R G
+
+#0058  path=03  reward=0.280974  moves=RUUR  colors=GRGR  painted=[(0,1)=G, (1,1)=R, (2,1)=G, (2,2)=R]
+. G .
+. R .
+. G R
+
+#0059  path=03  reward=0.494543  moves=RUUR  colors=GRGG  painted=[(0,1)=G, (1,1)=R, (2,1)=G, (2,2)=G]
+. G .
+. R .
+. G G
+
+#0060  path=03  reward=0.183598  moves=RUUR  colors=GGRR  painted=[(0,1)=G, (1,1)=G, (2,1)=R, (2,2)=R]
+. G .
+. G .
+. R R
+
+#0061  path=03  reward=0.397167  moves=RUUR  colors=GGRG  painted=[(0,1)=G, (1,1)=G, (2,1)=R, (2,2)=G]
+. G .
+. G .
+. R G
+
+#0062  path=03  reward=0.255970  moves=RUUR  colors=GGGR  painted=[(0,1)=G, (1,1)=G, (2,1)=G, (2,2)=R]
+. G .
+. G .
+. G R
+
+#0063  path=03  reward=0.469539  moves=RUUR  colors=GGGG  painted=[(0,1)=G, (1,1)=G, (2,1)=G, (2,2)=G]
+. G .
+. G .
+. G G
+
+#0064  path=04  reward=0.214181  moves=RURU  colors=RRRR  painted=[(0,1)=R, (1,1)=R, (1,2)=R, (2,2)=R]
+. R .
+. R R
+. . R
+
+#0065  path=04  reward=0.427749  moves=RURU  colors=RRRG  painted=[(0,1)=R, (1,1)=R, (1,2)=R, (2,2)=G]
+. R .
+. R R
+. . G
+
+#0066  path=04  reward=0.328343  moves=RURU  colors=RRGR  painted=[(0,1)=R, (1,1)=R, (1,2)=G, (2,2)=R]
+. R .
+. R G
+. . R
+
+#0067  path=04  reward=0.541912  moves=RURU  colors=RRGG  painted=[(0,1)=R, (1,1)=R, (1,2)=G, (2,2)=G]
+. R .
+. R G
+. . G
+
+#0068  path=04  reward=0.189177  moves=RURU  colors=RGRR  painted=[(0,1)=R, (1,1)=G, (1,2)=R, (2,2)=R]
+. R .
+. G R
+. . R
+
+#0069  path=04  reward=0.402746  moves=RURU  colors=RGRG  painted=[(0,1)=R, (1,1)=G, (1,2)=R, (2,2)=G]
+. R .
+. G R
+. . G
+
+#0070  path=04  reward=0.303339  moves=RURU  colors=RGGR  painted=[(0,1)=R, (1,1)=G, (1,2)=G, (2,2)=R]
+. R .
+. G G
+. . R
+
+#0071  path=04  reward=0.516908  moves=RURU  colors=RGGG  painted=[(0,1)=R, (1,1)=G, (1,2)=G, (2,2)=G]
+. R .
+. G G
+. . G
+
+#0072  path=04  reward=0.166812  moves=RURU  colors=GRRR  painted=[(0,1)=G, (1,1)=R, (1,2)=R, (2,2)=R]
+. G .
+. R R
+. . R
+
+#0073  path=04  reward=0.380380  moves=RURU  colors=GRRG  painted=[(0,1)=G, (1,1)=R, (1,2)=R, (2,2)=G]
+. G .
+. R R
+. . G
+
+#0074  path=04  reward=0.280974  moves=RURU  colors=GRGR  painted=[(0,1)=G, (1,1)=R, (1,2)=G, (2,2)=R]
+. G .
+. R G
+. . R
+
+#0075  path=04  reward=0.494543  moves=RURU  colors=GRGG  painted=[(0,1)=G, (1,1)=R, (1,2)=G, (2,2)=G]
+. G .
+. R G
+. . G
+
+#0076  path=04  reward=0.141808  moves=RURU  colors=GGRR  painted=[(0,1)=G, (1,1)=G, (1,2)=R, (2,2)=R]
+. G .
+. G R
+. . R
+
+#0077  path=04  reward=0.355377  moves=RURU  colors=GGRG  painted=[(0,1)=G, (1,1)=G, (1,2)=R, (2,2)=G]
+. G .
+. G R
+. . G
+
+#0078  path=04  reward=0.255970  moves=RURU  colors=GGGR  painted=[(0,1)=G, (1,1)=G, (1,2)=G, (2,2)=R]
+. G .
+. G G
+. . R
+
+#0079  path=04  reward=0.469539  moves=RURU  colors=GGGG  painted=[(0,1)=G, (1,1)=G, (1,2)=G, (2,2)=G]
+. G .
+. G G
+. . G
+
+#0080  path=05  reward=0.119934  moves=RRUU  colors=RRRR  painted=[(0,1)=R, (0,2)=R, (1,2)=R, (2,2)=R]
+. R R
+. . R
+. . R
+
+#0081  path=05  reward=0.333503  moves=RRUU  colors=RRRG  painted=[(0,1)=R, (0,2)=R, (1,2)=R, (2,2)=G]
+. R R
+. . R
+. . G
+
+#0082  path=05  reward=0.234096  moves=RRUU  colors=RRGR  painted=[(0,1)=R, (0,2)=R, (1,2)=G, (2,2)=R]
+. R R
+. . G
+. . R
+
+#0083  path=05  reward=0.447665  moves=RRUU  colors=RRGG  painted=[(0,1)=R, (0,2)=R, (1,2)=G, (2,2)=G]
+. R R
+. . G
+. . G
+
+#0084  path=05  reward=0.136082  moves=RRUU  colors=RGRR  painted=[(0,1)=R, (0,2)=G, (1,2)=R, (2,2)=R]
+. R G
+. . R
+. . R
+
+#0085  path=05  reward=0.349651  moves=RRUU  colors=RGRG  painted=[(0,1)=R, (0,2)=G, (1,2)=R, (2,2)=G]
+. R G
+. . R
+. . G
+
+#0086  path=05  reward=0.250245  moves=RRUU  colors=RGGR  painted=[(0,1)=R, (0,2)=G, (1,2)=G, (2,2)=R]
+. R G
+. . G
+. . R
+
+#0087  path=05  reward=0.463814  moves=RRUU  colors=RGGG  painted=[(0,1)=R, (0,2)=G, (1,2)=G, (2,2)=G]
+. R G
+. . G
+. . G
+
+#0088  path=05  reward=0.072565  moves=RRUU  colors=GRRR  painted=[(0,1)=G, (0,2)=R, (1,2)=R, (2,2)=R]
+. G R
+. . R
+. . R
+
+#0089  path=05  reward=0.286134  moves=RRUU  colors=GRRG  painted=[(0,1)=G, (0,2)=R, (1,2)=R, (2,2)=G]
+. G R
+. . R
+. . G
+
+#0090  path=05  reward=0.186727  moves=RRUU  colors=GRGR  painted=[(0,1)=G, (0,2)=R, (1,2)=G, (2,2)=R]
+. G R
+. . G
+. . R
+
+#0091  path=05  reward=0.400296  moves=RRUU  colors=GRGG  painted=[(0,1)=G, (0,2)=R, (1,2)=G, (2,2)=G]
+. G R
+. . G
+. . G
+
+#0092  path=05  reward=0.088713  moves=RRUU  colors=GGRR  painted=[(0,1)=G, (0,2)=G, (1,2)=R, (2,2)=R]
+. G G
+. . R
+. . R
+
+#0093  path=05  reward=0.302282  moves=RRUU  colors=GGRG  painted=[(0,1)=G, (0,2)=G, (1,2)=R, (2,2)=G]
+. G G
+. . R
+. . G
+
+#0094  path=05  reward=0.202876  moves=RRUU  colors=GGGR  painted=[(0,1)=G, (0,2)=G, (1,2)=G, (2,2)=R]
+. G G
+. . G
+. . R
+
+#0095  path=05  reward=0.416445  moves=RRUU  colors=GGGG  painted=[(0,1)=G, (0,2)=G, (1,2)=G, (2,2)=G]
+. G G
+. . G
+. . G
+

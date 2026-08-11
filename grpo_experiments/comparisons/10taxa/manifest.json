@@ -1,0 +1,29 @@
+{
+  "dataset": "dataset/benchmark_datasets/DS1_reduced_10taxa.pickle",
+  "num_taxa": 10,
+  "theoretical_topologies": 34459425,
+  "reward": "R(x) = 5000 + log L(x)",
+  "log_score_shift": 5000.0,
+  "training": {
+    "epochs": 10000,
+    "on_policy_batch_size": 4096,
+    "full_model": true,
+    "outcome_level": "signature"
+  },
+  "methods": {
+    "learned_reverse": {
+      "run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+      "plot": "grpo_experiments/comparisons/10taxa/learned_reverse/model_probability_vs_reward.png",
+      "unique_signatures": 999986,
+      "pearson_r_vs_ideal": 0.9755383305808716,
+      "log_file": "grpo_experiments/comparisons/10taxa/logs/learned_reverse_e2e.log",
+      "training_started_at": "2026-08-03 12:48:33",
+      "training_completed_at": "2026-08-03 23:22:03",
+      "training_duration_seconds": 38010,
+      "training_duration": "10:33:30",
+      "pipeline_completed_at": "2026-08-03 23:47:54",
+      "pipeline_duration_seconds": 39561,
+      "pipeline_duration": "10:59:21"
+    }
+  }
+}

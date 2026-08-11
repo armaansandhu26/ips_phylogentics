@@ -30,6 +30,7 @@ def step_log_paths_pf_at_sampling_temperature(
     batch_nb_seq: torch.Tensor,
     edges_independent: bool,
     random_spec: dict | None,
+    only_train_tree_model: bool = False,
 ) -> torch.Tensor:
     """log pi(a|s) at the temperature used for sampling (random_spec['T'])."""
     temperature = sampling_temperature(random_spec)
@@ -37,7 +38,7 @@ def step_log_paths_pf_at_sampling_temperature(
     tree_actions = trees_ret["tree_actions"]
     log_paths_pf = _gather_log_prob(trees_ret["logits"], tree_actions, temperature)
 
-    if parsimony_problem:
+    if parsimony_problem or only_train_tree_model:
         return log_paths_pf
 
     edges_ret = ret["edges_ret"]

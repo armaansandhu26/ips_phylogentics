@@ -1,0 +1,10 @@
+{
+  "method": "gflownet",
+  "dataset": "dataset/benchmark_datasets/DS1_reduced_10taxa.pickle",
+  "num_taxa": 10,
+  "log_score_shift": 5000.0,
+  "reward": "R(x) = 5000 + log L(x)",
+  "started_at": "2026-08-03 12:48:40",
+  "cuda_device": 0,
+  "run_dir": "/home/armaan/phylogfn/og_code/experiments/full_model/20260803_124841_phylgfn_logreward_10taxa_g4096_1m_full_replay_op3277_r819_rb4096"
+}

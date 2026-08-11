@@ -1,0 +1,32 @@
+{
+  "reward_axis": {
+    "min": 64.12892560526906,
+    "max": 392.3272633306564
+  },
+  "panels": {
+    "Plain GRPO": {
+      "samples": 1000000,
+      "unique_signatures": 1,
+      "pearson_r_vs_ideal": 1.0,
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_grpo_5taxa_full_sig_b4096_grpo/sampled_full_diagnostics_1000000.npz"
+    },
+    "Original IPS": {
+      "samples": 1000000,
+      "unique_signatures": 66268,
+      "pearson_r_vs_ideal": 0.31890957478775794,
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_count_ips_5taxa_full_sig_b4096_ips_grpo/sampled_full_diagnostics_1000000.npz"
+    },
+    "GFlowNet (trajectory balance)": {
+      "samples": 1000000,
+      "unique_signatures": 960960,
+      "pearson_r_vs_ideal": 0.982035817448059,
+      "samples_file": "og_code/experiments/full_model/20260703_172421_phylgfn_logreward_g4096_1m_full_replay_op3277_r819_rb4096/plots/forward_trajectory_eval_1000000/og_gflownet_reward_probability_samples.npz"
+    },
+    "Learned reverse IPS (new proposed)": {
+      "samples": 1000000,
+      "unique_signatures": 951175,
+      "pearson_r_vs_ideal": 0.9943623464765192,
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz"
+    }
+  }
+}

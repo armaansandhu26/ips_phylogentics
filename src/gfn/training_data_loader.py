@@ -5,6 +5,8 @@ from src.utils.utils import schedule
 import pickle
 import torch
 
+from src.gfn.action_tensors import TensorActionBatch
+
 
 class TrainingDataLoader(object):
 
@@ -58,11 +60,15 @@ class TrainingDataLoader(object):
 
         input_actions_set = None
         if self.best_state_batch_size > 0:
-            input_actions_set = []
+            replay_action_lists = []
             trees = random.choices(self.best_trees, k=self.best_state_batch_size)
             for t in trees:
                 actions, _ = self.env.sample_backward_from_tree(t)
-                input_actions_set.append(actions)
+                replay_action_lists.append(actions)
+            input_actions_set = TensorActionBatch.from_actions_set(
+                replay_action_lists,
+                device=self.env.seq_arrays.device,
+            )
 
         if self.amp:
             with torch.autocast(device_type='cuda', dtype=torch.float16):
@@ -79,7 +85,14 @@ class TrainingDataLoader(object):
             trees_indices = torch.where(data['log_scores'][self.best_state_batch_size:] > min_best_scores)[
                 0].cpu().numpy()
             if len(trees_indices) > 0:
-                trees_actions = [trajectories[self.best_state_batch_size:][idx].actions for idx in trees_indices]
+                offset = self.best_state_batch_size
+                if data.get("action_tensors") is not None:
+                    actions_set = data["action_tensors"].to_actions_set()
+                    trees_actions = [actions_set[offset + int(idx)] for idx in trees_indices]
+                else:
+                    trees_actions = [
+                        trajectories[offset + int(idx)].actions for idx in trees_indices
+                    ]
                 trees_log_scores = data['log_scores'][self.best_state_batch_size:][trees_indices]
                 trees = self.env.batch_actions_to_trees(trees_actions, trees_log_scores)
                 self.update_best_trees_buffer(trees)

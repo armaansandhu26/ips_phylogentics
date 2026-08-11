@@ -1,0 +1,32 @@
+{
+  "method": "learned_reverse",
+  "dataset": "dataset/benchmark_datasets/DS1_reduced_10taxa.pickle",
+  "num_taxa": 10,
+  "log_score_shift": 5000.0,
+  "reward": "R(x) = 5000 + log L(x)",
+  "started_at": "2026-08-03 12:48:33",
+  "cuda_device": 1,
+  "run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+  "completed_at": "2026-08-03 23:47:54",
+  "plot_source": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k/model_probability_vs_reward.png",
+  "plot_copy": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/learned_reverse/model_probability_vs_reward.png",
+  "comparison_metrics": {
+    "samples": 1000000,
+    "plotted_samples": 1000000,
+    "observed_topologies": 955973,
+    "unique_observed_signatures": 999986,
+    "importance_ess": 994991.2265362868,
+    "importance_ess_fraction": 0.9949912265362868,
+    "log_weight_std": 0.20937360538110267,
+    "log_weight_range": 23.820159352067137,
+    "topology_total_variation": 0.023797657268885986,
+    "signature_total_variation_on_observed_support": 0.02435256516921195,
+    "loglikelihood_histogram_total_variation": 0.0076387079544706525,
+    "log_model_probability_vs_log_reward_pearson_vs_ideal": 0.8353434390005601,
+    "model_probability_vs_reward_pearson_vs_ideal": 0.9755383305808716,
+    "estimated_log_partition": 93.89306284454179,
+    "reference_run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+    "shared_reward_axes": true
+  },
+  "status": "complete"
+}

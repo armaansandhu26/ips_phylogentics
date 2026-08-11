@@ -1,0 +1,56 @@
+{
+  "comparison_dir": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/early_epoch4000_100k",
+  "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/early_epoch4000_100k/sampling_comparison_grid.png",
+  "plot_kind": "partition_calibrated_probability_vs_reward",
+  "shared_axis": {
+    "source": "learned_reverse/partition_calibrated_model_probability_vs_reward",
+    "min": -27.22343665281556,
+    "max": 934.6713254333343,
+    "log_partition": 93.89359245573476
+  },
+  "panels": {
+    "Learned reverse IPS": {
+      "samples": 100000,
+      "plotted_samples": 100000,
+      "observed_topologies": 99559,
+      "unique_observed_signatures": 100000,
+      "importance_ess": 99385.78921690419,
+      "importance_ess_fraction": 0.9938578921690419,
+      "log_weight_std": 0.17081484783292764,
+      "log_weight_range": 23.629756798028353,
+      "topology_total_variation": 0.02798091248704879,
+      "signature_total_variation_on_observed_support": 0.02803871119603717,
+      "loglikelihood_histogram_total_variation": 0.01216930683830879,
+      "log_model_probability_vs_log_reward_pearson_vs_ideal": 0.8771206974735326,
+      "model_probability_vs_reward_pearson_vs_ideal": 0.9706832762095955,
+      "estimated_log_partition": 93.89359245573476,
+      "reference_run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+      "shared_reward_axes": true
+    },
+    "GFlowNet": {
+      "samples": 100000,
+      "plotted_samples": 100000,
+      "unique_observed_signatures": 100000,
+      "log_probability_vs_log_reward_pearson_vs_ideal": 0.7094000284547174,
+      "probability_vs_reward_pearson_vs_ideal": 0.8800645570192545,
+      "log_probability_on_log_reward_slope": 0.4820901888755797,
+      "log_probability_on_log_reward_intercept": -83.75603224942928,
+      "checkpoint_log_partition": 86.72514343261719,
+      "importance_estimated_log_partition": 86.73033955649674,
+      "checkpoint_log_partition_error": -0.005196123879557035,
+      "checkpoint_balance_residual_mean": 0.0051961238795518875,
+      "checkpoint_balance_residual_std": 0.2925206515628466,
+      "fitted_balance_residual_std": 0.2925206515628466,
+      "importance_ess": 97732.15625933131,
+      "importance_ess_fraction": 0.9773215625933132,
+      "reference_run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+      "run_dir": "/home/armaan/phylogfn/og_code/experiments/full_model/20260803_124841_phylgfn_logreward_10taxa_g4096_1m_full_replay_op3277_r819_rb4096",
+      "checkpoint": "/home/armaan/phylogfn/og_code/experiments/full_model/20260803_124841_phylgfn_logreward_10taxa_g4096_1m_full_replay_op3277_r819_rb4096/checkpoints/checkpoint_003999.pt",
+      "dataset": "dataset/benchmark_datasets/DS1_reduced_10taxa.pickle",
+      "device": "cuda:0",
+      "reward_target": "R(x) = 5000 + terminal_log_likelihood",
+      "maximum_reward_definition_error": NaN,
+      "observed_topologies": 99858
+    }
+  }
+}

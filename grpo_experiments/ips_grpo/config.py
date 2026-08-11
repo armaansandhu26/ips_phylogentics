@@ -14,7 +14,11 @@ import sys
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal, Optional
 
+from grpo_experiments.ips_grpo.policy_loss_modes import ALL_POLICY_LOSS_MODES, PolicyLossMode
+
 OutcomeLevel = Literal["signature", "topology"]
+AdvantageRewardMode = Literal["exp_linear", "log_reward"]
+IPSPropensityMode = Literal["count", "exact"]
 
 _CONFIG_DIR = os.path.join(os.path.dirname(__file__), "..", "configs")
 DEFAULT_PRESET_FILE = os.path.join(_CONFIG_DIR, "ips_grpo_presets.json")
@@ -61,17 +65,69 @@ class IPSExperimentConfig:
     ips_prob_floor: float = 1e-6
     """eps in r_tilde = r / max(p_hat(o), eps) — arXiv:2601.21669 Eq. 9."""
 
+    ips_propensity_mode: IPSPropensityMode = "count"
+    """count: legacy batch outcome counts; exact: exp(-log p_theta(tau)) with SNIPS."""
+
+    max_inverse_weight: float = 2560.0
+    """Cap for exact inverse trajectory propensity before SNIPS normalization (legacy path)."""
+
+    ips_weight_temperature: float = 1.0
+    """exact mode: beta in (0, 1] applied to log inverse propensity before SNIPS.
+
+    beta == 1 is pure exact IPS (heavy-tailed, collapses at scale); beta -> 0 recovers
+    plain GRPO. Values around 0.2-0.5 keep ESS healthy on the full model. Any value
+    other than 1.0 switches to the numerically stable log-space SNIPS path."""
+
+    snips_truncate_ratio: float | None = None
+    """exact mode: truncate SNIPS weights (mean 1) to this multiple of the mean, then
+    renormalize. e.g. 10.0 bounds any single sample to <=10x average influence. None
+    keeps the legacy raw-exp + absolute-cap behavior when combined with temperature 1.0."""
+
+    ips_target_ess_fraction: float | None = None
+    """exact mode: if set (e.g. 0.5), auto-solve the temperature beta each batch so the
+    SNIPS effective sample size stays at this fraction of the group. Overrides
+    ips_weight_temperature and adapts as the policy sharpens. Recommended over a fixed
+    temperature; start at 0.5."""
+
     enable_policy_is: bool = False
     """If True: sample buffer under behavior policy, replay with pi_new/pi_old weights."""
 
     resample_rounds: Optional[int] = None
     update_cycles: Optional[int] = None
     buffer_size: Optional[int] = None
-    rollout_chunk_size: int = 64
+    rollout_chunk_size: int = 2048
+
+    only_train_tree_model: bool | None = None
+    """If set, override GFN.MODEL.ONLY_TRAIN_TREE_MODEL (False = train tree + edges)."""
+
+    edge_rep_grad_alpha: float | None = None
+    """Override GFN.MODEL.EDGE_REP_GRAD_ALPHA; None keeps the YAML/default value."""
 
     outcome_level: OutcomeLevel = "topology"
     print_every: int = 1
     checkpoint_every: int = 0
+    dump_advantage_groups: bool = False
+    advantage_reward_mode: AdvantageRewardMode = "log_reward"
+    policy_loss_mode: PolicyLossMode = "ppo"
+    """ppo: IPS-scaled advantages + PPO clip. split_ppo / magnitude_weighted_ppo: tree-edge credit split."""
+
+    tree_loss_weight: float = 0.5
+    """split_ppo only: weight on the tree PPO term."""
+
+    edge_loss_weight: float = 0.5
+    """split_ppo only: weight on the edge PPO term."""
+
+    tempered_ips_tau: float | None = None
+    """Fixed temperature tau for tempered_log_ips. None => tau = std(ell) / tempered_ips_tau_divisor per batch."""
+
+    tempered_ips_tau_divisor: float = 3.0
+    """Batch-adaptive tau divisor when tempered_ips_tau is None."""
+
+    log_score_decimals: int | None = None
+    """If set, round log_scores (and log_rewards) to this many decimal places everywhere."""
+
+    cpu_threads: int = 0
+    """Max CPU threads per process; 0 uses YAML/env/default resolution."""
 
     resume_from: Optional[str] = None
     resume_checkpoint: Optional[str] = None
@@ -227,6 +283,46 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Floor on batch outcome probability before inverting.",
     )
     g.add_argument(
+        "--ips-propensity-mode",
+        choices=["count", "exact"],
+        default="count",
+        help="count = legacy count propensity; exact = exp(-log p_theta(tau)) with cap + SNIPS.",
+    )
+    g.add_argument(
+        "--max-inverse-weight",
+        type=float,
+        default=2560.0,
+        help="Cap for exact inverse trajectory propensity before SNIPS normalization (legacy path).",
+    )
+    g.add_argument(
+        "--ips-weight-temperature",
+        type=float,
+        default=1.0,
+        help=(
+            "exact mode: beta in (0,1] on the log inverse propensity before SNIPS. "
+            "1.0 = pure exact IPS (collapses at scale); ~0.2-0.5 keeps ESS healthy; "
+            "-> 0 = plain GRPO. Any value != 1.0 uses stable log-space SNIPS."
+        ),
+    )
+    g.add_argument(
+        "--snips-truncate-ratio",
+        type=float,
+        default=None,
+        help=(
+            "exact mode: clip SNIPS weights (mean 1) to this multiple of the mean and "
+            "renormalize (truncated IS). e.g. 10 bounds single-sample influence."
+        ),
+    )
+    g.add_argument(
+        "--ips-target-ess-fraction",
+        type=float,
+        default=None,
+        help=(
+            "exact mode: auto-solve temperature beta each batch to hold SNIPS ESS at "
+            "this fraction of the group (e.g. 0.5). Overrides --ips-weight-temperature."
+        ),
+    )
+    g.add_argument(
         "--outcome-level",
         choices=["signature", "topology"],
         default="topology",
@@ -249,11 +345,106 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument("--resample-rounds", type=int, default=None)
     g.add_argument("--update-cycles", type=int, default=None)
     g.add_argument("--buffer-size", type=int, default=None)
-    g.add_argument("--rollout-chunk-size", type=int, default=64)
+    g.add_argument("--rollout-chunk-size", type=int, default=2048)
+
+    g = p.add_argument_group("model ablations")
+    g.add_argument(
+        "--full-model",
+        action="store_true",
+        help=(
+            "Train tree topology and categorical edge lengths "
+            "(ONLY_TRAIN_TREE_MODEL=false). Default follows YAML (tree-only)."
+        ),
+    )
+    g.add_argument(
+        "--tree-only",
+        action="store_true",
+        help="Train topology only with fixed edge lengths (ONLY_TRAIN_TREE_MODEL=true).",
+    )
+    g.add_argument(
+        "--edge-rep-grad-alpha",
+        type=float,
+        default=None,
+        help=(
+            "Scale edge-loss gradients flowing into tree representations. "
+            "0 detaches edge inputs; 1 keeps the original coupled path."
+        ),
+    )
 
     g = p.add_argument_group("logging")
     g.add_argument("--print-every", type=int, default=1)
     g.add_argument("--checkpoint-every", type=int, default=0)
+    g.add_argument(
+        "--dump-advantage-groups",
+        action="store_true",
+        help="Save per-group advantage vectors and shape stats to advantage_groups/.",
+    )
+    g.add_argument(
+        "--advantage-reward-mode",
+        choices=["exp_linear", "log_reward"],
+        default="log_reward",
+        help="exp_linear: r=exp(log_r-max); log_reward: r=log_r before group normalization.",
+    )
+    g.add_argument(
+        "--policy-loss-mode",
+        choices=list(ALL_POLICY_LOSS_MODES),
+        default="ppo",
+        help=(
+            "Objective function for training. "
+            "ppo: IPS-scaled group advantages + PPO surrogate (core/loss.py). "
+            "split_ppo: separate tree/edge PPO surrogates (core/loss_split_ppo.py). "
+            "magnitude_weighted_ppo: |log p|-weighted combo before PPO (core/loss_magnitude_weighted_ppo.py). "
+            "tempered_log_ips: tempered log-space IPS advantages + PPO surrogate. "
+            "log_ips: token log(pi_new/pi_old) + log(score) - log(p_hat). "
+            "terminal_seq_pf / terminal_token_ratio / terminal_seq_ratio: IPS terminal ablations."
+        ),
+    )
+    g.add_argument(
+        "--tree-loss-weight",
+        type=float,
+        default=0.5,
+        help="split_ppo only: weight on tree PPO term (edge weight is --edge-loss-weight).",
+    )
+    g.add_argument(
+        "--edge-loss-weight",
+        type=float,
+        default=0.5,
+        help="split_ppo only: weight on edge PPO term.",
+    )
+    g.add_argument(
+        "--tempered-ips-tau",
+        type=float,
+        default=None,
+        metavar="TAU",
+        help=(
+            "tempered_log_ips only: fixed batch temperature tau. "
+            "Omit for adaptive tau = std(ell) / --tempered-ips-tau-divisor."
+        ),
+    )
+    g.add_argument(
+        "--tempered-ips-tau-divisor",
+        type=float,
+        default=3.0,
+        help="tempered_log_ips only: divisor for adaptive tau when --tempered-ips-tau is omitted.",
+    )
+    g.add_argument(
+        "--log-score-decimals",
+        type=int,
+        default=None,
+        help=(
+            "Round log_scores to this many decimal places for training, logging, and "
+            "signature outcomes. Use 3 to match signature discretization."
+        ),
+    )
+    g.add_argument(
+        "--cpu-threads",
+        type=int,
+        default=0,
+        help=(
+            "Cap PyTorch/BLAS CPU threads for this process. "
+            "0 uses YAML/env/default resolution."
+        ),
+    )
 
     g = p.add_argument_group("resume")
     g.add_argument(
@@ -270,6 +461,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def config_from_args(args: argparse.Namespace) -> IPSExperimentConfig:
+    if args.full_model and args.tree_only:
+        raise ValueError("Use only one of --full-model or --tree-only")
+    if args.full_model:
+        only_train_tree_model = False
+    elif args.tree_only:
+        only_train_tree_model = True
+    else:
+        only_train_tree_model = None
+
     return IPSExperimentConfig(
         cfg_path=args.cfg_path,
         dataset_path=args.dataset_path,
@@ -292,14 +492,30 @@ def config_from_args(args: argparse.Namespace) -> IPSExperimentConfig:
         grpo_entropy_coef=args.grpo_entropy_coef,
         grpo_num_iterations=args.grpo_num_iterations,
         ips_prob_floor=args.ips_prob_floor,
+        ips_propensity_mode=args.ips_propensity_mode,
+        max_inverse_weight=args.max_inverse_weight,
+        ips_weight_temperature=args.ips_weight_temperature,
+        snips_truncate_ratio=args.snips_truncate_ratio,
+        ips_target_ess_fraction=args.ips_target_ess_fraction,
         enable_policy_is=args.enable_policy_is,
         resample_rounds=args.resample_rounds,
         update_cycles=args.update_cycles,
         buffer_size=args.buffer_size,
         rollout_chunk_size=args.rollout_chunk_size,
+        only_train_tree_model=only_train_tree_model,
+        edge_rep_grad_alpha=args.edge_rep_grad_alpha,
         outcome_level=args.outcome_level,
         print_every=args.print_every,
         checkpoint_every=args.checkpoint_every,
+        dump_advantage_groups=args.dump_advantage_groups,
+        advantage_reward_mode=args.advantage_reward_mode,
+        policy_loss_mode=args.policy_loss_mode,
+        tree_loss_weight=args.tree_loss_weight,
+        edge_loss_weight=args.edge_loss_weight,
+        tempered_ips_tau=args.tempered_ips_tau,
+        tempered_ips_tau_divisor=args.tempered_ips_tau_divisor,
+        log_score_decimals=args.log_score_decimals,
+        cpu_threads=args.cpu_threads,
         resume_from=args.resume_from,
         resume_checkpoint=args.resume_checkpoint,
     )

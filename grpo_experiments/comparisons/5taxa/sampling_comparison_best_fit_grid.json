@@ -1,0 +1,48 @@
+{
+  "fit_definition": "Independent ordinary least-squares fit in displayed linear space: displayed outcome estimate = slope * reward + intercept.",
+  "panels": {
+    "Plain GRPO": {
+      "samples": 1000000,
+      "unique_signatures": 1,
+      "quantity": "empirical_signature_frequency",
+      "fit": null,
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_grpo_5taxa_full_sig_b4096_grpo/sampled_full_diagnostics_1000000.npz"
+    },
+    "Original IPS": {
+      "samples": 1000000,
+      "unique_signatures": 66268,
+      "quantity": "empirical_signature_frequency",
+      "fit": {
+        "slope": 1.0831724388575525e-06,
+        "intercept": -0.0003787584055650128,
+        "r_squared": 0.3193461512055209,
+        "pearson_r": 0.56510720328582
+      },
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_count_ips_5taxa_full_sig_b4096_ips_grpo/sampled_full_diagnostics_1000000.npz"
+    },
+    "GFlowNet (trajectory balance)": {
+      "samples": 1000000,
+      "unique_signatures": 960960,
+      "quantity": "reverse_corrected_pathwise_estimate",
+      "fit": {
+        "slope": 3.0511736238384265e-16,
+        "intercept": 5.2670954296023636e-15,
+        "r_squared": 0.9643943467508708,
+        "pearson_r": 0.9820358174480545
+      },
+      "samples_file": "/home/armaan/phylogfn/og_code/experiments/full_model/20260703_172421_phylgfn_logreward_g4096_1m_full_replay_op3277_r819_rb4096/plots/forward_trajectory_eval_1000000/og_gflownet_reward_probability_samples.npz"
+    },
+    "Learned reverse IPS (new proposed)": {
+      "samples": 1000000,
+      "unique_signatures": 951175,
+      "quantity": "reverse_corrected_pathwise_estimate",
+      "fit": {
+        "slope": 2.7220032024098343e-17,
+        "intercept": -3.3696703446903604e-17,
+        "r_squared": 0.9887564760902924,
+        "pearson_r": 0.9943623464765217
+      },
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz"
+    }
+  }
+}

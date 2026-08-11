@@ -1,0 +1,7 @@
+{
+  "run_dir": "/home/armaan/phylogfn/og_code/experiments/full_model/20260806_150835_phylgfn_logreward_27taxa_g1024_noreplay_shift12000",
+  "epochs": 32000,
+  "final_loss": 0.43043386936187744,
+  "final_log_partition": 279.6461486816406,
+  "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/27taxa/gflownet_noreplay_training_curves.png"
+}

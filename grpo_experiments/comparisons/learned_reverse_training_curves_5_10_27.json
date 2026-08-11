@@ -1,0 +1,26 @@
+[
+  {
+    "run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+    "epochs": 10000,
+    "final_mean_log_score": 267.00543212890625,
+    "final_reverse_loss": 2.03549861907959e-05,
+    "final_ips_ess_fraction": 0.9997539769308064,
+    "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/5taxa/learned_reverse_training_curves.png"
+  },
+  {
+    "run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+    "epochs": 10000,
+    "final_mean_log_score": 335.6351318359375,
+    "final_reverse_loss": 6.458163261413574e-05,
+    "final_ips_ess_fraction": 0.9943732454165003,
+    "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/learned_reverse_training_curves.png"
+  },
+  {
+    "run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260806_144004_learned_reverse_27taxa_mlp_shifted_linear_b1024_rlr1e-3_rev8x_learned_reverse_ips_grpo",
+    "epochs": 32000,
+    "final_mean_log_score": 2026.1506042480469,
+    "final_reverse_loss": 3.86867905035615e-05,
+    "final_ips_ess_fraction": 0.9986096647773839,
+    "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/27taxa/learned_reverse_noreplay_training_curves.png"
+  }
+]

@@ -23,6 +23,9 @@ from grpo_experiments.ips_grpo.runner import run_experiment
 
 
 def main() -> None:
+    from src.utils.cpu_threads import apply_cpu_thread_limit
+
+    apply_cpu_thread_limit()
     exp_cfg = parse_experiment_config()
     run_experiment(exp_cfg)
 

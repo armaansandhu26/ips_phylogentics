@@ -1,0 +1,39 @@
+{
+  "fit_definition": "One shared log(Z) minimizing pooled squared error between log implied probability and log reward - log(Z).",
+  "shared_log_partition": 23.765694437341153,
+  "shared_partition": 20956075417.61051,
+  "reward_axis": {
+    "min": 64.12892560526906,
+    "max": 392.3272633306564
+  },
+  "panels": {
+    "Plain GRPO": {
+      "samples": 1000000,
+      "unique_signatures": 1,
+      "pearson_r_probability_vs_reward": NaN,
+      "log_space_rmse": 19.818252157740755,
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_grpo_5taxa_full_sig_b4096_grpo/sampled_full_diagnostics_1000000.npz"
+    },
+    "Original IPS": {
+      "samples": 1000000,
+      "unique_signatures": 66268,
+      "pearson_r_probability_vs_reward": 0.3189095747877576,
+      "log_space_rmse": 6.598857374963644,
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260802_174242_count_ips_5taxa_full_sig_b4096_ips_grpo/sampled_full_diagnostics_1000000.npz"
+    },
+    "GFlowNet (trajectory balance)": {
+      "samples": 1000000,
+      "unique_signatures": 960850,
+      "pearson_r_probability_vs_reward": 0.9820557278136657,
+      "log_space_rmse": 11.896505610978485,
+      "samples_file": "/home/armaan/phylogfn/og_code/experiments/full_model/20260703_172421_phylgfn_logreward_g4096_1m_full_replay_op3277_r819_rb4096/plots/reward_probability_eval_1000000/og_gflownet_reward_probability_samples.npz"
+    },
+    "Learned reverse IPS (new proposed)": {
+      "samples": 1000000,
+      "unique_signatures": 951175,
+      "pearson_r_probability_vs_reward": 0.9943623464765221,
+      "log_space_rmse": 14.38165237658999,
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz"
+    }
+  }
+}

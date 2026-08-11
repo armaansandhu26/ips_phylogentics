@@ -1,0 +1,32 @@
+{
+  "comparison_dir": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/early_epoch1000_100k",
+  "output": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/early_epoch1000_100k/union_ideal_sampling_grid.png",
+  "plot_kind": "union_catalog_reward_proportional_qhat_vs_reward",
+  "ideal_definition": "Union over all methods' observed signatures. q*(sigma) = R(sigma) / sum_{sigma in union} R(sigma). Same ideal on every panel; not IPS-weighted and not per-method support.",
+  "union_catalog": {
+    "n_signatures": 199694,
+    "reward_sum": 66287140.76121056,
+    "ideal_slope": 1.5085882246789755e-08,
+    "signature_overlap_between_methods": 306
+  },
+  "shared_axis": {
+    "x_min": -23.0917236225125,
+    "x_max": 792.8158447262625,
+    "y_min": 0.0,
+    "y_max": 1.1960326476934074e-05
+  },
+  "panels": {
+    "Learned reverse IPS": {
+      "n_samples": 100000,
+      "n_observed_signatures": 100000,
+      "tv_vs_union_ideal": 0.4936483125330336,
+      "pearson_vs_union_ideal": NaN
+    },
+    "GFlowNet": {
+      "n_samples": 100000,
+      "n_observed_signatures": 100000,
+      "tv_vs_union_ideal": 0.5049361521701311,
+      "pearson_vs_union_ideal": NaN
+    }
+  }
+}

@@ -33,12 +33,15 @@ from grpo_experiments.resume import (
 )
 from grpo_experiments.utils import (
     append_jsonl,
+    apply_experiment_log_score_discretization,
     build_random_spec,
     choose_device,
     generate_exploration_spec,
     get_generator_params,
     load_phylogfn_cfg,
+    resolve_rollout_chunk_size,
     set_seed,
+    apply_training_cpu_limits,
 )
 from src.env import build_env
 from src.gfn.build import build_gfn
@@ -106,6 +109,7 @@ def _run_hybrid_ips_policy_is(
     cfg,
     all_seqs,
 ) -> str:
+    rollout_chunk = resolve_rollout_chunk_size(exp_cfg)
     env = build_env(cfg, all_seqs)
     env.to(device)
     generator = build_gfn(cfg, env, device, ddp=False)
@@ -123,7 +127,7 @@ def _run_hybrid_ips_policy_is(
             generator,
             env,
             num_samples=exp_cfg.replay_warmstart_samples,
-            chunk_size=exp_cfg.rollout_chunk_size,
+            chunk_size=rollout_chunk,
             device=device,
         )
         print(f"warmstarted best-tree buffer: +{warm_added} entries (size={len(replay_buffer)})")
@@ -178,10 +182,11 @@ def _run_hybrid_ips_policy_is(
             replay_buffer=replay_buffer,
             fresh_buffer_size=fresh_size,
             replay_sample_size=replay_size,
-            chunk_size=exp_cfg.rollout_chunk_size,
+            chunk_size=rollout_chunk,
             random_spec=random_spec,
             device=device,
         )
+        apply_experiment_log_score_discretization(batch, exp_cfg, cfg)
 
         outcome_ids, topology_ids = extract_outcome_ids(batch.trees, exp_cfg.outcome_level)
         use_ips = not (exp_cfg.ips_start_round > 0 and resample_round < exp_cfg.ips_start_round)
@@ -241,7 +246,7 @@ def _run_hybrid_ips_policy_is(
             advantage_metrics=ips_metrics,
             outcome_ids=outcome_ids if use_ips else None,
             update_cycles=exp_cfg.effective_update_cycles - cycle_begin,
-            chunk_size=exp_cfg.rollout_chunk_size,
+            chunk_size=rollout_chunk,
             device=device,
             reevaluate_fn=reevaluate_log_paths_pf_hybrid,
         )
@@ -340,6 +345,7 @@ def _run_hybrid_ips_policy_is(
 def run_experiment(exp_cfg: HybridIPSExperimentConfig) -> str:
     device = choose_device(exp_cfg.device)
     set_seed(exp_cfg.seed)
+    rollout_chunk = resolve_rollout_chunk_size(exp_cfg)
     print(
         f"method={exp_cfg.method}  mode=policy_is_hybrid  device={device}  "
         f"ips_prob_floor={exp_cfg.ips_prob_floor}  outcome_level={exp_cfg.outcome_level}  "
@@ -356,11 +362,14 @@ def run_experiment(exp_cfg: HybridIPSExperimentConfig) -> str:
     print(
         f"  resample_rounds={exp_cfg.effective_resample_rounds}  "
         f"update_cycles={exp_cfg.effective_update_cycles}  "
-        f"chunk={exp_cfg.rollout_chunk_size}  "
+        f"chunk={rollout_chunk}"
+        + (f" (from {exp_cfg.rollout_chunk_size})" if rollout_chunk != exp_cfg.rollout_chunk_size else "")
+        + f"  "
         f"entropy_coef={exp_cfg.entropy_coef}"
     )
 
     cfg, all_seqs = load_phylogfn_cfg(exp_cfg)
+    apply_training_cpu_limits(exp_cfg, cfg)
     output_dir = resolve_output_dir(exp_cfg)
     cfg.OUTPUT_PATH = output_dir
 

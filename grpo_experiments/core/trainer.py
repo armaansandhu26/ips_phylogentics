@@ -20,6 +20,10 @@ from grpo_experiments.core.advantages import (
     linear_rewards_from_log_scores,
 )
 from grpo_experiments.core.loss import aggregate_step_entropy, compute_grpo_policy_loss
+from grpo_experiments.core.loss_magnitude_weighted_ppo import compute_magnitude_weighted_ppo_policy_loss
+from grpo_experiments.core.loss_split_ppo import compute_split_ppo_policy_loss
+
+SPLIT_CREDIT_POLICY_LOSS_MODES = frozenset({"split_ppo", "magnitude_weighted_ppo"})
 
 
 def sequence_importance_metrics(
@@ -53,6 +57,9 @@ class GRPOTrainer:
         entropy_coef: float = 0.0,
         num_iterations: int = 1,
         advantage_reward_mode: AdvantageRewardMode = "exp_linear",
+        policy_loss_mode: str = "ppo",
+        tree_loss_weight: float = 0.5,
+        edge_loss_weight: float = 0.5,
     ):
         self.params = params
         self.clip_eps = clip_eps
@@ -64,10 +71,17 @@ class GRPOTrainer:
         self.reward_c = float(reward_c)
         self.reward_scale = float(reward_scale)
         self.advantage_reward_mode = advantage_reward_mode
+        self.policy_loss_mode = policy_loss_mode
+        self.tree_loss_weight = float(tree_loss_weight)
+        self.edge_loss_weight = float(edge_loss_weight)
         self.num_iterations = max(1, int(num_iterations))
         if self.reward_scale == 0:
             raise ValueError("reward_scale must be non-zero.")
         self.optimizer = torch.optim.Adam(params, lr=lr)
+
+    @property
+    def uses_split_log_probs(self) -> bool:
+        return self.policy_loss_mode in SPLIT_CREDIT_POLICY_LOSS_MODES
 
     def batch_rewards(self, log_scores: torch.Tensor) -> torch.Tensor:
         return linear_rewards_from_log_scores(
@@ -89,9 +103,10 @@ class GRPOTrainer:
         log_scores: torch.Tensor,
         *,
         outcome_ids: list[str] | None = None,
+        log_paths_pf: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, dict]:
         """Batch advantages for buffering (μ reuse / policy IS). Subclasses may scale rewards first."""
-        del outcome_ids
+        del outcome_ids, log_paths_pf
         return self.compute_advantages(log_scores), {}
 
     def compute_policy_loss(
@@ -100,8 +115,44 @@ class GRPOTrainer:
         advantages: torch.Tensor,
         *,
         log_paths_pf_old: torch.Tensor | None = None,
+        log_paths_pf_tree: torch.Tensor | None = None,
+        log_paths_pf_edge: torch.Tensor | None = None,
+        log_paths_pf_tree_old: torch.Tensor | None = None,
+        log_paths_pf_edge_old: torch.Tensor | None = None,
         mask: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, dict]:
+        if self.policy_loss_mode == "split_ppo":
+            if log_paths_pf_tree is None or log_paths_pf_edge is None:
+                raise ValueError("split_ppo requires log_paths_pf_tree and log_paths_pf_edge.")
+            return compute_split_ppo_policy_loss(
+                log_paths_pf_tree,
+                log_paths_pf_edge,
+                advantages,
+                log_paths_pf_tree_old=log_paths_pf_tree_old,
+                log_paths_pf_edge_old=log_paths_pf_edge_old,
+                tree_weight=self.tree_loss_weight,
+                edge_weight=self.edge_loss_weight,
+                clip_eps=self.clip_eps,
+                clip_eps_high=self.clip_eps_high,
+                log_ratio_clamp_max=self.log_ratio_clamp_max,
+                mask=mask,
+            )
+        if self.policy_loss_mode == "magnitude_weighted_ppo":
+            if log_paths_pf_tree is None or log_paths_pf_edge is None:
+                raise ValueError(
+                    "magnitude_weighted_ppo requires log_paths_pf_tree and log_paths_pf_edge."
+                )
+            return compute_magnitude_weighted_ppo_policy_loss(
+                log_paths_pf_tree,
+                log_paths_pf_edge,
+                advantages,
+                log_paths_pf_tree_old=log_paths_pf_tree_old,
+                log_paths_pf_edge_old=log_paths_pf_edge_old,
+                clip_eps=self.clip_eps,
+                clip_eps_high=self.clip_eps_high,
+                log_ratio_clamp_max=self.log_ratio_clamp_max,
+                mask=mask,
+            )
         return compute_grpo_policy_loss(
             log_paths_pf,
             advantages,
@@ -123,6 +174,10 @@ class GRPOTrainer:
         fixed_advantages: torch.Tensor | None = None,
         paths_entropy: torch.Tensor | None = None,
         log_paths_pf_old_for_metrics: torch.Tensor | None = None,
+        log_paths_pf_tree: torch.Tensor | None = None,
+        log_paths_pf_edge: torch.Tensor | None = None,
+        log_paths_pf_tree_old: torch.Tensor | None = None,
+        log_paths_pf_edge_old: torch.Tensor | None = None,
         mask: torch.Tensor | None = None,
         extra_metrics: dict | None = None,
     ) -> dict:
@@ -143,6 +198,10 @@ class GRPOTrainer:
             log_paths_pf,
             advantages,
             log_paths_pf_old=log_paths_pf_old,
+            log_paths_pf_tree=log_paths_pf_tree,
+            log_paths_pf_edge=log_paths_pf_edge,
+            log_paths_pf_tree_old=log_paths_pf_tree_old,
+            log_paths_pf_edge_old=log_paths_pf_edge_old,
             mask=mask,
         )
 

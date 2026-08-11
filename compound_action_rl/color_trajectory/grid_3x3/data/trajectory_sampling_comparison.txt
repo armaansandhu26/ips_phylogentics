@@ -1,0 +1,29 @@
+GRPO sampling vs enumerated trajectories
+episodes_sampled=100
+enumerated_trajectories=96
+unique_enumerated_trajectories_hit=30
+sample_mean=0.553239
+sample_min=0.397167
+sample_max=0.655509
+
+Top sampled trajectory indices (index -> count):
+  #0023  x12
+  #0021  x8
+  #0003  x7
+  #0067  x6
+  #0071  x6
+  #0055  x5
+  #0051  x5
+  #0007  x4
+  #0063  x4
+  #0035  x4
+  #0047  x4
+  #0001  x4
+  #0017  x4
+  #0033  x3
+  #0087  x3
+  #0039  x3
+  #0043  x2
+  #0059  x2
+  #0019  x2
+  #0027  x2

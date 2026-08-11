@@ -1,0 +1,28 @@
+{
+  "run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+  "metrics_rows": 10000,
+  "epoch0": {
+    "batch_unique_outcomes": 4096,
+    "batch_unique_topologies": 4093,
+    "ips_ess_fraction": 0.9138081274440412,
+    "loss": 1.1641532182693481e-10,
+    "reverse_loss": 21.640243530273438
+  },
+  "final": {
+    "batch_unique_outcomes": 4096,
+    "batch_unique_topologies": 4096,
+    "ips_ess_fraction": 0.9943732454165003,
+    "loss": 0.0005909639876335859,
+    "reverse_loss": 6.458163261413574e-05,
+    "cumulative_unique_outcomes": 40959601,
+    "global_duplicate_fraction": 9.741210937552758e-06
+  },
+  "last_epoch_summary": {
+    "epoch": 9999,
+    "method": "learned_reverse_ips_grpo",
+    "mean_loss": 0.0005909639876335859,
+    "mean_reverse_loss": 6.458163261413574e-05,
+    "mean_ips_ess_fraction": 0.9943732454165003,
+    "cumulative_unique_outcomes": 40959601
+  }
+}

@@ -24,6 +24,14 @@ from grpo_experiments.eval_utils import (
     save_json,
     set_seed,
 )
+from grpo_experiments.ideal_sampling import (
+    IDEAL_SAMPLING_LABEL,
+    IDEAL_SAMPLING_STYLE,
+    build_signature_log_score_catalog,
+    compute_ideal_log_score_density,
+    compute_ideal_signature_mass,
+    plot_ideal_sampling_reference,
+)
 from src.gfn.rollout_worker_phylo import RolloutWorker
 
 
@@ -209,7 +217,7 @@ def rank_frequency(counter: Counter[str], top_k: int) -> np.ndarray:
 
 def compute_bin_edges(summaries: list[dict[str, Any]], n_bins: int) -> np.ndarray:
     combined = np.concatenate([row["log_scores"] for row in summaries])
-    return np.linspace(combined.min(), combined.max(), n_bins + 1)
+    return _shared_bin_edges(combined, n_bins)
 
 
 def compute_bin_frequencies(
@@ -333,6 +341,16 @@ def _is_collapsed_distribution(scores: np.ndarray, *, max_unique: int = 8, max_s
     return len(np.unique(scores)) <= max_unique or float(scores.std()) <= max_std
 
 
+def _shared_bin_edges(values: np.ndarray, n_bins: int) -> np.ndarray:
+    """Bin edges for histograms; degenerate when min==max breaks matplotlib."""
+    values = np.asarray(values, dtype=np.float64)
+    lo, hi = float(values.min()), float(values.max())
+    if lo == hi:
+        pad = max(1.0, abs(lo) * 0.001)
+        lo, hi = lo - pad, hi + pad
+    return np.linspace(lo, hi, n_bins + 1)
+
+
 def _choose_histogram_bins(scores: np.ndarray, *, max_bins: int = 30) -> int | np.ndarray:
     scores = np.asarray(scores, dtype=np.float64)
     n_unique = len(np.unique(scores))
@@ -355,9 +373,25 @@ def _draw_collapsed_distribution(
     ax.vlines(xs, 0.0, shares, colors=color, linewidth=3.0, alpha=0.9)
     ax.scatter(xs, shares, s=28, color=color, zorder=3, edgecolors="white", linewidths=0.5)
     ax.set_ylim(0.0, min(1.05, max(shares.max() * 1.15, 0.05)))
-    ax.set_xlim(xs.min() - 0.5, xs.max() + 0.5)
+    pad = max(1.0, abs(xs[0]) * 0.001) if xs.size else 1.0
+    ax.set_xlim(xs.min() - pad, xs.max() + pad)
     ax.set_ylabel("Sampling Frequency")
     ax.grid(True, alpha=0.25, axis="y")
+
+
+def _ideal_bin_counts(
+    summaries: list[dict[str, Any]],
+    bin_edges: np.ndarray,
+    n_samples: int,
+) -> np.ndarray:
+    catalog = build_signature_log_score_catalog(summaries)
+    log_scores, q_star = compute_ideal_signature_mass(catalog)
+    counts = np.zeros(len(bin_edges) - 1, dtype=np.float64)
+    for log_score, weight in zip(log_scores, q_star, strict=True):
+        idx = int(np.searchsorted(bin_edges, log_score, side="right") - 1)
+        idx = min(max(idx, 0), len(counts) - 1)
+        counts[idx] += float(weight) * float(n_samples)
+    return counts
 
 
 def _draw_single_distribution_panel(
@@ -366,6 +400,7 @@ def _draw_single_distribution_panel(
     *,
     color,
     global_range: tuple[float, float] | None = None,
+    ideal_summaries: list[dict[str, Any]] | None = None,
 ) -> None:
     scores = np.asarray(row["log_scores"], dtype=np.float64)
     label = row["label"]
@@ -386,6 +421,20 @@ def _draw_single_distribution_panel(
             edgecolor="white",
             linewidth=0.5,
         )
+        if ideal_summaries is not None:
+            if isinstance(bins, int):
+                bin_edges = np.histogram_bin_edges(scores, bins=bins)
+            else:
+                bin_edges = np.asarray(bins, dtype=np.float64)
+            ideal_counts = _ideal_bin_counts(ideal_summaries, bin_edges, int(row["samples"]))
+            if ideal_counts.max() > 0:
+                centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+                ax.plot(
+                    centers,
+                    ideal_counts,
+                    **IDEAL_SAMPLING_STYLE,
+                    label=IDEAL_SAMPLING_LABEL,
+                )
         ax.set_ylabel("Count")
         if global_range is not None:
             ax.set_xlim(global_range)
@@ -411,6 +460,20 @@ def _draw_single_distribution_panel(
     )
 
 
+def _plot_ideal_log_score_density(
+    ax: plt.Axes,
+    summaries: list[dict[str, Any]],
+    bin_edges: np.ndarray,
+    *,
+    label: str = IDEAL_SAMPLING_LABEL,
+) -> None:
+    catalog = build_signature_log_score_catalog(summaries)
+    centers, density = compute_ideal_log_score_density(catalog, bin_edges)
+    if centers.size == 0:
+        return
+    ax.plot(centers, density, label=label, **IDEAL_SAMPLING_STYLE)
+
+
 def _draw_ridge_distributions(
     ax: plt.Axes,
     summaries: list[dict[str, Any]],
@@ -420,7 +483,7 @@ def _draw_ridge_distributions(
 ) -> None:
     """Ridge plot on a shared log-score axis — collapsed runs appear as narrow spikes."""
     combined = np.concatenate([row["log_scores"] for row in summaries])
-    bin_edges = np.linspace(combined.min(), combined.max(), n_bins + 1)
+    bin_edges = _shared_bin_edges(combined, n_bins)
     bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
     ridge_height = 0.85
 
@@ -455,11 +518,30 @@ def _draw_ridge_distributions(
             color=cmap(idx % 10),
         )
 
-    ax.set_yticks([])
+    catalog = build_signature_log_score_catalog(summaries)
+    ideal_centers, ideal_density = compute_ideal_log_score_density(catalog, bin_edges)
+    if ideal_centers.size > 0 and ideal_density.max() > 0:
+        ideal_hist = ideal_density / ideal_density.max() * ridge_height
+        y_base = len(summaries)
+        ax.plot(
+            ideal_centers,
+            y_base + ideal_hist,
+            **IDEAL_SAMPLING_STYLE,
+        )
+        ax.text(
+            combined.min(),
+            y_base + ridge_height * 0.35,
+            IDEAL_SAMPLING_LABEL,
+            fontsize=7,
+            va="center",
+            color=IDEAL_SAMPLING_STYLE["color"],
+        )
+        ax.set_ylim(-0.2, len(summaries) + 1.05)
+    else:
+        ax.set_ylim(-0.2, len(summaries))
     ax.set_xlabel("Log Score (shared axis)")
     ax.set_ylabel("")
     ax.set_title("Log Score Ridge Plot (shared axis, peaks normalized per run)")
-    ax.set_ylim(-0.2, len(summaries))
     ax.grid(True, alpha=0.2, axis="x")
 
 
@@ -499,6 +581,7 @@ def plot_sampling_distributions(
             row,
             color=cmap(idx % 10),
             global_range=global_range if not _is_collapsed_distribution(row["log_scores"]) else None,
+            ideal_summaries=summaries,
         )
 
     for idx in range(n_runs, n_rows * n_cols):
@@ -526,7 +609,7 @@ def plot_sampling_overlay(
     """Single-axis overlay of run score distributions for direct comparison."""
     cmap = plt.get_cmap("tab10")
     combined = np.concatenate([row["log_scores"] for row in summaries])
-    edges = np.linspace(combined.min(), combined.max(), bins + 1)
+    edges = _shared_bin_edges(combined, bins)
 
     fig, ax = plt.subplots(figsize=(12, 5), dpi=200, constrained_layout=True)
     for idx, row in enumerate(summaries):
@@ -553,6 +636,8 @@ def plot_sampling_overlay(
             color=color,
             edgecolor="none",
         )
+
+    _plot_ideal_log_score_density(ax, summaries, edges)
 
     ax.set_title(f"Log Score Distribution Overlay ({title_context.lower()} trees, shared axis)")
     ax.set_xlabel("Log Score")
@@ -584,7 +669,7 @@ def plot_score_density(
         for row in summaries
     ]
     all_scores = np.concatenate(score_arrays)
-    edges = np.linspace(float(all_scores.min()), float(all_scores.max()), bins + 1)
+    edges = _shared_bin_edges(all_scores, bins)
 
     fig, ax = plt.subplots(figsize=(12, 5), dpi=200, constrained_layout=True)
     for idx, (row, scores) in enumerate(zip(summaries, score_arrays)):
@@ -797,6 +882,40 @@ def json_ready_summary(
     return out
 
 
+def write_sampling_diversity_report(summaries: list[dict[str, Any]], path: Path) -> None:
+    """Write per-run signature/topology diversity from a sampling eval."""
+    lines = [
+        "Sampling diversity summary",
+        f"samples_per_run: {summaries[0]['samples'] if summaries else 0}",
+        "",
+    ]
+    rows = []
+    for row in summaries:
+        rows.append({
+            "label": row["label"],
+            "samples": int(row["samples"]),
+            "unique_signatures": int(row["unique_signatures"]),
+            "unique_topologies": int(row["unique_topologies"]),
+            "signature_duplicate_fraction": float(row["signature_duplicate_fraction"]),
+            "topology_duplicate_fraction": float(row["topology_duplicate_fraction"]),
+            "signature_entropy": float(row["signature_entropy"]),
+            "topology_entropy": float(row["topology_entropy"]),
+            "log_score_mean": float(row["log_score_mean"]),
+            "log_score_max": float(row["log_score_max"]),
+        })
+        lines.append(
+            f"{row['label']}: "
+            f"unique_signatures={row['unique_signatures']} "
+            f"unique_topologies={row['unique_topologies']} "
+            f"topo_dup={row['topology_duplicate_fraction']:.4f} "
+            f"log_score_mean={row['log_score_mean']:.2f} "
+            f"log_score_best={row['log_score_max']:.2f}"
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n")
+    save_json(path.with_suffix(".json"), {"runs": rows})
+
+
 def save_scores_cache(summaries: list[dict[str, Any]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez(path, **{row["label"]: row["log_scores"] for row in summaries})
@@ -934,6 +1053,10 @@ def main() -> None:
     }
     save_json(args.output_dir / "sampling_summary.json", payload)
     save_scores_cache(summaries, args.output_dir / "sampling_scores.npz")
+    write_sampling_diversity_report(
+        summaries,
+        args.output_dir / "sampling_diversity_report.txt",
+    )
 
     plot_path = args.output_dir / "sampling_comparison.png"
     plot_sampling_comparison(
@@ -972,6 +1095,8 @@ def main() -> None:
     print("  sampling_distributions.png")
     print("  sampling_distributions_overlay.png")
     print("  sampling_score_density.png")
+    print("  sampling_diversity_report.txt")
+    print("  sampling_diversity_report.json")
     for row in summaries:
         print(
             f"  {row['label']}: unique_topo={row['unique_topologies']} "

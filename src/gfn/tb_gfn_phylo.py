@@ -31,6 +31,13 @@ class TBGFlowNetGenerator(torch.nn.Module):
         self.scale_set = gfn_cfg.SCALES_SET
         self.parsimony_problem = env.parsimony_problem
         self.env = env
+        self.only_train_tree_model = gfn_model_cfg.ONLY_TRAIN_TREE_MODEL
+        self.fixed_edge_length = gfn_model_cfg.FIXED_EDGE_LENGTH
+        self.edge_rep_grad_alpha = float(gfn_model_cfg.EDGE_REP_GRAD_ALPHA)
+        if not 0.0 <= self.edge_rep_grad_alpha <= 1.0:
+            raise ValueError(
+                f"GFN.MODEL.EDGE_REP_GRAD_ALPHA must be in [0, 1], got {self.edge_rep_grad_alpha}"
+            )
 
         self.condition_on_scale = gfn_cfg.CONDITION_ON_SCALE
         self.scale_set = gfn_cfg.SCALES_SET
@@ -77,9 +84,13 @@ class TBGFlowNetGenerator(torch.nn.Module):
             self.edges_model = self.full_model.edges_model
             self._Z = self.full_model._Z
 
+        if self.only_train_tree_model and self.edges_model is not None:
+            for param in self.edges_model.parameters():
+                param.requires_grad = False
+
         # Z and other model parts use different learning rate
         params = list(self.tree_model.parameters())
-        if self.edges_model is not None:
+        if self.edges_model is not None and not self.only_train_tree_model:
             params = params + list(self.edges_model.parameters())
         params = [
             {'params': params, 'lr': gfn_model_cfg.LR_MODEL}
@@ -88,7 +99,9 @@ class TBGFlowNetGenerator(torch.nn.Module):
             params = params + [{'params': [self._Z], 'lr': gfn_model_cfg.LR_Z}]
 
         # gradient clipping exclude the Z part
-        self.gradient_clipping_params = list(self.tree_model.parameters()) + list(self.edges_model.parameters())
+        self.gradient_clipping_params = list(self.tree_model.parameters())
+        if self.edges_model is not None and not self.only_train_tree_model:
+            self.gradient_clipping_params = self.gradient_clipping_params + list(self.edges_model.parameters())
         self.grad_clip = gfn_model_cfg.GRAD_CLIP
 
         # optimizer
@@ -201,26 +214,95 @@ class TBGFlowNetGenerator(torch.nn.Module):
         """
         assume all input states have the same input/output dimension and the same state type
         """
-        trees_ret = self.tree_model(**input_dict)
-        tree_actions = trees_ret['tree_actions'].cpu().numpy()
-        tree_pairs = self.env.retrieve_tree_pairs(input_dict['batch_nb_seq'], tree_actions)
+        trees_ret = self.tree_model(**input_dict) #tree_model is topology network (PhyloTreeModelOneStep)-> decides which subtrees to merge
+        tree_actions = trees_ret['tree_actions']
+        # trees_ret['logits'] = scores for all possible merges.
+        # trees_ret['tree_actions'] = chosen merge index per episode (after sampling from those logits).
+        # So tree_actions looks like something like: tensor([5, 2, 9, ...]) (one chosen index per batch item)
+        tree_pairs = self.env.retrieve_tree_pairs_tensor(
+            int(input_dict['batch_nb_seq'][0].item()),
+            tree_actions,
+        )
+        # for each batch [left_tree, right_tree] -> [B,2]
         trees_ret['tree_pairs'] = tree_pairs
         ret = {
             'trees_ret': trees_ret
         }
 
+        # B = number of episodes (batch size)                                                           B=2
+        # N = current number of trees in each episode                                                   B=4
+        # P = N*(N-1)/2 = number of possible merge pairs                                                P=6
+        # E = embedding                                                                                 E=128
+
+        #tree_features shape = [B, N, m, c] = [2, 4, 100, 4]
+        #n = 5, m = 100, c = 4
+
+        #input to tree model:
+        #input_dict = {
+        #   batch_input: [B, N, m*c] = [2, 4, 400] (flattened per-tree features for MLP input)
+        #   batch_nb_seq: [B] = [2] = tensor([4, 4]) (how many trees/sequences are currently valid in each batch item)
+        #}
+
+        #output:
+        # trees_ret['logits']: [B, P] --> one score per possible pair, per episode                      [2, 6]
+        # trees_ret['tree_actions']: [B] --> one chosen pair-index per episode (sampled from logits)    [2] ([3,0])
+        # trees_ret['log_paths_pf']: [B] --> log-prob of chosen tree action per episode                 [2] ([-0.4,-1.2])
+        # trees_ret['trees_reps']: [B, N, E] --> One embedding vector per current subtree, per episode               [2, 4, 128]
+        # trees_ret['summary_reps']: [B, E] --> One global embedding per episode that summarizes the whole current forest.   [2, 128]
+
+        # trees_ret['tree_pairs']: [B, 2] --> mapped (left_idx, right_idx) for each chosen action       [2,2] [[1,2], [0,1]]
+
         # for likelihood problem continue the computation
         if not self.parsimony_problem:
-            left_trees_indices = [x[0] for x in tree_pairs]
-            right_trees_indices = [x[1] for x in tree_pairs]
-            n = len(tree_pairs)
-            left_trees_reps = trees_ret['trees_reps'][torch.arange(n), left_trees_indices]
-            right_trees_reps = trees_ret['trees_reps'][torch.arange(n), right_trees_indices]
-            edges_ret = self.edges_model(trees_ret['summary_reps'], left_trees_reps, right_trees_reps, input_dict)
+            if self.only_train_tree_model:
+                edges_ret = self._fixed_edges_ret(
+                    tree_pairs.shape[0],
+                    tree_actions.device,
+                    input_dict['batch_nb_seq'],
+                )
+            else:
+                left_trees_indices = tree_pairs[:, 0] #-> [B,1]
+                right_trees_indices = tree_pairs[:, 1] #->[B,1]
+                n = tree_pairs.shape[0]
+                batch_idx = torch.arange(n, device=tree_actions.device)
+                left_trees_reps = trees_ret['trees_reps'][batch_idx, left_trees_indices]
+                right_trees_reps = trees_ret['trees_reps'][batch_idx, right_trees_indices]
+                summary_reps = self._edge_rep_with_scaled_tree_grad(trees_ret['summary_reps'])
+                left_trees_reps = self._edge_rep_with_scaled_tree_grad(left_trees_reps)
+                right_trees_reps = self._edge_rep_with_scaled_tree_grad(right_trees_reps)
+                edges_ret = self.edges_model(summary_reps, left_trees_reps, right_trees_reps, input_dict)
             ret['edges_ret'] = edges_ret
 
         ret['log_paths_pf'] = ret['edges_ret']['log_paths_pf'] + ret['trees_ret']['log_paths_pf']
         return ret
+
+    def _edge_rep_with_scaled_tree_grad(self, rep):
+        """Keep edge inputs unchanged while scaling edge-loss gradients into tree reps."""
+        # Edge-feedback ablation knob: compare alpha=0/0.2/0.4/0.8 against
+        # existing alpha=1 runs to see how much edge loss should shape tree reps.
+        alpha = self.edge_rep_grad_alpha
+        if alpha == 1.0:
+            return rep
+        if alpha == 0.0:
+            return rep.detach()
+        return rep.detach() + alpha * (rep - rep.detach())
+
+    def _fixed_edges_ret(self, batch_size, device, batch_nb_seq):
+        """Fixed branch lengths for topology-only training (no edge-model gradients)."""
+        at_root = (batch_nb_seq[0] == 2).item()
+        log_paths_pf = torch.zeros(batch_size, device=device)
+        # Root step uses a single edge action (total = 2 * FIXED_EDGE_LENGTH);
+        # non-root steps use independent left/right actions.
+        if at_root:
+            edge_actions = torch.zeros(batch_size, device=device, dtype=torch.long)
+        elif self.env.edge_env.edges_independent:
+            edge_actions = torch.zeros(batch_size, 2, device=device, dtype=torch.long)
+        else:
+            edge_actions = torch.zeros(batch_size, device=device, dtype=torch.long)
+        return {
+            'edge_actions': edge_actions,
+            'log_paths_pf': log_paths_pf,
+        }
 
     def get_weighted_loss_from_rollout_outputs(self, rollout_outputs, weights):
 

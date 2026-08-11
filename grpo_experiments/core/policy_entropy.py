@@ -60,9 +60,10 @@ def step_entropy_from_forward(
     parsimony_problem: bool,
     batch_nb_seq: torch.Tensor,
     edges_independent: bool,
+    only_train_tree_model: bool = False,
 ) -> torch.Tensor:
     ent = tree_step_entropy(ret["trees_ret"])
-    if parsimony_problem:
+    if parsimony_problem or only_train_tree_model:
         return ent
 
     edges_ret = ret["edges_ret"]

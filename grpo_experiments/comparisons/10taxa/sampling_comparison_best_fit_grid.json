@@ -1,0 +1,53 @@
+{
+  "fit_definition": "Independent ordinary least-squares fit in displayed linear space: displayed outcome estimate = slope * reward + intercept.",
+  "panels": {
+    "Plain GRPO": {
+      "samples": 1000000,
+      "unique_signatures": 2850,
+      "quantity": "empirical_signature_frequency",
+      "fit": {
+        "slope": 2.0392889077629537e-06,
+        "intercept": -0.0011327660182574896,
+        "r_squared": 0.0010634607887316516,
+        "pearson_r": 0.032610746522154344
+      },
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260804_133452_plain_grpo_10taxa_full_sig_b4096_shift5000_grpo/sampled_full_diagnostics_1000000.npz"
+    },
+    "Original IPS": {
+      "samples": 1000000,
+      "unique_signatures": 140109,
+      "quantity": "empirical_signature_frequency",
+      "fit": {
+        "slope": 2.0951486129275938e-08,
+        "intercept": -8.567109522483741e-06,
+        "r_squared": 0.0024856058686019145,
+        "pearson_r": 0.04985585089637716
+      },
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260804_011029_count_ips_10taxa_full_sig_b4096_shift5000_ips_grpo/sampled_full_diagnostics_1000000.npz"
+    },
+    "GFlowNet (trajectory balance)": {
+      "samples": 1000000,
+      "unique_signatures": 1000000,
+      "quantity": "reverse_corrected_pathwise_estimate",
+      "fit": {
+        "slope": 1.849704018028747e-38,
+        "intercept": 9.269698048347595e-37,
+        "r_squared": 0.7767593947795043,
+        "pearson_r": 0.8813395456800437
+      },
+      "samples_file": "/home/armaan/phylogfn/og_code/experiments/full_model/20260804_112555_20260803_124841_phylgfn_logreward_10taxa_g4096_1m_full_replay_op3277_r819_rb4096_resumed/plots/reward_probability_eval_1000000/og_gflownet_reward_probability_samples.npz"
+    },
+    "Learned reverse IPS (new proposed)": {
+      "samples": 1000000,
+      "unique_signatures": 1000000,
+      "quantity": "reverse_corrected_pathwise_estimate",
+      "fit": {
+        "slope": 1.6120070929312168e-41,
+        "intercept": 1.6671038996258438e-40,
+        "r_squared": 0.9516750344325139,
+        "pearson_r": 0.975538330580872
+      },
+      "samples_file": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz"
+    }
+  }
+}

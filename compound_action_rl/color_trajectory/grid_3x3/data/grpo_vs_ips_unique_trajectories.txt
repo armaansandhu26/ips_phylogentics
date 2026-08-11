@@ -1,0 +1,42 @@
+Unique enumerated trajectories captured
+
+GRPO
+  episodes_sampled=1000
+  enumerated_trajectories=96
+  matched_episodes=1000
+  unmatched_episodes=0
+  unique_enumerated_trajectories_hit=3
+
+  Top sampled trajectory indices (index -> count):
+    #0093  x491
+    #0094  x269
+    #0095  x240
+
+IPS-GRPO
+  episodes_sampled=1000
+  enumerated_trajectories=96
+  matched_episodes=999
+  unmatched_episodes=1
+  unique_enumerated_trajectories_hit=54
+
+  Top sampled trajectory indices (index -> count):
+    #0091  x87
+    #0095  x72
+    #0093  x69
+    #0092  x68
+    #0094  x57
+    #0089  x50
+    #0083  x44
+    #0087  x42
+    #0086  x40
+    #0071  x39
+    #0088  x38
+    #0082  x38
+    #0090  x32
+    #0081  x27
+    #0074  x25
+    #0070  x24
+    #0078  x22
+    #0077  x21
+    #0073  x20
+    #0075  x20

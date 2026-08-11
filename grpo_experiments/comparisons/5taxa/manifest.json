@@ -1,0 +1,42 @@
+{
+  "dataset": "DS1_reduced (5 taxa)",
+  "samples": 1000000,
+  "reward": "R(x) = 3600 + log L(x)",
+  "shared_reference_log_partition": 38.14733846647034,
+  "reference_run": "grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+  "grid_plot": "sampling_comparison_grid.png",
+  "plots": {
+    "learned_reverse_ips": {
+      "file": "learned_reverse_ips_model_probability_vs_reward.png",
+      "source_run": "grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+      "unique_signatures": 951175,
+      "pearson_r": 0.9943623464765217,
+      "observed_topologies": 105,
+      "pearson_r_vs_ideal": 0.9943623464765192
+    },
+    "gflownet": {
+      "file": "gflownet_model_probability_vs_reward.png",
+      "source_run": "og_code/experiments/full_model/20260703_172421_phylgfn_logreward_g4096_1m_full_replay_op3277_r819_rb4096",
+      "pearson_r": null,
+      "unique_signatures": 960850,
+      "observed_topologies": 105,
+      "pearson_r_vs_ideal": 0.982055727813664
+    },
+    "count_ips": {
+      "file": "count_ips_model_probability_vs_reward.png",
+      "source_run": "grpo_experiments/learned_reverse_runs/20260802_174242_count_ips_5taxa_full_sig_b4096_ips_grpo",
+      "unique_signatures": 66268,
+      "pearson_r": 0.3189095747877569,
+      "observed_topologies": 3,
+      "pearson_r_vs_ideal": 0.31890957478775794
+    },
+    "grpo": {
+      "file": "grpo_model_probability_vs_reward.png",
+      "source_run": "grpo_experiments/learned_reverse_runs/20260802_174242_grpo_5taxa_full_sig_b4096_grpo",
+      "unique_signatures": 1,
+      "pearson_r": NaN,
+      "observed_topologies": 1,
+      "pearson_r_vs_ideal": 1.0
+    }
+  }
+}
