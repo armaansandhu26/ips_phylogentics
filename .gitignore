@@ -67,6 +67,11 @@ nohup.out
 tb_log/
 wandb/
 
+# Molecule-synthesis external dependency and generated runs
+molecule_synthesis/external/RGFN/
+molecule_synthesis/runs/
+molecule_synthesis/toy/runs/
+
 # Nested repos / editor index junk inside vendored trees
 **/.git/
 

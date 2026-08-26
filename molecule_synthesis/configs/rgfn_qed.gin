@@ -1,0 +1,12 @@
+# Offline-friendly RGFN configuration used by the smoke suite.
+# Includes resolve from the RGFN checkout because train.py changes into it.
+include 'configs/rgfn_base.gin'
+include 'configs/envs/reaction.gin'
+include 'configs/proxies/target/qed.gin'
+
+beta = 4
+
+NumScaffoldsFound.proxy_value_threshold_list = [0.5, 0.6, 0.7, 0.8]
+TanimotoSimilarityModes.proxy_term_threshold = 0.6
+TanimotoSimilarityModes.similarity_threshold = 0.5
+TanimotoSimilarityModes.max_modes = 500

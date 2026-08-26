@@ -1,0 +1,41 @@
+# Reduced-space sEH configuration for an A100-budgeted comparison.
+#
+# This keeps the released sEH proxy and reward transform but reduces the
+# chemical language deterministically to common reaction families and a small
+# number of fragments from each compatible group. It is intentionally a new
+# experimental task and must not be labelled as the full RGFN sEH benchmark.
+include 'configs/rgfn_base.gin'
+include 'configs/proxies/target/seh.gin'
+
+MiniReactionDataFactory.reaction_path = 'data/chemistry.xlsx'
+MiniReactionDataFactory.reaction_families = [
+  'Amide synthesis',
+  'Suzuki cross coupling',
+  'Buchwald-Hartwig amination',
+  'Reductive amination',
+]
+MiniReactionDataFactory.fragment_groups = [
+  'Acids',
+  'Amines',
+  'Aryl halides',
+  'Boronic acids',
+  'aldehydes v2',
+]
+MiniReactionDataFactory.fragments_per_group = 10
+MiniReactionDataFactory.docking = False
+data_factory/gin.singleton.constructor = @MiniReactionDataFactory
+data_factory = @data_factory/gin.singleton()
+
+ReactionEnv.max_num_reactions = 2
+ReactionEnv.data_factory = %data_factory
+env/gin.singleton.constructor = @ReactionEnv
+train_env = @env/gin.singleton()
+valid_env = %train_env
+
+beta = 8
+evaluation_step = 200
+
+NumScaffoldsFound.proxy_value_threshold_list = [5, 6, 7, 8]
+TanimotoSimilarityModes.proxy_term_threshold = 7.0
+TanimotoSimilarityModes.similarity_threshold = 0.5
+TanimotoSimilarityModes.max_modes = 5000

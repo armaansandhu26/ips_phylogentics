@@ -1,0 +1,30 @@
+{
+  "id": "qed_smoke",
+  "description": "One-step, CPU-safe QED smoke run with no model download or docking.",
+  "config": "molecule_synthesis/configs/rgfn_qed.gin",
+  "methods": [
+    "rgfn",
+    "grpo",
+    "count_ips_grpo",
+    "mips_grpo"
+  ],
+  "training": {
+    "seed": 7,
+    "iterations": 1,
+    "forward_trajectories": 4,
+    "replay_trajectories": 0,
+    "batch_size": 4,
+    "max_reactions": 1,
+    "device": "cpu",
+    "learning_rate": 0.0001,
+    "clip_eps": 0.2,
+    "reward_mode": "linear",
+    "count_probability_floor": 1e-6,
+    "reverse_loss_weight": 1.0,
+    "wandb_mode": "disabled"
+  },
+  "sampling": {
+    "n_samples": 8,
+    "batch_size": 4
+  }
+}

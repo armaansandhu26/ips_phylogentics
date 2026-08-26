@@ -1,0 +1,30 @@
+{
+  "id": "seh_small",
+  "description": "Small sEH comparison using the paper's pretrained proxy and reaction space.",
+  "config": "@rgfn/configs/rgfn_seh_proxy.gin",
+  "methods": [
+    "rgfn",
+    "grpo",
+    "count_ips_grpo",
+    "mips_grpo"
+  ],
+  "training": {
+    "seed": 42,
+    "iterations": 500,
+    "forward_trajectories": 100,
+    "replay_trajectories": 0,
+    "batch_size": 100,
+    "max_reactions": 4,
+    "device": "auto",
+    "learning_rate": 0.0001,
+    "clip_eps": 0.2,
+    "reward_mode": "linear",
+    "count_probability_floor": 1e-6,
+    "reverse_loss_weight": 1.0,
+    "wandb_mode": "disabled"
+  },
+  "sampling": {
+    "n_samples": 1000,
+    "batch_size": 100
+  }
+}

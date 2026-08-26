@@ -1,0 +1,36 @@
+{
+  "id": "qed_cpu_pilot",
+  "description": "Enumerable one-reaction MiniChem QED pilot for CPU comparison.",
+  "config": "molecule_synthesis/configs/rgfn_qed_minichem.gin",
+  "methods": [
+    "rgfn",
+    "grpo",
+    "count_ips_grpo",
+    "mips_grpo"
+  ],
+  "training": {
+    "seed": 7,
+    "iterations": 30,
+    "forward_trajectories": 64,
+    "replay_trajectories": 0,
+    "batch_size": 64,
+    "max_reactions": 1,
+    "device": "cpu",
+    "learning_rate": 0.0003,
+    "clip_eps": 0.2,
+    "reward_mode": "linear",
+    "count_probability_floor": 0.0078125,
+    "reverse_loss_weight": 1.0,
+    "wandb_mode": "disabled"
+  },
+  "sampling": {
+    "n_samples": 5000,
+    "batch_size": 100
+  },
+  "enumeration": {
+    "beta": 4.0,
+    "max_reactions": 1,
+    "fragments_per_group": 8,
+    "max_partial_trajectories": 100000
+  }
+}

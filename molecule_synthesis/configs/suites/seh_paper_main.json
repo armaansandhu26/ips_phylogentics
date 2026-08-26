@@ -1,0 +1,49 @@
+{
+  "id": "seh_paper_main",
+  "description": "Paper-scale comparison on RGFN's canonical public sEH proxy task.",
+  "config": "@rgfn/configs/rgfn_seh_proxy.gin",
+  "methods": [
+    "rgfn",
+    "grpo",
+    "count_ips_grpo",
+    "mips_grpo"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "training": {
+    "iterations": 4000,
+    "forward_trajectories": 100,
+    "replay_trajectories": 0,
+    "batch_size": 100,
+    "max_reactions": 4,
+    "device": "cuda",
+    "learning_rate": 0.001,
+    "clip_eps": 0.2,
+    "reward_mode": "linear",
+    "count_probability_floor": 1e-6,
+    "reverse_loss_weight": 1.0,
+    "wandb_mode": "offline"
+  },
+  "method_overrides": {
+    "rgfn": {
+      "replay_trajectories": 20
+    }
+  },
+  "sampling": {
+    "n_samples": 100000,
+    "batch_size": 100
+  },
+  "evaluation": {
+    "mode_threshold": 7.0,
+    "similarity_threshold": 0.5,
+    "max_modes": 5000,
+    "top_k": 500,
+    "scaffold_thresholds": [
+      7.0,
+      8.0
+    ]
+  }
+}

@@ -44,6 +44,13 @@ python train.py <cfg_path> <sequences_path> <output_path> [--nb_device=<device_n
 
 PhyloGFN with continuous branch length modeling achieves SOTA MLL estimation performance.
 
+## Molecule-synthesis experiments
+
+The unified RGFN/GRPO/MIPS-GRPO harness lives in
+[`molecule_synthesis/`](molecule_synthesis/README.md). It includes a pinned
+upstream setup script, QED smoke suite, sEH comparison suite, checkpoint
+sampling, and comparison-table aggregation.
+
 |                | Training trajs |     DS1         |     DS2         |     DS3         |     DS4         |     DS5         |     DS6         |     DS7         |     DS8         |  cfg/weights       |
 |----------------|----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|----------------|
 | PhyloGFN Full |    3.20E+07    | -7108.4 (0.04)  | -26367.7 (0.04) | -33735.1 (0.02) | -13329.9 (0.09) | -8214.4 (0.16)  | -6724.2 (0.10)  | -37331.9 (0.14) | -8650.5 (0.05)  |       -        |
@@ -63,6 +70,5 @@ We will publish the optimized code for parsimony analysis in the near future. In
 ## TODO list
 - [ ] mutigpu training 
 - [ ] parsimony inference
-
 
 

@@ -1,0 +1,51 @@
+{
+  "id": "seh_reduced_a100",
+  "description": "Reduced two-reaction sEH task targeting no more than 4-5 hours per method/seed on a dedicated A100.",
+  "config": "molecule_synthesis/configs/rgfn_seh_reduced.gin",
+  "methods": [
+    "rgfn",
+    "grpo",
+    "count_ips_grpo",
+    "mips_grpo"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "training": {
+    "iterations": 1200,
+    "forward_trajectories": 64,
+    "replay_trajectories": 0,
+    "batch_size": 64,
+    "max_reactions": 2,
+    "device": "cuda",
+    "learning_rate": 0.001,
+    "clip_eps": 0.2,
+    "reward_mode": "linear",
+    "count_probability_floor": 1e-6,
+    "reverse_loss_weight": 1.0,
+    "wandb_mode": "offline"
+  },
+  "method_overrides": {
+    "rgfn": {
+      "replay_trajectories": 13
+    }
+  },
+  "sampling": {
+    "n_samples": 20000,
+    "batch_size": 128
+  },
+  "evaluation": {
+    "mode_threshold": 7.0,
+    "similarity_threshold": 0.5,
+    "max_modes": 5000,
+    "top_k": 500,
+    "scaffold_thresholds": [
+      5.0,
+      6.0,
+      7.0,
+      8.0
+    ]
+  }
+}

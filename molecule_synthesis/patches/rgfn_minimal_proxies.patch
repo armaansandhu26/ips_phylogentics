@@ -1,0 +1,23 @@
+diff --git a/rgfn/gfns/reaction_gfn/proxies/__init__.py b/rgfn/gfns/reaction_gfn/proxies/__init__.py
+index f1b577f..93abfd9 100644
+--- a/rgfn/gfns/reaction_gfn/proxies/__init__.py
++++ b/rgfn/gfns/reaction_gfn/proxies/__init__.py
+@@ -1,7 +1,13 @@
+-from .docking_proxy.docking_proxy import DockingMoleculeProxy
+-from .drd2 import DRD2Proxy
++import os
++
+ from .qed_proxy import QEDProxy
+-from .reinvent_prior_proxy import ReinventPriorProxy
+ from .rnd_novelty_proxy import RNDNoveltyProxy
+ from .seh_proxy import SehMoleculeProxy
+-from .seno_proxy import SenoProxy
++
++# The upstream package eagerly imports every optional oracle. Keep the default
++# behaviour for paper reproduction, but allow offline QED experiments to avoid
++# TDC, docking, private GNEprop, and REINVENT dependencies.
++if os.environ.get("RGFN_MINIMAL_PROXIES") != "1":
++    from .docking_proxy.docking_proxy import DockingMoleculeProxy
++    from .drd2 import DRD2Proxy
++    from .reinvent_prior_proxy import ReinventPriorProxy
++    from .seno_proxy import SenoProxy
