@@ -1,0 +1,66 @@
+{
+  "description": "Canonical comparison_metrics sources for paper Table 2 and matched-transform figures.",
+  "reward_shifts": {
+    "5": 3600,
+    "10": 5000,
+    "27": 12000
+  },
+  "comparisons": [
+    {
+      "taxa": 5,
+      "method_id": "mips_grpo",
+      "method_label": "MIPS-GRPO",
+      "metrics": "grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k/comparison_metrics.json",
+      "samples_npz": "grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "samples_kind": "learned_reverse"
+    },
+    {
+      "taxa": 5,
+      "method_id": "gflownet",
+      "method_label": "GFlowNet",
+      "metrics": null,
+      "metrics_fallback": {
+        "probability_vs_reward_pearson_vs_ideal": 0.982055727813664,
+        "unique_observed_signatures": 960850,
+        "observed_topologies": 105,
+        "samples": 1000000,
+        "note": "linear r from grpo_experiments/comparisons/5taxa/manifest.json; log-log r not archived"
+      },
+      "prerendered_linear": "grpo_experiments/comparisons/5taxa/gflownet_model_probability_vs_reward.png",
+      "prerendered_log": null
+    },
+    {
+      "taxa": 10,
+      "method_id": "mips_grpo",
+      "method_label": "MIPS-GRPO",
+      "metrics": "grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k/comparison_metrics.json",
+      "samples_npz": "grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "samples_kind": "learned_reverse"
+    },
+    {
+      "taxa": 10,
+      "method_id": "gflownet",
+      "method_label": "GFlowNet",
+      "metrics": "grpo_experiments/comparisons/10taxa/gflownet/comparison_metrics.json",
+      "prerendered_linear": "grpo_experiments/comparisons/10taxa/gflownet/model_probability_vs_reward.png",
+      "prerendered_log": null
+    },
+    {
+      "taxa": 27,
+      "method_id": "mips_grpo",
+      "method_label": "MIPS-GRPO",
+      "metrics": "grpo_experiments/comparisons/27taxa/learned_reverse/comparison_metrics.json",
+      "samples_npz": "grpo_experiments/learned_reverse_runs/20260806_144004_learned_reverse_27taxa_mlp_shifted_linear_b1024_rlr1e-3_rev8x_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "samples_kind": "learned_reverse",
+      "log_score_shift": 12000
+    },
+    {
+      "taxa": 27,
+      "method_id": "gflownet",
+      "method_label": "GFlowNet",
+      "metrics": "grpo_experiments/comparisons/27taxa/gflownet/comparison_metrics.json",
+      "prerendered_linear": "grpo_experiments/comparisons/27taxa/gflownet/model_probability_vs_reward.png",
+      "prerendered_log": "grpo_experiments/comparisons/27taxa/gflownet/log_probability_vs_log_reward.png"
+    }
+  ]
+}

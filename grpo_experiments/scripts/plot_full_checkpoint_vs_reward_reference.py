@@ -91,6 +91,17 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def load_terminal_log_likelihood(
+    payload: np.lib.npyio.NpzFile,
+    *,
+    shift: float,
+) -> np.ndarray:
+    if "raw_log_likelihood" in payload:
+        return payload["raw_log_likelihood"].astype(np.float64)
+    log_score = payload["log_score"].astype(np.float64)
+    return log_score - shift
+
+
 def normalized_reference_weights(
     log_score: np.ndarray,
     log_pf: np.ndarray,
@@ -313,10 +324,7 @@ def save_og_scatter(
     max_points: int,
     seed: int,
     unique_signatures: int,
-    method_name: str,
-    estimator_label: str,
     title_prefix: str,
-    reward_shift: float,
     reference_log_partition: float | None = None,
     axis_spec: dict[str, float] | None = None,
 ) -> tuple[float, float]:
@@ -349,11 +357,10 @@ def save_og_scatter(
         color=BLUE,
         edgecolors="none",
         rasterized=True,
-        label=(
-            f"{method_name}: {estimator_label}"
-            f"\n{len(log_model_probability):,} trajectories"
-            f"\n{unique_signatures:,} unique signatures"
-            f"\nPearson r vs ideal={pearson:.4f}"
+        label=sample_legend_label(
+            n_trajectories=len(log_model_probability),
+            unique_signatures=unique_signatures,
+            pearson=pearson,
         ),
     )
     if axis_spec is not None:
@@ -379,9 +386,7 @@ def save_og_scatter(
         ax.set_xlim(axis_spec["log_reward_min"], axis_spec["log_reward_max"])
     y_min, y_max = log_probability_limits(y, line_x, line_log_partition)
     ax.set_ylim(y_min, y_max)
-    ax.set_xlabel(
-        rf"Log terminal reward: $\log R(x)=\log({reward_shift:g}+\log L(x))$"
-    )
+    ax.set_xlabel(r"Log terminal reward: $\log R(x)=\log L(x)$")
     ax.set_ylabel("Pathwise implied log terminal probability")
     ax.set_title(f"{title_prefix}: terminal probability vs reward")
     ax.grid(True, alpha=0.2)
@@ -399,10 +404,23 @@ def select_scatter_points(size: int, *, maximum: int, seed: int) -> np.ndarray:
 
 def scatter_style(displayed_points: int) -> tuple[float, float]:
     if displayed_points >= 500_000:
-        return 8.0, 0.10
+        return 16.0, 0.14
     if displayed_points >= 100_000:
-        return 12.0, 0.15
-    return 20.0, 0.30
+        return 24.0, 0.20
+    return 32.0, 0.35
+
+
+def sample_legend_label(
+    *,
+    n_trajectories: int,
+    unique_signatures: int,
+    pearson: float,
+) -> str:
+    return (
+        f"{n_trajectories:,} trajectories\n"
+        f"{unique_signatures:,} unique signatures\n"
+        f"Pearson r vs ideal={pearson:.4f}"
+    )
 
 
 def save_linear_probability_reward_plots(
@@ -414,10 +432,7 @@ def save_linear_probability_reward_plots(
     max_points: int,
     seed: int,
     unique_signatures: int,
-    method_name: str,
-    estimator_label: str,
     title_prefix: str,
-    reward_shift: float,
     reference_log_partition: float | None = None,
     axis_spec: dict[str, float] | None = None,
 ) -> tuple[float, float]:
@@ -445,11 +460,10 @@ def save_linear_probability_reward_plots(
         line_log_partition,
     )
     marker_size, alpha = scatter_style(len(selected))
-    sample_label = (
-        f"{method_name}: {estimator_label}"
-        f"\n{len(log_model_probability):,} trajectories"
-        f"\n{unique_signatures:,} unique signatures"
-        f"\nPearson r vs ideal={pearson:.4f}"
+    sample_label = sample_legend_label(
+        n_trajectories=len(log_model_probability),
+        unique_signatures=unique_signatures,
+        pearson=pearson,
     )
 
     fig, ax = plt.subplots(figsize=(10, 10), dpi=220, constrained_layout=True)
@@ -486,7 +500,7 @@ def save_linear_probability_reward_plots(
         ax.set_xlim(axis_spec["reward_min"], axis_spec["reward_max"])
     y_min, y_max = linear_probability_limits(model_probability, line_x, partition)
     ax.set_ylim(y_min, y_max)
-    ax.set_xlabel(rf"Terminal reward: $R(x)={reward_shift:g}+\log L(x)$")
+    ax.set_xlabel(r"Terminal reward: $R(x)=L(x)$")
     ax.set_ylabel("Pathwise implied terminal probability")
     ax.set_title(f"{title_prefix}: terminal probability vs reward")
     ax.grid(True, alpha=0.2)
@@ -520,7 +534,7 @@ def save_linear_probability_reward_plots(
     ax.set_xlim(lower - padding, upper + padding)
     ax.set_ylim(lower - padding, upper + padding)
     ax.set_aspect("equal", adjustable="box")
-    ax.set_xlabel(rf"Terminal reward: $R(x)={reward_shift:g}+\log L(x)$")
+    ax.set_xlabel(r"Terminal reward: $R(x)=L(x)$")
     ax.set_ylabel(r"Partition-calibrated terminal probability: $\hat ZP(x)$")
     ax.set_title(f"{title_prefix}: calibrated probability vs reward")
     ax.grid(True, alpha=0.2)
@@ -543,19 +557,21 @@ def main() -> None:
     if args.shared_reference or args.reference_run_dir is not None:
         axis_spec = shared_reward_axis_bounds(args.reference_run_dir)
 
+    metadata_path = args.samples.with_suffix(".json")
+    metadata = json.loads(metadata_path.read_text()) if metadata_path.exists() else {}
+    shift = float(metadata.get("log_score_shift", 3600.0))
+
     with np.load(args.samples) as payload:
         log_score = payload["log_score"].astype(np.float64)
         log_pf = payload["log_pf"].astype(np.float64)
         log_q_reverse = payload["log_q_reverse"].astype(np.float64)
         topology_index = payload["topology_index"].astype(np.int64)
         topology_ids = payload["topology_ids"].astype(str)
+        log_likelihood = load_terminal_log_likelihood(payload, shift=shift)
 
     n = len(log_score)
     if not (len(log_pf) == len(log_q_reverse) == len(topology_index) == n):
         raise ValueError("sample arrays have inconsistent lengths")
-    metadata_path = args.samples.with_suffix(".json")
-    metadata = json.loads(metadata_path.read_text()) if metadata_path.exists() else {}
-    shift = float(metadata.get("log_score_shift", 3600.0))
 
     reference_weights, log_weights, ess = normalized_reference_weights(
         log_score,
@@ -638,40 +654,26 @@ def main() -> None:
     )
 
     log_model_probability = log_pf - log_q_reverse
-    log_target_reward = np.log(log_score)
     if axis_spec is not None:
         axis_spec = merge_reward_axis_bounds(
             axis_spec,
-            reward=np.exp(log_target_reward),
-            log_reward=log_target_reward,
+            reward=np.exp(log_likelihood),
+            log_reward=log_likelihood,
         )
         reference_run_dir = axis_spec["reference_run_dir"]
     if args.plot_method == "ppo":
-        method_name = "PPO"
-        log_estimator_label = (
-            r"$\log P_F(\tau)-\log P_B(\tau)$"
-        )
-        linear_estimator_label = r"$P_F(\tau)/P_B(\tau)$"
-        title_prefix = "PPO"
+        title_prefix = "Full model"
     else:
-        method_name = "Learned reverse"
-        log_estimator_label = (
-            r"$\log P_F(\tau)-\log q_\phi(\tau|x)$"
-        )
-        linear_estimator_label = r"$P_F(\tau)/q_\phi(\tau|x)$"
         title_prefix = "Learned-reverse IPS-GRPO"
 
     pearson, estimated_log_partition = save_og_scatter(
         args.output_dir / "log_model_probability_vs_log_reward.png",
         log_model_probability=log_model_probability,
-        log_target_reward=log_target_reward,
+        log_target_reward=log_likelihood,
         max_points=args.scatter_points,
         seed=args.seed,
         unique_signatures=len(unique_signatures),
-        method_name=method_name,
-        estimator_label=log_estimator_label,
         title_prefix=title_prefix,
-        reward_shift=shift,
         reference_log_partition=reference_log_partition,
         axis_spec=axis_spec,
     )
@@ -679,14 +681,11 @@ def main() -> None:
         args.output_dir / "model_probability_vs_reward.png",
         args.output_dir / "partition_calibrated_model_probability_vs_reward.png",
         log_model_probability=log_model_probability,
-        log_target_reward=log_target_reward,
+        log_target_reward=log_likelihood,
         max_points=args.scatter_points,
         seed=args.seed,
         unique_signatures=len(unique_signatures),
-        method_name=method_name,
-        estimator_label=linear_estimator_label,
         title_prefix=title_prefix,
-        reward_shift=shift,
         reference_log_partition=reference_log_partition,
         axis_spec=axis_spec,
     )

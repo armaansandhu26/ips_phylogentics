@@ -1,0 +1,20 @@
+% Hyper-grid $H=64$, group size 32, 25k epochs (seed 0).
+% Source: final/runs/hypergrid_64/plots/epoch_24999/recovery_summary.json
+\begin{table}[htbp]
+\centering
+\caption{Hyper-grid, $H=64$, group size $32$, four modes, 25{,}000 epochs (seed~0).
+Recovery is the fraction of modes visited. $\ell_1$ is the distance between the
+empirical terminal distribution and $p(x) \propto R(x)$; lower is better. Unique
+terminals is out of $4096$ (50k eval samples).}
+\label{tab:grid}
+\begin{tabular}{lrrrr}
+\toprule
+Method & Recovery (\%) & Modes & $\ell_1$ & Unique terminals \\
+\midrule
+GRPO                     & 25.0  & 1 & 1.966 & 17 \\
+Count IPS-GRPO           & 25.0  & 1 & 1.844 & 42 \\
+MIPS-GRPO                & 100.0 & 4 & 0.262 & 4056 \\
+GFlowNet TB              & 100.0 & 4 & 0.270 & 4043 \\
+\bottomrule
+\end{tabular}
+\end{table}

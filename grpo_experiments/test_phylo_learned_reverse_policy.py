@@ -83,11 +83,9 @@ class PhyloLearnedReversePolicyTest(unittest.TestCase):
         self.assertEqual(len(mask), 10)
         self.assertEqual(sum(mask), 10)
 
-    def test_parse_config_accepts_mlp_reverse_policy(self) -> None:
+    def test_parse_config_accepts_mlp_reverse_settings(self) -> None:
         config = parse_config(
             [
-                "--reverse-policy-type",
-                "mlp",
                 "--reverse-hidden-size",
                 "32",
                 "--reverse-num-layers",
@@ -97,6 +95,7 @@ class PhyloLearnedReversePolicyTest(unittest.TestCase):
             ]
         )
         self.assertEqual(config.reverse_policy_type, "mlp")
+        self.assertFalse(config.only_train_tree_model)
         self.assertEqual(config.reverse_hidden_size, 32)
         self.assertEqual(config.reverse_num_layers, 1)
 

@@ -1,0 +1,484 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{natbib}
+\usepackage{placeins}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+
+\title{Reward-Proportional Sampling in Large DAGs with\\
+Multiplicity-Corrected Inverse Probability Scaling}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+%======================================================================
+\section{Introduction}
+%======================================================================
+
+Many reinforcement learning problems have more than one good answer. In those
+settings we do not want the single best terminal outcome, we want to sample
+terminal outcomes in proportion to their reward,
+\begin{equation}
+p^{*}(x) \;=\; \frac{R(x)}{Z}, \qquad Z = \sum_{x} R(x).
+\label{eq:target}
+\end{equation}
+Policies trained by expected-return maximization do not do this. They collapse
+onto a small set of outcomes, and this collapse comes from the objective itself
+rather than from weak exploration \citep{sinha2026ips}. Inverse probability
+scaling (IPS) removes the frequency multiplier from the learning signal by
+dividing the terminal reward by the outcome probability, and IPS-GRPO
+implements this by estimating that probability with within-group counts.
+
+Counting works when the outcome space is small enough that the same outcome
+appears several times in one group. It stops working in two situations we care
+about. First, when the number of reachable outcomes is much larger than the
+group size, every sampled outcome is unique and $\hat{p}(x)=1/G$ for all of
+them, so the correction becomes a constant and IPS-GRPO reduces to GRPO.
+Second, when the environment is a DAG rather than a tree, one outcome is
+reachable by many different trajectories, and a trajectory-level weight has to
+account for that.
+
+This paper replaces the count estimate with a learned reverse policy
+$q_\phi(\tau \mid x)$, and calls the resulting algorithm \emph{multiplicity-corrected
+inverse probability scaling} (MIPS-GRPO). The reverse policy gives a
+trajectory-level weight that is unbiased at the outcome level for any DAG, and
+does not depend on seeing repeats inside a group.
+
+Correcting for multiplicity is not by itself new: a GFlowNet with a fixed
+uniform backward policy $P_B$ already does it. The contribution here is that
+$q_\phi$ is fitted to $P_F(\cdot \mid x)$ rather than left uniform. Any
+normalized reverse policy gives the same terminal distribution, so fitting
+cannot change what the method converges to, but it controls the variance of the
+weights and therefore how fast it gets there. That distinction is invisible on
+small problems and decisive on large ones: at 27 taxa a uniform reverse policy
+leaves the effective sample size at $0.847$, while a fitted one reaches $0.999$,
+and the difference between the two is the difference between a usable sampler
+and an unusable one.
+
+We test the method on a $64\times64$ hypergrid at group size $32$, where
+counting is provably uninformative, and then on phylogenetic tree sampling with
+up to $27$ taxa, where the outcome space cannot be enumerated at all.
+
+%======================================================================
+\section{Setup}
+%======================================================================
+
+The environment is a DAG. A forward policy $P_F$ starts at a fixed root and
+produces a trajectory $\tau = (s_0, a_1, \dots, a_T, s_T)$ ending at a terminal
+outcome $x = s_T$. The forward policy gives the probability of a path,
+$P_F(\tau) = \prod_t P_F(a_t \mid s_{t-1})$, but the objective in
+Eq.~\eqref{eq:target} is defined over terminals, and
+\begin{equation}
+P_F(x) \;=\; \sum_{\tau \in \mathcal{T}(x)} P_F(\tau)
+\end{equation}
+requires summing over every trajectory that ends at $x$. That sum is computable
+in a small toy DAG and nowhere else.
+
+\paragraph{The naive weight is wrong.}
+Since $P_F(\tau)$ is known exactly for a sampled rollout, it is tempting to use
+$w = R(x)/P_F(\tau)$. But then every trajectory ending at $x$ contributes
+$P_F(\tau) \cdot R(x)/P_F(\tau) = R(x)$, so a terminal reachable by
+$m(x) = |\mathcal{T}(x)|$ paths receives target mass $m(x)R(x)$ instead of
+$R(x)$. Terminals with more paths are systematically over-weighted. This is not
+a small effect. On the $64\times64$ hypergrid of Section~\ref{sec:grid}, the
+four modes carry identical reward but their multiplicities span about
+$7\times10^{5}$ to $1.6\times10^{30}$.
+
+\paragraph{The fix.}
+Introduce a distribution $q_\phi(\tau \mid x)$ over the trajectories that could
+have produced $x$, normalized per terminal,
+$\sum_{\tau \in \mathcal{T}(x)} q_\phi(\tau \mid x) = 1$. The corrected weight
+is
+\begin{equation}
+w(\tau) \;=\; \frac{R(x)\, q_\phi(\tau \mid x)}{P_F(\tau)},
+\label{eq:weight}
+\end{equation}
+and now the paths to $x$ sum to the right thing:
+\begin{equation}
+\sum_{\tau \in \mathcal{T}(x)} P_F(\tau)\, w(\tau)
+= R(x) \sum_{\tau \in \mathcal{T}(x)} q_\phi(\tau \mid x) = R(x).
+\end{equation}
+The choice of $q_\phi$ moves mass between the paths to a terminal but never
+changes the total mass of that terminal.
+
+\paragraph{Why learn $q_\phi$ instead of fixing it uniform.}
+Any normalized $q_\phi$ is unbiased, so a fixed uniform reverse policy (what
+GFlowNet uses as $P_B$) is already valid. The issue is variance. If
+$q_\phi = P_F(\tau \mid x)$ exactly, then
+\begin{equation}
+w(\tau) = \frac{R(x) P_F(\tau \mid x)}{P_F(x) P_F(\tau \mid x)} = \frac{R(x)}{P_F(x)},
+\end{equation}
+which is constant across all paths to $x$: zero within-terminal variance, and
+the weight equals the ideal terminal-level weight we could not compute
+directly. The further $q_\phi$ is from $P_F(\cdot \mid x)$, the more the weights
+scatter and the lower the effective sample size (ESS). Normalization is what
+makes $q_\phi$ correct. Learning $q_\phi$ is what makes it low variance. A badly
+fit $q_\phi$ hurts ESS but cannot bias the terminal distribution.
+
+%======================================================================
+\section{Method}
+%======================================================================
+
+Each edge of a sampled trajectory is one labelled example: given the child state
+and the terminal, predict which incoming action was taken,
+\begin{equation}
+\text{input } (s_{i,t}, x_i) \;\longrightarrow\; \text{target } a_{i,t}.
+\end{equation}
+The reverse network outputs a masked categorical over the valid parent edges of
+$s_{i,t}$, and the path probability is the product over steps,
+$\log q_\phi(\tau_i \mid x_i) = \sum_t \log q_\phi(a_{i,t} \mid s_{i,t}, x_i)$.
+Training is maximum likelihood on the on-policy batch:
+\begin{equation}
+\mathcal{L}_{\text{rev}}(\phi) = -\frac{1}{N} \sum_{i=1}^{N} \sum_{t=1}^{T_i}
+\log q_\phi(a_{i,t} \mid s_{i,t}, x_i).
+\label{eq:revloss}
+\end{equation}
+Rewards do not appear here. The reverse model only learns which paths the
+forward policy tends to use given the terminal, which is exactly
+$P_F(\tau \mid x)$ in the realizable limit.
+
+\paragraph{One iteration.}
+\begin{enumerate}\itemsep2pt
+\item Sample trajectories with $P_F$; record log-probs, actions, terminals, rewards.
+\item Score them with the \emph{frozen} reverse model to get $q_\phi(\tau_i \mid x_i)$.
+\item Form $\log w = \log R(x) + \log q_\phi(\tau \mid x) - \log P_F(\tau)$,
+normalize to advantages with a running EMA, and update $P_F$ with path-level PPO.
+\item Fit $q_\phi$ on the same batch by minimizing Eq.~\eqref{eq:revloss}; use the
+updated model for the next batch.
+\end{enumerate}
+The freeze-then-fit order matters. Fitting before scoring would inflate
+$q_\phi$ on whichever paths happened to appear, which is self-reinforcing. The
+reverse model never generates rollouts, it only scores them.
+
+\paragraph{Comparison to the baselines.}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Method & Training signal & Multiplicity? \\
+\midrule
+GRPO & group-normalized rewards $\to$ PPO & no \\
+IPS-GRPO & $R(x)/\hat{p}(x)$, $\hat{p}$ from batch counts $\to$ PPO & no \\
+GFlowNet TB & squared loss, fixed uniform $P_B$, learned $\log Z$ & yes \\
+MIPS-GRPO & $R(x) q_\phi(\tau\mid x)/P_F(\tau) \to$ PPO & yes \\
+\bottomrule
+\end{tabular}
+\end{center}
+At initialization our $q_\phi$ is uniform, that is, identical to GFlowNet's
+$P_B$. The difference is that it is then fit to $P_F(\cdot \mid x)$, and that
+$Z$ is absorbed by the advantage normalization instead of being learned as a
+separate scalar.
+
+%======================================================================
+\section{Hyper-Grid Task}
+\label{sec:grid}
+%======================================================================
+
+\paragraph{Task setup.}
+We use the two-dimensional hyper-grid of \citet{sinha2026ips}. Episodes start at
+$x_0 = (0,0)$, and an action either increments one coordinate by $1$ or
+terminates the episode and collects the terminal reward. Terminals are grid
+coordinates $x \in \{0,\dots,H-1\}^2$, and the reward is
+\begin{equation}
+\begin{aligned}
+R(x) ={}& R_0 + R_1 \prod_{i=1}^{n}\mathbf{1}\bigl(|x_i| > 0.5\bigr) \\
+        &+ R_2 \prod_{i=1}^{n}\mathbf{1}\bigl(0.6 < |x_i| < 0.8\bigr),
+\end{aligned}
+\label{eq:gridreward}
+\end{equation}
+where $n=2$ in our experiments, $0 < R_0 \ll R_1 < R_2$, and coordinates are
+normalized to $[0,1]$. This gives
+four symmetric high-reward modes inside a lower ring
+(Figure~\ref{fig:grid-heatmaps}a). We use $R_0 = 0.1$, $R_1 = 0.5$,
+$R_2 = 2.0$, so the peak reward is $2.6$. The target distribution is
+$p(x) \propto R(x)$ and it is known in closed form, so we can measure the
+$\ell_1$ distance between the empirical terminal distribution and the target
+exactly.
+
+\paragraph{Why we run it at $H=64$ and $G=32$.}
+\citet{sinha2026ips} report this task at a grid size where counting works. We
+run the same reward landscape at $H = 64$, which gives $4096$ terminal states,
+with group size $G = 32$. Two things break in this regime, and they are the two
+things the reverse policy is meant to fix.
+
+First, the count estimate is uninformative. With $4096$ terminals and $32$
+samples per group, the sampled outcomes in a group are almost always distinct,
+so $\hat{p}(x) = 1/G$ for every one of them. The scaling $R(x)/\hat{p}(x)$ is
+then a constant multiple of $R(x)$, and IPS-GRPO becomes GRPO with a rescaled
+reward. Clipping at $\epsilon$ does not help, because the problem is not that
+$\hat{p}$ is small but that it is the same for everything.
+
+Second, path multiplicity is extreme. A terminal $(a,b)$ is reachable by
+$\binom{a+b}{a}$ distinct trajectories. The four modes sit near $(11,11)$,
+$(11,52)$, $(52,11)$ and $(52,52)$, with multiplicities of about
+$7.1\times10^{5}$, $6.2\times10^{11}$, $6.2\times10^{11}$ and
+$1.6\times10^{30}$. The modes carry identical reward and differ in reachability
+by roughly twenty-four orders of magnitude. Any trajectory-level weight that
+ignores multiplicity will put almost all of its mass on the far corner.
+
+\paragraph{Baselines and metrics.}
+We compare against GRPO, count-based IPS-GRPO, and a GFlowNet trained with the
+trajectory balance objective under a fixed uniform $P_B$. All four methods share
+the architecture, optimizer, sampling budget and entropy regularization. We
+report four numbers: $\ell_1$ distance to the target, the number of the four
+modes that are visited, the number of distinct terminals seen out of $4096$, and
+mode recovery as a function of samples drawn from the trained policy.
+
+\paragraph{Results.}
+Table~\ref{tab:grid} and Figure~\ref{fig:grid-heatmaps} give the summary. GRPO
+and count IPS-GRPO both collapse onto a single mode and end at $\ell_1$ of
+$1.966$ and $1.844$. They also visit almost nothing: $15$ and $43$ distinct
+terminals out of $4096$. The small gap between them is what the argument above
+predicts. Once every outcome in a group is unique, the count correction has
+nothing left to correct, and count IPS-GRPO inherits GRPO's behaviour.
+
+MIPS-GRPO and GFlowNet TB both recover all four modes, reach $\ell_1$
+of $0.262$ and $0.270$, and cover $4056$ and $4043$ terminals. These two are
+tied on this task, and we do not claim otherwise. The point of the hyper-grid
+here is not to separate MIPS-GRPO from GFlowNet TB, it is to show that
+the learned reverse weight recovers the reward-proportional distribution in a
+setting where the count-based estimate provably cannot, and to check it against
+a method whose correctness is already established. The separation between the
+two appears in Section~\ref{sec:phylo}, where the outcome space is large enough
+that a uniform $P_B$ becomes a poor proposal.
+
+Figure~\ref{fig:modes} shows mode discovery against samples drawn. Both
+methods that correct for multiplicity find all four modes within roughly $10^2$ samples,
+while GRPO and count IPS-GRPO stay at one mode for the full $5\times10^4$
+sample budget. Extra sampling does not rescue them, which is the signature of
+outcome-level collapse rather than of slow exploration.
+
+Figure~\ref{fig:train-reward} is worth reading alongside the table. GRPO and
+count IPS-GRPO reach mean terminal reward $2.6$, the maximum available, within a
+few thousand steps and stay there. MIPS-GRPO and GFlowNet TB settle
+near $1.0$. The two collapsed methods are winning on the metric they optimize.
+Mean reward is the wrong metric for this problem, and a method that samples in
+proportion to reward should be expected to score worse on it.
+
+\paragraph{Regime where counting works ($H=8$, $G=256$).}
+To isolate the effect of group size, we also run the same reward landscape on
+an $8\times8$ grid ($64$ terminals) with batch size $G=256$ and 2{,}000
+epochs, averaged over three seeds (Table~\ref{tab:grid-b256}). Here
+$G > |\mathcal{X}|$, so repeated outcomes appear in every group and the count
+estimate $\hat{p}(x)$ is informative. Count IPS-GRPO recovers all four modes
+($\ell_1 = 0.226 \pm 0.007$), confirming that IPS works when counting is
+possible. MIPS-GRPO also recovers all four modes but with substantially lower
+$\ell_1$ ($0.057 \pm 0.007$), showing that the learned reverse weight still
+helps even when counts are available. GRPO continues to collapse to one mode.
+Figure~\ref{fig:grid-b256} shows seed~0 terminal distributions and training
+curves; per-seed numbers are in Table~\ref{tab:grid-b256-seeds}.
+
+\input{tables/tab_hypergrid64}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{hypergrid/terminal_distribution_comparison.png}
+\caption{Terminal distributions on the $64\times64$ hyper-grid. (a) target
+$p(x) \propto R(x)$. (b) GRPO and (c) count IPS-GRPO put nearly all mass on one
+of the four equal-reward modes. (d) MIPS-GRPO and (e) GFlowNet TB
+cover all four and reproduce the ring.}
+\label{fig:grid-heatmaps}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.49\textwidth}
+  \includegraphics[width=\textwidth]{hypergrid/modes_found_vs_samples_logx.png}
+  \caption{log scale}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.49\textwidth}
+  \includegraphics[width=\textwidth]{hypergrid/modes_found_vs_samples.png}
+  \caption{linear scale}
+\end{subfigure}
+\caption{Modes found against samples drawn from the trained policy. The two
+methods that correct for multiplicity reach all four modes within about $10^2$ samples.
+GRPO and count IPS-GRPO stay at one mode for the whole budget.}
+\label{fig:modes}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.49\textwidth}
+  \includegraphics[width=\textwidth]{hypergrid/training_l1_curve.png}
+  \caption{evaluation $\ell_1$}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.49\textwidth}
+  \includegraphics[width=\textwidth]{hypergrid/training_reward_curve.png}
+  \caption{training reward}
+\end{subfigure}
+\caption{Left: $\ell_1$ to the target during training. The two collapsed methods
+never improve. Right: mean terminal reward per batch. GRPO and count IPS-GRPO
+saturate at the maximum reward $2.6$ while sampling one mode; the
+reward-proportional methods sit near $1.0$ by design.}
+\label{fig:train-reward}
+\end{figure}
+
+\input{tables/tab_hypergrid8_b256}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{hypergrid_b256/terminal_distribution_comparison.png}
+\caption{Terminal distributions on the $8\times8$ hyper-grid with $G=256$
+(seed~0). Count IPS-GRPO and MIPS-GRPO both cover all four modes; GRPO
+collapses. MIPS-GRPO matches the target most closely ($\ell_1 = 0.049$).}
+\label{fig:grid-b256-dist}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{0.49\textwidth}
+  \includegraphics[width=\textwidth]{hypergrid_b256/modes_found_vs_samples_logx.png}
+  \caption{modes found (log scale)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.49\textwidth}
+  \includegraphics[width=\textwidth]{hypergrid_b256/training_l1_curve.png}
+  \caption{evaluation $\ell_1$}
+\end{subfigure}
+\caption{Hyper-grid $H=8$, $G=256$ (seed~0). Left: mode discovery against
+samples drawn. Count IPS-GRPO and MIPS-GRPO reach four modes quickly; GRPO
+stays at one. Right: $\ell_1$ to target during training.}
+\label{fig:grid-b256}
+\end{figure}
+
+\FloatBarrier
+
+%======================================================================
+\section{Application: phylogenetic sampling}
+\label{sec:phylo}
+%======================================================================
+
+A tree is built by repeatedly merging subtrees. At each of the $N-1$ steps the
+forward policy picks a pair to merge, from $\binom{k}{2}$ options, and then
+branch lengths for the new edge. The reward is a shifted log-likelihood
+$R(x) = c + \log L(x)$, with $c$ chosen so that $R > 0$, which the importance
+weights require. Evaluation is at \emph{signature} level: an outcome is a
+(topology, branch lengths) pair, which is finer than topology alone and matches
+the full generative model. All methods draw 1M samples from the trained policy,
+and the primary metric is the Pearson correlation between estimated terminal
+probability and reward.
+
+\input{tables/tab_phylo_setup}
+
+\input{tables/tab_phylo_matched}
+
+\input{tables/tab_phylo_extended}
+
+At 5 taxa both multiplicity-aware methods recover the ideal distribution and
+cover all 105 topologies (Table~\ref{tab:phylo-extended}), while count IPS-GRPO
+finds 3 topologies and GRPO collapses to 1. At 10 taxa the learned reverse
+policy is ahead on correlation at equal coverage (Table~\ref{tab:phylo-matched}),
+and it gets there faster: at epoch 1000 it is already at $r = 0.953$ against
+$0.861$ for GFlowNet. At 27 taxa the gap is the largest result in the paper:
+near-perfect correlation on both linear and log-log scales ($r = 0.977$) against
+no meaningful probability--reward relationship for GFlowNet ($r = 0.002$ linear,
+$r = 0.024$ log-log). We report \emph{matched transforms} for both methods so
+that linear and log-log panels are directly comparable
+(Table~\ref{tab:phylo-matched}; Figure~\ref{fig:phylo-27}).
+
+Figures~\ref{fig:phylo-5} and~\ref{fig:phylo-10} show the probability--reward
+relationship for all four methods at 5 taxa and the matched-transform comparison
+at 10 taxa. At 5 taxa, both multiplicity-aware methods track the target on
+log-log axes, whereas GRPO and count IPS-GRPO cover only a small fraction of the
+outcome space. At 10 taxa, MIPS-GRPO remains tightly aligned with the ideal
+linear relationship while GFlowNet TB shows substantially more dispersion.
+
+\input{tables/tab_uniform_ablation}
+
+At 10 taxa, a uniform-$P_B$ ablation (Table~\ref{tab:uniform-ablation}) shows
+that IPS weights remain tractable (ESS $\approx 0.995$) without fitting
+$q_\phi$, but linear-scale calibration requires the learned reverse policy.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+  \includegraphics[width=\textwidth]{phylo/5taxa_grpo_p_vs_r.png}
+  \caption{GRPO (collapsed)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+  \includegraphics[width=\textwidth]{phylo/5taxa_count_ips_p_vs_r.png}
+  \caption{Count IPS-GRPO}
+\end{subfigure}
+\\[0.5em]
+\begin{subfigure}[t]{0.49\textwidth}
+  \includegraphics[width=\textwidth]{phylo/5taxa_mips_grpo_log_p_vs_log_r.png}
+  \caption{MIPS-GRPO (log-log)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+  \includegraphics[width=\textwidth]{phylo/5taxa_gflownet_log_p_vs_log_r.png}
+  \caption{GFlowNet TB (log-log)}
+\end{subfigure}
+\caption{Five-taxa outcome probability versus terminal reward from 1M samples
+(\texttt{final/runs/5taxa\_noreplay}). GRPO collapses and count IPS-GRPO covers
+few signatures; GFlowNet TB and MIPS-GRPO both recover the
+reward-proportional relationship on log-log axes.}
+\label{fig:phylo-5}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.96\textwidth]{phylo/figure6_10taxa_matched_transform.png}
+\caption{Ten-taxa matched-transform comparison (1M samples). Linear and log-log
+Pearson $r$ values match Table~\ref{tab:phylo-matched}. MIPS-GRPO closely
+follows the ideal relationship on both scales; GFlowNet TB has greater
+dispersion on linear axes.}
+\label{fig:phylo-10}
+\end{figure}
+
+Figure~\ref{fig:phylo-27} isolates the largest-scale comparison. Despite both
+methods producing almost entirely unique signatures, MIPS-GRPO preserves a
+strong probability--reward relationship and GFlowNet TB does not.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{phylo/figure6_27taxa_matched_transform.png}
+\caption{Twenty-seven taxa on full DS1, evaluated with 1M samples under matched
+transforms. MIPS-GRPO achieves Pearson $r=0.977$ on both linear and log-log
+axes; GFlowNet TB has no meaningful probability--reward relationship
+($r=0.002$ linear, $r=0.024$ log-log).}
+\label{fig:phylo-27}
+\end{figure}
+
+\paragraph{The reverse policy is the bottleneck at scale.}
+At 27 taxa with 10k epochs the reverse loss was still $4.82$ and ESS only
+$0.49$, and sampling quality was correspondingly poor. Extending to 32k epochs
+with 8 reverse MLE steps per update drove the reverse loss to
+$\sim4\times10^{-5}$ and ESS to $0.999$. This is the clearest evidence that the
+fit of $q_\phi$, and not the forward objective, controls how well the method
+works. Figure~\ref{fig:phylo-training} shows the corresponding optimization
+curves across all three problem sizes.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{phylo/training_all_taxa.png}
+\caption{MIPS-GRPO training diagnostics for 5, 10, and 27 taxa. Columns show
+reverse-policy negative log-likelihood, IPS effective sample size, and mean log
+score. The dashed line marks 10k epochs for the 27-taxa run; continued reverse
+training raises ESS toward one and stabilizes the sampling objective.}
+\label{fig:phylo-training}
+\end{figure}
+
+\input{tables/tab_reverse_training}
+
+\FloatBarrier
+
+\bibliographystyle{plainnat}
+\begin{thebibliography}{9}
+\bibitem[Sinha et al.(2026)]{sinha2026ips}
+A. Sinha, S. Elango, and D. Liu.
+\newblock Expected return causes outcome-level mode collapse in reinforcement
+learning and how to fix it with inverse probability scaling.
+\newblock arXiv:2601.21669, 2026.
+\end{thebibliography}
+
+\end{document}

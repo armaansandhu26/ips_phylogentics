@@ -1,0 +1,21 @@
+{
+  "_comment": "Hyper-Grid toy suite: 4096x4096, 4 corner modes, GRPO + count IPS only.",
+  "id": "hypergrid_4096",
+  "env": "hypergrid",
+  "dataset": "final/datasets/hypergrid_4096",
+  "training": {
+    "epochs": 100,
+    "steps_per_epoch": 10,
+    "batch_size": 256,
+    "lr": 0.001,
+    "clip_eps": 0.2,
+    "entropy_coef": 0.0,
+    "checkpoint_every": 10,
+    "seed": 0
+  },
+  "eval": {
+    "samples": 100000,
+    "every_epochs": 10
+  },
+  "methods": ["grpo", "count_ips"]
+}

@@ -130,6 +130,12 @@ def main() -> None:
         artifacts.checkpoint_path = checkpoint_path
 
     reverse_state_path = args.reverse_state or artifacts.root / "learned_reverse_state.pt"
+    reverse_policy_type = str(
+        artifacts.config.get(
+            "reverse_policy_type",
+            "mlp",
+        )
+    )
     output_path = args.output or (
         artifacts.root / f"sampled_full_diagnostics_{args.num_trees}.npz"
     )
@@ -147,17 +153,21 @@ def main() -> None:
     print(f"checkpoint: {artifacts.checkpoint_path}")
     print(f"reverse state: {reverse_state_path}")
     print(f"device: {device}")
+    print(f"reverse policy: {reverse_policy_type}")
     print(f"sampling {args.num_trees:,} full-model terminal trees")
 
     cfg, env, generator = load_generator(artifacts, device)
     if bool(cfg.GFN.MODEL.ONLY_TRAIN_TREE_MODEL):
         raise ValueError("resolved checkpoint is tree-only, not a full model")
-    reverse_policy, reverse_state = load_reverse_policy(
-        reverse_state_path,
-        env=env,
-        device=device,
-    )
-    reverse_policy_type = str(reverse_state.get("reverse_policy_type", "tabular"))
+    reverse_policy = None
+    reverse_state: dict = {"reverse_policy_type": reverse_policy_type, "update_step": -1}
+    if reverse_policy_type != "uniform":
+        reverse_policy, reverse_state = load_reverse_policy(
+            reverse_state_path,
+            env=env,
+            device=device,
+        )
+        reverse_policy_type = str(reverse_state.get("reverse_policy_type", reverse_policy_type))
     rollout_worker = RolloutWorker(env)
     outcome_id_cache = OutcomeIdCache(env)
 
@@ -179,7 +189,9 @@ def main() -> None:
                 generate_full_trajectories=True,
             )
             paths = rollout_tree_action_paths(batch)
-            if reverse_policy_type == "tabular":
+            if reverse_policy_type == "uniform":
+                batch_log_q = batch["log_paths_pb"].sum(dim=-1)
+            elif reverse_policy_type == "tabular":
                 catalog_indices = reverse_policy.catalog_indices(paths)
                 batch_log_q = reverse_policy.log_prob(catalog_indices)
             else:

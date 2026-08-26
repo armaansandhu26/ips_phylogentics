@@ -1,0 +1,19 @@
+% Extended phylogenetic results including GRPO-family baselines (5 taxa: final/runs).
+\begin{table}[htbp]
+\centering
+\caption{Extended phylogenetic sampling results at 5 taxa (1M samples).
+GRPO and count IPS-GRPO collapse; multiplicity-aware methods recover the
+reward-proportional relationship. Metrics from \texttt{final/runs/5taxa\_noreplay}
+(Aug 2026).}
+\label{tab:phylo-extended}
+\begin{tabular}{llrrr}
+\toprule
+Setting & Method & Log-log $r$ & Unique sig.\ / 1M & Topologies \\
+\midrule
+5 taxa & MIPS-GRPO & 0.992 & 951{,}180 & 105/105 \\
+       & GFlowNet TB & 0.991 & 100{,}508 & 15/105 \\
+       & Count IPS-GRPO & 0.565 & 66{,}268 & 3/105 \\
+       & GRPO & --- & 1 & 1/105 \\
+\bottomrule
+\end{tabular}
+\end{table}

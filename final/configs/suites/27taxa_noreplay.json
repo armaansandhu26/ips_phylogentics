@@ -1,0 +1,41 @@
+{
+  "_comment": "Paper comparison suite: 27 taxa, full signature model, no replay (G=1024).",
+  "id": "27taxa_noreplay",
+  "taxa": 27,
+  "dataset": "dataset/benchmark_datasets/DS1.pickle",
+  "log_score_shift": 12000,
+  "training": {
+    "epochs": 32000,
+    "steps_per_epoch": 1,
+    "on_policy_batch_size": 1024,
+    "replay_batch_size": 0,
+    "replay_buffer_size": 4096,
+    "disable_replay": true,
+    "checkpoint_every": 1000,
+    "seed": 0
+  },
+  "sampling": {
+    "num_trees": 1000000,
+    "batch_size": 1024
+  },
+  "methods": {
+    "grpo": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml"
+    },
+    "count_ips": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml"
+    },
+    "learned_reverse": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml",
+      "reward_target": "shifted_linear",
+      "reverse_lr": 0.001,
+      "reverse_train_epochs": 8,
+      "reverse_hidden_size": 256,
+      "reverse_num_layers": 3
+    },
+    "phylgfn": {
+      "backend": "og_code",
+      "cfg": "og_code/src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_ds1_full_g1024_noreplay_27taxa_shift12000.yaml"
+    }
+  }
+}

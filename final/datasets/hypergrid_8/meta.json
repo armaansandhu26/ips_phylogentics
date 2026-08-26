@@ -1,0 +1,56 @@
+{
+  "H": 8,
+  "D": 2,
+  "R0": 0.1,
+  "R1": 0.5,
+  "R2": 2.0,
+  "outer_lo": 0.25,
+  "outer_hi": 0.5,
+  "inner_lo": 0.3,
+  "inner_hi": 0.4,
+  "num_terminals": 64,
+  "reward_formula": "R(x) = R0 + R1 * prod_d I(|x_d/(H-1) - 0.5| in (outer_lo, outer_hi]) + R2 * prod_d I(|x_d/(H-1) - 0.5| in (inner_lo, inner_hi))",
+  "shape": [
+    8,
+    8
+  ],
+  "reward_min": 0.10000000149011612,
+  "reward_max": 2.5999999046325684,
+  "reward_levels": [
+    {
+      "reward": 0.10000000149011612,
+      "count": 48
+    },
+    {
+      "reward": 0.6000000238418579,
+      "count": 12
+    },
+    {
+      "reward": 2.5999999046325684,
+      "count": 4
+    }
+  ],
+  "num_modes_at_peak": 4,
+  "expected_num_modes": 4,
+  "mass_by_level": {
+    "0.10000000149011612": 0.75,
+    "0.6000000238418579": 0.1875,
+    "2.5999999046325684": 0.0625
+  },
+  "dataset_kind": "hypergrid",
+  "coordinate_domain": {
+    "min": 0,
+    "max": 7
+  },
+  "action_space": {
+    "increment_coordinate": [
+      0,
+      1
+    ],
+    "terminate": "stop and receive R(x)"
+  },
+  "initial_state": [
+    0,
+    0
+  ]
+}

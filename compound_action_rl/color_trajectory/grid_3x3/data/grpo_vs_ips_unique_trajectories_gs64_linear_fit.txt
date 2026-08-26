@@ -1,7 +1,0 @@
-Linear fit: sampling density vs reward
-
-IPS-GRPO (group_size=64)
-  slope=0.077969
-  intercept=-0.018696
-  R2=0.749644
-  RMSE=0.005639

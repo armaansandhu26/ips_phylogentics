@@ -1,0 +1,18 @@
+% Phylogenetic benchmark settings (final/runs suites, Aug 2026).
+\begin{table}[htbp]
+\centering
+\caption{Phylogenetic benchmark settings. All methods use no replay; evaluation
+draws 1M samples from the trained forward policy at signature level.}
+\label{tab:phylo-setup}
+\begin{tabular}{lccc}
+\toprule
+ & 5 taxa & 10 taxa & 27 taxa \\
+\midrule
+Dataset        & DS1 reduced & DS1 reduced & DS1 (full) \\
+Reward shift $c$ & 3600 & 5000 & 12000 \\
+Topologies     & 105 & $\sim3.4\times10^{7}$ & very large \\
+Batch / epochs & 4096 / 10k & 4096 / 10k & 1024 / 25k--32k \\
+Replay         & none & none & none \\
+\bottomrule
+\end{tabular}
+\end{table}

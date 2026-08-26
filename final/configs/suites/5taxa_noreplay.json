@@ -1,0 +1,42 @@
+{
+  "_comment": "Paper comparison suite: 5 taxa, full signature model, no replay.",
+  "id": "5taxa_noreplay",
+  "taxa": 5,
+  "dataset": "dataset/benchmark_datasets/DS1_reduced.pickle",
+  "log_score_shift": 3600,
+  "training": {
+    "epochs": 10000,
+    "steps_per_epoch": 1,
+    "on_policy_batch_size": 4096,
+    "replay_batch_size": 0,
+    "replay_buffer_size": 4096,
+    "disable_replay": true,
+    "checkpoint_every": 500,
+    "seed": 0
+  },
+  "sampling": {
+    "num_trees": 1000000,
+    "batch_size": 4096
+  },
+  "methods": {
+    "grpo": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4.yaml"
+    },
+    "count_ips": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4.yaml"
+    },
+    "learned_reverse": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4.yaml",
+      "reward_target": "shifted_linear",
+      "reverse_lr": 0.001,
+      "reverse_train_epochs": 4,
+      "reverse_hidden_size": 128,
+      "reverse_num_layers": 2
+    },
+    "phylgfn": {
+      "backend": "paper",
+      "cfg": "phylogfn_paper/src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_ds1_paper_5taxa_g4096_noreplay.yaml",
+      "note": "Paper-faithful TB: log L reward, no shift. Same compute budget as GRPO family."
+    }
+  }
+}

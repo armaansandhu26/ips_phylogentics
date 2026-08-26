@@ -1,0 +1,18 @@
+{
+  "taxa": 27,
+  "panels": {
+    "mips_grpo": {
+      "source": "regenerated_npz",
+      "samples_npz": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260806_144004_learned_reverse_27taxa_mlp_shifted_linear_b1024_rlr1e-3_rev8x_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "pearson_linear": 0.9765244699180198,
+      "pearson_loglog": 0.9770566753812454
+    },
+    "gflownet": {
+      "source": "prerendered_png",
+      "pearson_linear": 0.0017626432084605597,
+      "pearson_loglog": 0.02422228174090787,
+      "prerendered_linear": "/home/armaan/phylogfn/grpo_experiments/comparisons/27taxa/gflownet/model_probability_vs_reward.png",
+      "prerendered_log": "/home/armaan/phylogfn/grpo_experiments/comparisons/27taxa/gflownet/log_probability_vs_log_reward.png"
+    }
+  }
+}

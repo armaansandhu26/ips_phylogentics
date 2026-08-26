@@ -1,0 +1,18 @@
+{
+  "taxa": 10,
+  "panels": {
+    "gflownet": {
+      "source": "prerendered_png",
+      "pearson_linear": 0.8813395456800395,
+      "pearson_loglog": 0.6979731820244894,
+      "prerendered_linear": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/gflownet/model_probability_vs_reward.png",
+      "prerendered_log": null
+    },
+    "mips_grpo": {
+      "source": "regenerated_npz",
+      "samples_npz": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+      "pearson_linear": 0.9755383305808717,
+      "pearson_loglog": 0.8353434390005602
+    }
+  }
+}

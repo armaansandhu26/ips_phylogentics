@@ -1,0 +1,82 @@
+{
+  "rows": [
+    {
+      "taxa": 5,
+      "method_id": "gflownet",
+      "method_label": "GFlowNet",
+      "reward": "R(x) = 3600 + log L(x)",
+      "pearson_linear": 0.982055727813664,
+      "pearson_loglog": null,
+      "ess_fraction": null,
+      "unique_signatures": 960850,
+      "samples": 1000000,
+      "metrics_path": "",
+      "note": "linear r from grpo_experiments/comparisons/5taxa/manifest.json; log-log r not archived"
+    },
+    {
+      "taxa": 5,
+      "method_id": "mips_grpo",
+      "method_label": "MIPS-GRPO",
+      "reward": "R(x) = 3600 + log L(x)",
+      "pearson_linear": 0.9943623464765192,
+      "pearson_loglog": 0.9939187299670903,
+      "ess_fraction": 0.9997649438914874,
+      "unique_signatures": 951175,
+      "samples": 1000000,
+      "metrics_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k/comparison_metrics.json",
+      "note": ""
+    },
+    {
+      "taxa": 10,
+      "method_id": "gflownet",
+      "method_label": "GFlowNet",
+      "reward": "R(x) = 5000 + log L(x)",
+      "pearson_linear": 0.8813395456800395,
+      "pearson_loglog": 0.6979731820244894,
+      "ess_fraction": 0.977354401080066,
+      "unique_signatures": 1000000,
+      "samples": 1000000,
+      "metrics_path": "/home/armaan/phylogfn/grpo_experiments/comparisons/10taxa/gflownet/comparison_metrics.json",
+      "note": ""
+    },
+    {
+      "taxa": 10,
+      "method_id": "mips_grpo",
+      "method_label": "MIPS-GRPO",
+      "reward": "R(x) = 5000 + log L(x)",
+      "pearson_linear": 0.9755383305808716,
+      "pearson_loglog": 0.8353434390005601,
+      "ess_fraction": 0.9949912265362868,
+      "unique_signatures": 999986,
+      "samples": 1000000,
+      "metrics_path": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260803_124837_learned_reverse_10taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k/comparison_metrics.json",
+      "note": ""
+    },
+    {
+      "taxa": 27,
+      "method_id": "gflownet",
+      "method_label": "GFlowNet",
+      "reward": "R(x) = 12000 + log L(x)",
+      "pearson_linear": 0.0017626432084605597,
+      "pearson_loglog": 0.02422228174090787,
+      "ess_fraction": 0.8474948914873474,
+      "unique_signatures": 1000000,
+      "samples": 1000000,
+      "metrics_path": "/home/armaan/phylogfn/grpo_experiments/comparisons/27taxa/gflownet/comparison_metrics.json",
+      "note": ""
+    },
+    {
+      "taxa": 27,
+      "method_id": "mips_grpo",
+      "method_label": "MIPS-GRPO",
+      "reward": "R(x) = 12000 + log L(x)",
+      "pearson_linear": 0.9765244699180198,
+      "pearson_loglog": 0.9770566753812454,
+      "ess_fraction": 0.9992938905976162,
+      "unique_signatures": 999987,
+      "samples": 1000000,
+      "metrics_path": "/home/armaan/phylogfn/grpo_experiments/comparisons/27taxa/learned_reverse/comparison_metrics.json",
+      "note": ""
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+% Matched-transform headline comparison (MIPS-GRPO vs GFlowNet).
+% Source: final/paper/table2.json (manifest-backed runs).
+\begin{table}[htbp]
+\centering
+\caption{Matched-transform Pearson correlations between pathwise terminal
+probability and reward (1M self-sampled trajectories). Both methods report
+linear $P(x)$ vs.\ $R(x)$ and log-log $\log P(x)$ vs.\ $\log R(x)$ under the
+same transform within each column.}
+\label{tab:phylo-matched}
+\begin{tabular}{rlrrrr}
+\toprule
+Taxa & Method & Linear $r$ & Log-log $r$ & ESS & Unique / 1M \\
+\midrule
+5 & GFlowNet & 0.982 & --- & --- & 960{,}850 \\
+5 & MIPS-GRPO & 0.994 & 0.994 & 1.000 & 951{,}175 \\
+\addlinespace
+10 & GFlowNet & 0.881 & 0.698 & 0.977 & 1{,}000{,}000 \\
+10 & MIPS-GRPO & 0.976 & 0.835 & 0.995 & 999{,}986 \\
+\addlinespace
+27 & GFlowNet & 0.002 & 0.024 & 0.847 & 1{,}000{,}000 \\
+27 & MIPS-GRPO & 0.977 & 0.977 & 0.999 & 999{,}987 \\
+\bottomrule
+\end{tabular}
+\end{table}

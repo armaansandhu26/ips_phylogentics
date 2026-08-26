@@ -1,0 +1,30 @@
+{
+  "_comment": "Hyper-Grid 8x8: GRPO + MIPS-GRPO, batch 32, seed 1.",
+  "id": "hypergrid_8_seed1",
+  "env": "hypergrid",
+  "dataset": "final/datasets/hypergrid_8",
+  "training": {
+    "epochs": 25000,
+    "steps_per_epoch": 10,
+    "batch_size": 32,
+    "lr": 0.001,
+    "clip_eps": 0.2,
+    "entropy_coef": 0.0,
+    "checkpoint_every": 200,
+    "seed": 1,
+    "learned_reverse": {
+      "reverse_lr": 0.001,
+      "reverse_train_epochs": 4,
+      "reverse_hidden_size": 128,
+      "reverse_num_layers": 2,
+      "reverse_grad_clip_norm": 1.0,
+      "reward_target": "likelihood",
+      "advantage_normalization": "batch"
+    }
+  },
+  "eval": {
+    "samples": 10000,
+    "every_epochs": 250
+  },
+  "methods": ["grpo", "learned_reverse_ips"]
+}

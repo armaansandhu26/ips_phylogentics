@@ -1,0 +1,16 @@
+% Uniform P_B ablation at 10 taxa (P1 Issue 3).
+\begin{table}[htbp]
+\centering
+\caption{Uniform vs.\ fitted reverse policy at 10 taxa (1M eval samples).
+The ablation freezes GFlowNet's uniform $P_B$ (\texttt{reverse\_train\_epochs=0})
+while keeping the forward PPO update fixed.}
+\label{tab:uniform-ablation}
+\begin{tabular}{lrrrrr}
+\toprule
+Reverse policy & Linear $r$ & Log-log $r$ & ESS & Unique / 1M \\
+\midrule
+Fitted $q_\phi$ (baseline) & 0.976 & 0.835 & 0.995 & 999{,}986 \\
+Uniform $P_B$ (ablation)   & 0.000 & 0.969 & 0.995 & 999{,}974 \\
+\bottomrule
+\end{tabular}
+\end{table}

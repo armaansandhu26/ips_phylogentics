@@ -1,6 +1,0 @@
-data/runs/
-data/count_ips_runs/
-data/trajectory_ips_runs/
-data/unknown_m_trajectory_ips_runs/
-data/backward_kl_runs/
-data/gflownet_runs/

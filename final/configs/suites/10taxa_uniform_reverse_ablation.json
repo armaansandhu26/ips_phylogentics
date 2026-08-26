@@ -1,0 +1,42 @@
+{
+  "_comment": "P1 ablation: MIPS-GRPO with frozen uniform P_B vs fitted q_phi (compare to existing 10t fitted run).",
+  "id": "10taxa_uniform_reverse_ablation",
+  "taxa": 10,
+  "dataset": "dataset/benchmark_datasets/DS1_reduced_10taxa.pickle",
+  "log_score_shift": 5000,
+  "training": {
+    "epochs": 10000,
+    "steps_per_epoch": 1,
+    "on_policy_batch_size": 4096,
+    "replay_batch_size": 0,
+    "replay_buffer_size": 4096,
+    "disable_replay": true,
+    "checkpoint_every": 500,
+    "seed": 0
+  },
+  "sampling": {
+    "num_trees": 1000000,
+    "batch_size": 4096
+  },
+  "methods": {
+    "grpo": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_10taxa_shift5000.yaml"
+    },
+    "count_ips": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_10taxa_shift5000.yaml"
+    },
+    "learned_reverse": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_10taxa_shift5000.yaml",
+      "reward_target": "shifted_linear",
+      "reverse_policy": "uniform",
+      "reverse_train_epochs": 0,
+      "reverse_lr": 0.001,
+      "reverse_hidden_size": 256,
+      "reverse_num_layers": 3
+    },
+    "phylgfn": {
+      "backend": "og_code",
+      "cfg": "og_code/src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_ds1_full_g4096_replay_op3277_r819_rb4096_10taxa_shift5000.yaml"
+    }
+  }
+}

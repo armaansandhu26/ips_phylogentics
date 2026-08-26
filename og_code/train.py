@@ -437,9 +437,18 @@ def save_evaluation_results(logger, states, plot_utils, evaluation_result, outpu
     pickle.dump(states, open(path, 'wb'))
 
 
+def _apply_train_seed() -> None:
+    seed = int(os.environ.get("PHYLOGFN_SEED", "0"))
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
 if __name__ == '__main__':
 
     arguments = docopt(__doc__, argv=None, help=True, version=None, options_first=False)
+    _apply_train_seed()
     verbose = not arguments['--quiet']
     nb_device = int(arguments['--nb_device'])
     sequences_path = arguments['<sequences_path>']

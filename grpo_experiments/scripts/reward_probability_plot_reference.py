@@ -40,11 +40,21 @@ def load_reference_spec(
         raise FileNotFoundError(f"missing reference samples: {samples_path}")
 
     with np.load(samples_path) as payload:
-        log_score = payload["log_score"].astype(np.float64)
         log_pf = payload["log_pf"].astype(np.float64)
         log_q_reverse = payload["log_q_reverse"].astype(np.float64)
+        metadata_path = samples_path.with_suffix(".json")
+        metadata = (
+            json.loads(metadata_path.read_text(encoding="utf-8"))
+            if metadata_path.exists()
+            else {}
+        )
+        shift = float(metadata.get("log_score_shift", 3600.0))
+        if "raw_log_likelihood" in payload:
+            log_reward = payload["raw_log_likelihood"].astype(np.float64)
+        else:
+            log_score = payload["log_score"].astype(np.float64)
+            log_reward = log_score - shift
 
-    log_reward = np.log(log_score)
     log_probability = log_pf - log_q_reverse
     reward = np.exp(log_reward)
     probability = np.exp(log_probability)

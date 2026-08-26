@@ -42,17 +42,17 @@ class LearnedReverseIPSGRPOTest(unittest.TestCase):
                 reward_scale=1.0,
             )
 
-    def test_learn_edge_lengths_flag_disables_tree_only_mode(self) -> None:
+    def test_always_uses_full_model(self) -> None:
         config = parse_config(
             [
                 "--outcome-level",
                 "signature",
                 "--on-policy-batch-size",
                 "4096",
-                "--learn-edge-lengths",
             ]
         )
         self.assertFalse(config.only_train_tree_model)
+        self.assertEqual(config.reverse_policy_type, "mlp")
         self.assertEqual(config.outcome_level, "signature")
         self.assertEqual(config.on_policy_batch_size, 4096)
 

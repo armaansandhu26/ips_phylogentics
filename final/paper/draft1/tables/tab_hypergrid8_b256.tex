@@ -1,0 +1,45 @@
+% Hyper-grid H=8, batch/group size G=256, 2k epochs, 3 seeds.
+% Source: final/runs/hypergrid_8_b256/plots/seed{0,1,2}/recovery_summary.json
+% GFlowNet TB not included in this suite (3 methods only).
+\begin{table}[htbp]
+\centering
+\caption{Hyper-grid $H=8$ ($64$ terminals), group size $G=256$, 2{,}000 epochs.
+Mean $\pm$ std over three seeds. With $G > |\mathcal{X}|$, batch counts are
+informative and count IPS-GRPO recovers all four modes; MIPS-GRPO still achieves
+lower $\ell_1$.}
+\label{tab:grid-b256}
+\begin{tabular}{lrrrr}
+\toprule
+Method & Recovery (\%) & Modes & $\ell_1$ & Unique terminals \\
+\midrule
+GRPO           & $25.0 \pm 0.0$ & $1.0 \pm 0.0$ & $1.768 \pm 0.000$ & $1.0 \pm 0.0$ \\
+Count IPS-GRPO & $100.0 \pm 0.0$ & $4.0 \pm 0.0$ & $0.226 \pm 0.007$ & $64.0 \pm 0.0$ \\
+MIPS-GRPO      & $100.0 \pm 0.0$ & $4.0 \pm 0.0$ & $0.057 \pm 0.007$ & $64.0 \pm 0.0$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Per-seed hyper-grid $H=8$, $G=256$ results at epoch 1{,}999 (10k eval
+samples).}
+\label{tab:grid-b256-seeds}
+\small
+\begin{tabular}{clrrrr}
+\toprule
+Seed & Method & Recovery (\%) & Modes & $\ell_1$ & Unique \\
+\midrule
+0 & GRPO           & 25.0 & 1 & 1.768 & 1 \\
+  & Count IPS-GRPO & 100.0 & 4 & 0.221 & 64 \\
+  & MIPS-GRPO      & 100.0 & 4 & 0.049 & 64 \\
+\addlinespace
+1 & GRPO           & 25.0 & 1 & 1.768 & 1 \\
+  & Count IPS-GRPO & 100.0 & 4 & 0.223 & 64 \\
+  & MIPS-GRPO      & 100.0 & 4 & 0.062 & 64 \\
+\addlinespace
+2 & GRPO           & 25.0 & 1 & 1.768 & 1 \\
+  & Count IPS-GRPO & 100.0 & 4 & 0.234 & 64 \\
+  & MIPS-GRPO      & 100.0 & 4 & 0.061 & 64 \\
+\bottomrule
+\end{tabular}
+\end{table}
