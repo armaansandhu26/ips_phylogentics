@@ -82,6 +82,41 @@ Run all commands from the repository root:
 cd /Users/armaansandhu/Desktop/projects/ips_phylogentics
 ```
 
+### Recommended Linux/A100 setup
+
+For a cloned repository on an A100 server, the fastest supported path is:
+
+```bash
+git clone https://github.com/armaansandhu26/ips_phylogentics.git
+cd ips_phylogentics
+
+bash molecule_synthesis/scripts/bootstrap_a100.sh
+source .venv-rgfn-cu118/bin/activate
+```
+
+The bootstrap creates a Python 3.11 virtual environment, installs the pinned
+CUDA 11.8 PyTorch/DGL stack plus only the dependencies required by QED and the
+public sEH proxy, checks out and patches the pinned RGFN commit, downloads the
+small public sEH checkpoint, runs preflight, and dry-runs all four reduced-suite
+commands.
+
+For repeated clones or jobs, keep the environment and wheel cache on persistent
+storage. Substitute paths that exist on the server:
+
+```bash
+bash molecule_synthesis/scripts/bootstrap_a100.sh \
+  --venv /persistent/path/rgfn-cu118 \
+  --cache-dir /persistent/path/pip-cache
+
+source /persistent/path/rgfn-cu118/bin/activate
+```
+
+The first setup performs the downloads. Subsequent clones reuse the installed
+packages and cache, then quickly repoint the editable RGFN install to the new
+clone. Do not add the binary virtual environment to Git: it is large,
+platform-specific, and contains absolute paths. The tracked pinned requirements
+file is `molecule_synthesis/environments/requirements-seh-cu118.txt`.
+
 ### CPU environment
 
 ```bash

@@ -8,6 +8,7 @@ Untitled
 
 # Python
 .venv/
+.venv-rgfn-cu118/
 venv/
 __pycache__/
 *.py[cod]
@@ -20,6 +21,7 @@ build/
 .mypy_cache/
 .ruff_cache/
 .ipynb_checkpoints/
+.cache/
 
 # OS
 .DS_Store

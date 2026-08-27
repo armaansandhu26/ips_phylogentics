@@ -1,0 +1,24 @@
+# Minimal, pinned runtime for the QED and public-sEH molecule experiments.
+#
+# PyTorch and DGL are installed separately by bootstrap_a100.sh because they
+# use CUDA-specific wheel indexes. RGFN is also installed separately from its
+# pinned checkout with --no-deps.
+setuptools<81
+numpy==1.26.4
+gin-config==0.5.0
+more-itertools==10.1.0
+pandas==2.1.4
+openpyxl==3.1.4
+rdkit==2023.9.5
+pydantic==2.6.3
+tqdm==4.66.3
+wandb==0.15.12
+typing-extensions==4.8.0
+omegaconf==2.3.0
+torch-geometric==2.5.3
+torchmetrics==1.2.0
+torchdata==0.7.1
+dgllife==0.3.2
+matplotlib==3.9.2
+pytest==7.4.2
+xlsxwriter==3.2.0

@@ -172,6 +172,32 @@ The CUDA option follows upstream's PyTorch 2.3.0/DGL 2.2.1 setup. CPU uses the
 upstream DGL 1.1.2 recommendation. Python 3.11 is required; the repository's
 system Python should not be used if it is newer.
 
+### Fast Linux/A100 bootstrap
+
+For the public sEH and QED experiments on a Linux A100 server, use the smaller
+cache-aware environment instead of installing every optional upstream oracle:
+
+```bash
+bash molecule_synthesis/scripts/bootstrap_a100.sh
+source .venv-rgfn-cu118/bin/activate
+```
+
+To reuse the environment and downloaded wheels across future clones, place
+them on persistent scratch or shared storage:
+
+```bash
+bash molecule_synthesis/scripts/bootstrap_a100.sh \
+  --venv /persistent/path/rgfn-cu118 \
+  --cache-dir /persistent/path/pip-cache
+
+source /persistent/path/rgfn-cu118/bin/activate
+```
+
+The first call installs the pinned stack; later calls reuse it and only refresh
+the editable RGFN path for the current clone. The minimal environment supports
+QED and public-sEH proxy runs. It intentionally excludes DRD2/PyTDC, private
+senolytic models, direct docking, Jupyter, and development-only dependencies.
+
 ## 2. Smoke tests
 
 The default script runs unit checks, validates imports and the pinned checkout,
