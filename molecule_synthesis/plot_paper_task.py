@@ -30,6 +30,11 @@ METHOD_MARKERS = {
     "rgfn": "D",
 }
 
+SUITE_LABELS = {
+    "seh_reduced_a100": "reduced-space sEH",
+    "seh_paper_main": "paper-scale sEH",
+}
+
 
 def _load_json(path: Path):
     with path.open(encoding="utf-8") as handle:
@@ -42,6 +47,41 @@ def _normalized_runs(suite: dict) -> dict[str, dict[str, Path]]:
         values = {"legacy": raw} if isinstance(raw, str) else raw
         result[method] = {str(seed): Path(path) for seed, path in values.items()}
     return result
+
+
+def _suite_label(suite: dict) -> str:
+    suite_id = str(suite.get("suite", "")).strip()
+    if suite_id in SUITE_LABELS:
+        return SUITE_LABELS[suite_id]
+    return suite_id.replace("_", " ") or "sEH"
+
+
+def _forward_trajectories(run_dir: Path, default: int = 100) -> int:
+    manifest_path = run_dir / "manifest.json"
+    if not manifest_path.is_file():
+        return default
+    bindings = _load_json(manifest_path).get("bindings", [])
+    prefix = "Trainer.train_forward_n_trajectories="
+    for binding in bindings:
+        if str(binding).startswith(prefix):
+            return int(str(binding)[len(prefix) :])
+    return default
+
+
+def _result_caption(summaries: dict[str, list[dict]]) -> str:
+    seeds = sorted(
+        {
+            int(row["seed"])
+            for method_summaries in summaries.values()
+            for row in method_summaries
+            if "seed" in row
+        }
+    )
+    if len(seeds) == 1:
+        return f"seed {seeds[0]}"
+    if len(seeds) > 1:
+        return f"mean ± SD over {len(seeds)} seeds"
+    return "completed runs"
 
 
 def _save(fig, output_dir: Path, stem: str, dpi: int) -> list[Path]:
@@ -144,7 +184,7 @@ def run(args: argparse.Namespace) -> list[Path]:
                     continue
                 iteration = int(match.group(1))
                 n_modes = len(pd.read_excel(path))
-                points.append(((iteration + 1) * 100, n_modes))
+                points.append((iteration * _forward_trajectories(run_dir), n_modes))
             if points:
                 points.sort()
                 seed_curves.append(([point[0] for point in points], [point[1] for point in points]))
@@ -169,7 +209,16 @@ def run(args: argparse.Namespace) -> list[Path]:
     if any_mode_curve:
         axis.set_yscale("log")
         axis.set_xlabel("training oracle calls")
-        axis.set_ylabel("discovered modes (proxy > 8)")
+        mode_threshold = next(
+            (
+                float(row["mode_proxy_threshold"])
+                for method in methods
+                for row in summaries[method]
+                if "mode_proxy_threshold" in row
+            ),
+            8.0,
+        )
+        axis.set_ylabel(f"discovered modes (proxy > {mode_threshold:g})")
         axis.set_title("(b) mode discovery during training")
         axis.grid(color="#B0B0B0", linewidth=0.45, alpha=0.4, which="both")
         axis.legend(frameon=False)
@@ -218,7 +267,10 @@ def run(args: argparse.Namespace) -> list[Path]:
         if ylim is not None:
             axis.set_ylim(*ylim)
         axis.grid(axis="y", color="#B0B0B0", linewidth=0.45, alpha=0.4)
-    fig.suptitle("sEH paper-scale final-policy evaluation (mean ± SD over seeds)", fontsize=9)
+    fig.suptitle(
+        f"{_suite_label(suite)} final-policy evaluation ({_result_caption(summaries)})",
+        fontsize=9,
+    )
     fig.tight_layout(pad=0.7)
     written.extend(_save(fig, output_dir, "seh_final_summary", args.dpi))
     plt.close(fig)

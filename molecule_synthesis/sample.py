@@ -78,6 +78,7 @@ def run(args: argparse.Namespace) -> Path:
     from rgfn.utils.helpers import seed_everything
 
     from molecule_synthesis import objectives  # noqa: F401
+    from molecule_synthesis import optimizers  # noqa: F401
     from molecule_synthesis import minichem  # noqa: F401
 
     bindings = list(manifest["bindings"])

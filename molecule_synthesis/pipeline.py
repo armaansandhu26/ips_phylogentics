@@ -54,6 +54,15 @@ def build_train_command(
         "reward_mode": "--reward-mode",
         "count_probability_floor": "--count-probability-floor",
         "reverse_loss_weight": "--reverse-loss-weight",
+        "reverse_learning_rate": "--reverse-learning-rate",
+        "reverse_train_epochs": "--reverse-train-epochs",
+        "reverse_grad_clip_norm": "--reverse-grad-clip-norm",
+        "advantage_normalization": "--advantage-normalization",
+        "running_scale_decay": "--running-scale-decay",
+        "advantage_clip": "--advantage-clip",
+        "log_ratio_clip": "--log-ratio-clip",
+        "exploration_rate": "--exploration-rate",
+        "reward_beta": "--reward-beta",
         "wandb_mode": "--wandb-mode",
     }
     for key, flag in flags.items():
@@ -127,6 +136,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-root", default=str(REPO_ROOT / "molecule_synthesis" / "runs"))
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--device", default=None, help="Override suite device")
+    parser.add_argument(
+        "--wandb-mode",
+        choices=("online", "offline", "disabled"),
+        default=None,
+        help="Override suite W&B mode (use disabled for local/socket-restricted runs)",
+    )
     parser.add_argument("--seed", type=int, default=None, help="Run one seed instead of all suite seeds")
     parser.add_argument("--skip-sample", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
@@ -152,6 +167,8 @@ def main(argv: list[str] | None = None) -> int:
     base_training = dict(suite.training)
     if args.device is not None:
         base_training["device"] = args.device
+    if args.wandb_mode is not None:
+        base_training["wandb_mode"] = args.wandb_mode
     methods = _select_methods(args.method, suite.methods)
     seeds = (args.seed,) if args.seed is not None else suite.seeds
     output_root = Path(args.output_root).expanduser().resolve()

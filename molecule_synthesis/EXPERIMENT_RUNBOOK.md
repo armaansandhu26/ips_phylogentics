@@ -84,21 +84,47 @@ cd /Users/armaansandhu/Desktop/projects/ips_phylogentics
 
 ### Recommended Linux/A100 setup
 
-For a cloned repository on an A100 server, the fastest supported path is:
+For a cloned repository on an A100 server, the environment definition is
+already tracked in Git. Do **not** upload a virtual environment: it is large,
+platform-specific, and contains absolute paths. The bootstrap recreates it
+from the pinned CUDA requirements, pinned RGFN commit, and tracked patch.
+
+The exact one-command path for the first paper run is:
 
 ```bash
 git clone https://github.com/armaansandhu26/ips_phylogentics.git
 cd ips_phylogentics
 
-bash molecule_synthesis/scripts/bootstrap_a100.sh
-source .venv-rgfn-cu118/bin/activate
+bash molecule_synthesis/scripts/run_paper_mips_a100.sh
 ```
 
-The bootstrap creates a Python 3.11 virtual environment, installs the pinned
-CUDA 11.8 PyTorch/DGL stack plus only the dependencies required by QED and the
-public sEH proxy, checks out and patches the pinned RGFN commit, downloads the
-small public sEH checkpoint, runs preflight, and dry-runs all four reduced-suite
-commands.
+Run that command inside a scheduler allocation or `tmux`, since the process
+must survive for several hours. It creates/reuses a Python 3.11 virtual
+environment, installs the pinned CUDA 11.8 PyTorch/DGL stack plus only the
+dependencies required by QED and public sEH, checks out and patches the pinned
+RGFN commit, downloads the public sEH checkpoint, verifies CUDA, runs the MIPS
+tests and preflight, records `pip freeze` and the code commit, dry-runs the
+exact command, and then launches **paper-scale MIPS seed 0**. It also draws the
+100,000 final-policy samples after training and ends with `MIPS_HEALTH=PASS`
+only if the frozen configuration, artifacts, finite diagnostics, and basic
+non-collapse check all pass.
+
+The only final launch command executed by the wrapper is:
+
+```bash
+/usr/bin/time -p .venv-rgfn-cu118/bin/python \
+  -m molecule_synthesis.pipeline \
+  --suite seh_paper_main \
+  --seed 0 \
+  --method mips_grpo \
+  --device cuda \
+  --wandb-mode offline
+```
+
+Use `--wandb-mode offline`: this preserves local training history without
+requiring a W&B login or network connection. Run outputs, checkpoints, samples,
+the exact environment snapshot, and code commit are kept under
+`molecule_synthesis/runs/seh_paper_main/`.
 
 For repeated clones or jobs, keep the environment and wheel cache on persistent
 storage. Substitute paths that exist on the server:
@@ -109,6 +135,14 @@ bash molecule_synthesis/scripts/bootstrap_a100.sh \
   --cache-dir /persistent/path/pip-cache
 
 source /persistent/path/rgfn-cu118/bin/activate
+```
+
+To combine those persistent paths with the one-command launch, use:
+
+```bash
+bash molecule_synthesis/scripts/run_paper_mips_a100.sh \
+  --venv /persistent/path/rgfn-cu118 \
+  --cache-dir /persistent/path/pip-cache
 ```
 
 The first setup performs the downloads. Subsequent clones reuse the installed
@@ -282,7 +316,8 @@ python -m molecule_synthesis.preflight --strict-commit
 /usr/bin/time -p python -m molecule_synthesis.pipeline \
   --suite seh_reduced_a100 \
   --seed 0 \
-  --method mips_grpo
+  --method mips_grpo \
+  --wandb-mode disabled
 ```
 
 If that job stays within budget, run the other three methods for seed 0. Run
@@ -323,22 +358,75 @@ python -m molecule_synthesis.pipeline --list
 python -m molecule_synthesis.preflight --strict-commit
 ```
 
-Run seed 0 for all methods first:
+Run corrected MIPS seed 0 first. This is deliberate: validate our method before
+spending compute on any baseline.
 
 ```bash
-python -m molecule_synthesis.pipeline \
+bash molecule_synthesis/scripts/run_paper_mips_a100.sh
+```
+
+If setup has already passed and the environment is active, the exact equivalent
+launch command is:
+
+```bash
+/usr/bin/time -p python -m molecule_synthesis.pipeline \
   --suite seh_paper_main \
   --seed 0 \
-  --method all
+  --method mips_grpo \
+  --device cuda \
+  --wandb-mode offline
 ```
 
-If seed 0 completes and its diagnostics look healthy, run all three seeds:
+The paper-scale MIPS entry uses the corrected on-policy optimization recipe:
+forward LR `1e-4`, reverse LR `1e-3`, four reverse MLE updates after each
+forward update, reverse gradient clipping at 1, running importance-weight
+normalization with decay `0.9`, advantage clipping at 10, and log-ratio
+clipping at 20. Exploration and replay remain disabled for MIPS, so its weight
+is still exactly `R(x) q_phi(tau|x) / P_F(tau)`.
+
+Before starting baselines, require that seed 0 completed training and
+final-checkpoint sampling, the loss and importance diagnostics are finite, the
+reverse loss decreased, and the final policy did not collapse to a single
+molecule. These are implementation-health checks, not a rule that MIPS must
+beat every baseline on one seed.
+
+The wrapper performs the machine-checkable portion automatically. To rerun it:
+
+```bash
+python -m molecule_synthesis.verify_mips_run \
+  --suite-dir molecule_synthesis/runs/seh_paper_main \
+  --seed 0
+```
+
+Inspect the offline W&B training history to confirm the reverse-loss trend;
+the final health check additionally prints the final reverse loss, unique
+molecules, modes, proxy mean, and importance ESS fraction.
+
+Then run the other methods for seed 0:
+
+```bash
+python -m molecule_synthesis.pipeline --suite seh_paper_main --seed 0 --method rgfn --device cuda --wandb-mode offline
+python -m molecule_synthesis.pipeline --suite seh_paper_main --seed 0 --method grpo --device cuda --wandb-mode offline
+python -m molecule_synthesis.pipeline --suite seh_paper_main --seed 0 --method count_ips_grpo --device cuda --wandb-mode offline
+```
+
+If seed 0 completes and no configuration changes are made, retain it and run
+seeds 1 and 2 rather than repeating seed 0:
 
 ```bash
 python -m molecule_synthesis.pipeline \
   --suite seh_paper_main \
+  --seed 1 \
+  --method all
+
+python -m molecule_synthesis.pipeline \
+  --suite seh_paper_main \
+  --seed 2 \
   --method all
 ```
+
+If any hyperparameter is changed after inspecting seed 0, discard that pilot,
+freeze the new configuration, and rerun all three seeds from scratch.
 
 For a cluster, each method/seed can be submitted as an independent job. For
 example:

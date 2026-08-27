@@ -30,6 +30,16 @@
   "method_overrides": {
     "rgfn": {
       "replay_trajectories": 13
+    },
+    "mips_grpo": {
+      "learning_rate": 0.0001,
+      "reverse_learning_rate": 0.001,
+      "reverse_train_epochs": 4,
+      "reverse_grad_clip_norm": 1.0,
+      "advantage_normalization": "running",
+      "running_scale_decay": 0.9,
+      "advantage_clip": 10.0,
+      "log_ratio_clip": 20.0
     }
   },
   "sampling": {

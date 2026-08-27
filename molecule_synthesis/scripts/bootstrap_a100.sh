@@ -148,9 +148,11 @@ cd "${REPO_ROOT}"
 "${VENV_PYTHON}" -m molecule_synthesis.prefetch_assets --seh
 "${VENV_PYTHON}" -m molecule_synthesis.preflight --strict-commit
 "${VENV_PYTHON}" -m molecule_synthesis.pipeline \
-  --suite seh_reduced_a100 \
+  --suite seh_paper_main \
   --seed 0 \
-  --method all \
+  --method mips_grpo \
+  --device cuda \
+  --wandb-mode offline \
   --dry-run
 
 cat <<EOF
@@ -164,5 +166,5 @@ Activate with:
 
 Then launch the timed seed-0 job from:
   cd ${REPO_ROOT}
-  /usr/bin/time -p python -m molecule_synthesis.pipeline --suite seh_reduced_a100 --seed 0 --method mips_grpo
+  /usr/bin/time -p ${VENV_PYTHON} -m molecule_synthesis.pipeline --suite seh_paper_main --seed 0 --method mips_grpo --device cuda --wandb-mode offline
 EOF

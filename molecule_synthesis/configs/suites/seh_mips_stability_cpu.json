@@ -1,0 +1,48 @@
+{
+  "id": "seh_mips_stability_cpu",
+  "description": "Short beta-8 reduced-space sEH diagnostic for stabilized MIPS-GRPO.",
+  "config": "molecule_synthesis/configs/rgfn_seh_reduced.gin",
+  "methods": [
+    "mips_grpo"
+  ],
+  "seeds": [
+    0
+  ],
+  "training": {
+    "iterations": 150,
+    "forward_trajectories": 64,
+    "replay_trajectories": 0,
+    "batch_size": 64,
+    "max_reactions": 2,
+    "device": "cpu",
+    "learning_rate": 0.0001,
+    "clip_eps": 0.2,
+    "reward_mode": "linear",
+    "count_probability_floor": 0.000001,
+    "reverse_loss_weight": 1.0,
+    "reverse_learning_rate": 0.001,
+    "reverse_train_epochs": 4,
+    "reverse_grad_clip_norm": 1.0,
+    "advantage_normalization": "running",
+    "running_scale_decay": 0.9,
+    "advantage_clip": 10.0,
+    "log_ratio_clip": 20.0,
+    "wandb_mode": "disabled"
+  },
+  "sampling": {
+    "n_samples": 5000,
+    "batch_size": 128
+  },
+  "evaluation": {
+    "mode_threshold": 7.0,
+    "similarity_threshold": 0.5,
+    "max_modes": 5000,
+    "top_k": 500,
+    "scaffold_thresholds": [
+      5.0,
+      6.0,
+      7.0,
+      8.0
+    ]
+  }
+}
