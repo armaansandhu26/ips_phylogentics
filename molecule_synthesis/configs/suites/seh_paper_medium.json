@@ -1,0 +1,60 @@
+{
+  "id": "seh_paper_medium",
+  "description": "Full RGFN sEH chemistry at 62% of the paper training budget (2,500 updates, 50k final samples); inspect learning curves before scaling to 4,000 updates.",
+  "config": "@rgfn/configs/rgfn_seh_proxy.gin",
+  "methods": [
+    "rgfn",
+    "grpo",
+    "count_ips_grpo",
+    "mips_grpo"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "training": {
+    "iterations": 2500,
+    "forward_trajectories": 100,
+    "replay_trajectories": 0,
+    "batch_size": 100,
+    "max_reactions": 4,
+    "device": "cuda",
+    "learning_rate": 0.001,
+    "clip_eps": 0.2,
+    "reward_mode": "linear",
+    "count_probability_floor": 1e-6,
+    "reverse_loss_weight": 1.0,
+    "wandb_mode": "offline"
+  },
+  "method_overrides": {
+    "rgfn": {
+      "replay_trajectories": 20
+    },
+    "mips_grpo": {
+      "learning_rate": 0.0001,
+      "reverse_learning_rate": 0.001,
+      "reverse_train_epochs": 4,
+      "reverse_grad_clip_norm": 1.0,
+      "advantage_normalization": "running",
+      "running_scale_decay": 0.9,
+      "advantage_clip": 10.0,
+      "log_ratio_clip": 20.0,
+      "exploration_rate": 0.0
+    }
+  },
+  "sampling": {
+    "n_samples": 50000,
+    "batch_size": 100
+  },
+  "evaluation": {
+    "mode_threshold": 7.0,
+    "similarity_threshold": 0.5,
+    "max_modes": 5000,
+    "top_k": 500,
+    "scaffold_thresholds": [
+      7.0,
+      8.0
+    ]
+  }
+}

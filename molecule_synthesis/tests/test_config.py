@@ -13,6 +13,7 @@ class ConfigSmokeTest(unittest.TestCase):
         self.assertIn("seh_small", list_suites())
         self.assertIn("seh_reduced_a100", list_suites())
         self.assertIn("seh_paper_main", list_suites())
+        self.assertIn("seh_paper_medium", list_suites())
         for name in list_suites():
             suite = load_suite(name)
             self.assertGreater(suite.training["iterations"], 0)
@@ -32,6 +33,14 @@ class ConfigSmokeTest(unittest.TestCase):
         self.assertEqual(reduced_suite.sampling["n_samples"], 20000)
         self.assertEqual(
             reduced_suite.method_overrides["rgfn"]["replay_trajectories"], 13
+        )
+        medium_suite = load_suite("seh_paper_medium")
+        self.assertEqual(medium_suite.seeds, (0, 1, 2))
+        self.assertEqual(medium_suite.training["max_reactions"], 4)
+        self.assertEqual(medium_suite.training["iterations"], 2500)
+        self.assertEqual(medium_suite.sampling["n_samples"], 50000)
+        self.assertEqual(
+            medium_suite.method_overrides["rgfn"]["replay_trajectories"], 20
         )
 
     def test_cli_aliases(self):

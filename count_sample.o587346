@@ -1,0 +1,33 @@
+/home/svu/ophv165/miniconda3/envs/py311/lib/python3.11/site-packages/wandb/sdk/launch/builder/build.py:11: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+/home/svu/ophv165/miniconda3/envs/py311/lib/python3.11/site-packages/wandb/sdk/launch/builder/build.py:11: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: Tracking run with wandb version 0.15.12
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Waiting for W&B process to finish... (success).
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /nfs/home/svu/ophv165/ips_phylogentics/molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_0/batch/logs/wandb/offline-run-20260827_205047-68yn5fmi
+wandb: Find logs at: /nfs/home/svu/ophv165/ips_phylogentics/molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_0/batch/logs/wandb/offline-run-20260827_205047-68yn5fmi/logs
+Using 350 fragments, 66 reactions, and 132 anchored reactions
+SAMPLE_SUMMARY=/nfs/home/svu/ophv165/ips_phylogentics/molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_0/batch/samples/summary.json
+real 61.25
+user 56.05
+sys 4.76
+SAMPLE_SUMMARY=molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_0/batch/samples/summary.json
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			Resource Usage on 2026-08-27 20:51:40.698192:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	JobId: 587346.hopper-m-02
+	Project: CFP04-CF-024
+	Exit Status: 0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	NCPUs: Requested(12), Used(12)
+	CPU Time Used: 00:01:00
+	Memory: Requested(225gb), Used(960672kb)
+	Vmem Used: 21162804kb
+	Walltime: Requested(02:00:00), Used(00:01:02)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Execution Nodes Used: (hopper-19:ngpus=1:ncpus=12:mem=235929600kb)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	No GPU-related information available for this job.

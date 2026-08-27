@@ -47,6 +47,30 @@ def _mean(values: list[float]) -> float | None:
     return statistics.fmean(values) if values else None
 
 
+def _write_sampling_progress(
+    progress_path: Path,
+    *,
+    n_sampled: int,
+    n_requested: int,
+    batch_idx: int,
+    n_batches: int,
+    n_unique: int,
+    mean_proxy: float | None,
+) -> None:
+    progress = {
+        "n_sampled": n_sampled,
+        "n_requested": n_requested,
+        "progress_fraction": n_sampled / n_requested if n_requested else 0.0,
+        "batch": batch_idx,
+        "n_batches": n_batches,
+        "n_unique": n_unique,
+        "mean_proxy": mean_proxy,
+    }
+    with progress_path.open("w", encoding="utf-8") as handle:
+        json.dump(progress, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+
+
 def run(args: argparse.Namespace) -> Path:
     configure_runtime_environment()
     if args.n_samples <= 0 or args.batch_size <= 0:
@@ -71,6 +95,7 @@ def run(args: argparse.Namespace) -> Path:
 
     import gin
     import torch
+    from tqdm import tqdm
 
     import rgfn  # noqa: F401
     from rgfn.shared.samplers.random_sampler import RandomSampler
@@ -85,7 +110,14 @@ def run(args: argparse.Namespace) -> Path:
     if args.device is not None:
         bindings.append(f"Trainer.device={json.dumps(args.device)}")
 
+    sample_dir = run_dir / "samples"
+    sample_dir.mkdir(parents=True, exist_ok=True)
+    samples_path = sample_dir / "samples.jsonl"
+    progress_path = sample_dir / "progress.json"
+
     rows: list[dict] = []
+    unique_smiles: set[str] = set()
+    n_batches = (args.n_samples + args.batch_size - 1) // args.batch_size
     trainer = None
     with _working_directory(rgfn_root):
         gin.clear_config()
@@ -112,66 +144,93 @@ def run(args: argparse.Namespace) -> Path:
                 env=training_sampler.env,
                 reward=training_sampler.reward,
             )
-            for trajectories in sampler.get_trajectories_iterator(
-                args.n_samples, args.batch_size
-            ):
-                states = trajectories.get_last_states_flat()
-                reward_output = trajectories.get_reward_outputs()
-                with torch.no_grad():
-                    actions = trajectories.get_actions_flat()
-                    flat_log_pf = trainer.objective.forward_policy.compute_action_log_probs(
-                        states=trajectories.get_non_last_states_flat(),
-                        action_spaces=trajectories.get_forward_action_spaces_flat(),
-                        actions=actions,
-                    )
-                    flat_log_pb = trainer.objective.backward_policy.compute_action_log_probs(
-                        states=trajectories.get_non_source_states_flat(),
-                        action_spaces=trajectories.get_backward_action_spaces_flat(),
-                        actions=actions,
-                    ).to(flat_log_pf.device)
-                    trajectory_index = trajectories.get_index_flat().to(flat_log_pf.device)
-                    log_pf = torch.zeros(
-                        len(trajectories), dtype=flat_log_pf.dtype, device=flat_log_pf.device
-                    )
-                    log_pb = torch.zeros_like(log_pf)
-                    log_pf.scatter_add_(0, trajectory_index, flat_log_pf)
-                    log_pb.scatter_add_(0, trajectory_index, flat_log_pb)
-                    log_importance_weight = (
-                        reward_output.log_reward.to(flat_log_pf.device) + log_pb - log_pf
-                    )
-                for state, log_reward, reward, proxy, path_log_pf, path_log_pb, log_weight in zip(
-                    states,
-                    reward_output.log_reward.detach().cpu().tolist(),
-                    reward_output.reward.detach().cpu().tolist(),
-                    reward_output.proxy.detach().cpu().tolist(),
-                    log_pf.detach().cpu().tolist(),
-                    log_pb.detach().cpu().tolist(),
-                    log_importance_weight.detach().cpu().tolist(),
+            with samples_path.open("w", encoding="utf-8") as samples_handle:
+                batch_idx = 0
+                for trajectories in tqdm(
+                    sampler.get_trajectories_iterator(args.n_samples, args.batch_size),
+                    total=n_batches,
+                    desc="Sampling batches",
+                    unit="batch",
                 ):
-                    molecule = getattr(state, "molecule", None)
-                    rows.append(
-                        {
-                            "smiles": getattr(molecule, "smiles", None),
-                            "terminal_state": type(state).__name__,
-                            "log_reward": float(log_reward),
-                            "reward": float(reward),
-                            "proxy": float(proxy),
-                            "log_pf": float(path_log_pf),
-                            "log_pb": float(path_log_pb),
-                            "log_importance_weight": float(log_weight),
-                        }
+                    states = trajectories.get_last_states_flat()
+                    reward_output = trajectories.get_reward_outputs()
+                    with torch.no_grad():
+                        actions = trajectories.get_actions_flat()
+                        flat_log_pf = trainer.objective.forward_policy.compute_action_log_probs(
+                            states=trajectories.get_non_last_states_flat(),
+                            action_spaces=trajectories.get_forward_action_spaces_flat(),
+                            actions=actions,
+                        )
+                        flat_log_pb = trainer.objective.backward_policy.compute_action_log_probs(
+                            states=trajectories.get_non_source_states_flat(),
+                            action_spaces=trajectories.get_backward_action_spaces_flat(),
+                            actions=actions,
+                        ).to(flat_log_pf.device)
+                        trajectory_index = trajectories.get_index_flat().to(flat_log_pf.device)
+                        log_pf = torch.zeros(
+                            len(trajectories), dtype=flat_log_pf.dtype, device=flat_log_pf.device
+                        )
+                        log_pb = torch.zeros_like(log_pf)
+                        log_pf.scatter_add_(0, trajectory_index, flat_log_pf)
+                        log_pb.scatter_add_(0, trajectory_index, flat_log_pb)
+                        log_importance_weight = (
+                            reward_output.log_reward.to(flat_log_pf.device) + log_pb - log_pf
+                        )
+                    batch_rows: list[dict] = []
+                    for state, log_reward, reward, proxy, path_log_pf, path_log_pb, log_weight in zip(
+                        states,
+                        reward_output.log_reward.detach().cpu().tolist(),
+                        reward_output.reward.detach().cpu().tolist(),
+                        reward_output.proxy.detach().cpu().tolist(),
+                        log_pf.detach().cpu().tolist(),
+                        log_pb.detach().cpu().tolist(),
+                        log_importance_weight.detach().cpu().tolist(),
+                    ):
+                        molecule = getattr(state, "molecule", None)
+                        batch_rows.append(
+                            {
+                                "smiles": getattr(molecule, "smiles", None),
+                                "terminal_state": type(state).__name__,
+                                "log_reward": float(log_reward),
+                                "reward": float(reward),
+                                "proxy": float(proxy),
+                                "log_pf": float(path_log_pf),
+                                "log_pb": float(path_log_pb),
+                                "log_importance_weight": float(log_weight),
+                            }
+                        )
+                    for row in batch_rows:
+                        samples_handle.write(json.dumps(row, sort_keys=True) + "\n")
+                        if row["smiles"] is not None:
+                            unique_smiles.add(row["smiles"])
+                    samples_handle.flush()
+                    rows.extend(batch_rows)
+                    batch_idx += 1
+                    running_mean_proxy = _mean([row["proxy"] for row in rows])
+                    _write_sampling_progress(
+                        progress_path,
+                        n_sampled=len(rows),
+                        n_requested=args.n_samples,
+                        batch_idx=batch_idx,
+                        n_batches=n_batches,
+                        n_unique=len(unique_smiles),
+                        mean_proxy=running_mean_proxy,
+                    )
+                    proxy_text = (
+                        f"{running_mean_proxy:.3f}"
+                        if running_mean_proxy is not None
+                        else "n/a"
+                    )
+                    tqdm.write(
+                        f"sampled {len(rows)}/{args.n_samples} "
+                        f"({100 * len(rows) / args.n_samples:.1f}%) | "
+                        f"unique={len(unique_smiles)} | "
+                        f"mean_proxy={proxy_text}"
                     )
         finally:
             if trainer is not None:
                 trainer.close()
             gin.clear_config()
-
-    sample_dir = run_dir / "samples"
-    sample_dir.mkdir(parents=True, exist_ok=True)
-    samples_path = sample_dir / "samples.jsonl"
-    with samples_path.open("w", encoding="utf-8") as handle:
-        for row in rows:
-            handle.write(json.dumps(row, sort_keys=True) + "\n")
 
     valid = [row for row in rows if row["smiles"] is not None]
     unique = {row["smiles"] for row in valid}

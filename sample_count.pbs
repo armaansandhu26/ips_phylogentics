@@ -1,0 +1,40 @@
+#!/bin/bash
+#PBS -P CFP04-CF-024
+#PBS -j oe
+#PBS -N count_sample
+#PBS -q auto
+#PBS -l select=1:ngpus=1
+#PBS -l walltime=02:00:00
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-/home/svu/ophv165/ips_phylogentics}"
+
+PY=/home/svu/ophv165/miniconda3/envs/py311/bin/python
+RUN_DIR=molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_0/batch
+
+export DGLBACKEND=pytorch
+export LD_LIBRARY_PATH="$(
+"${PY}" - <<'PY'
+import os
+paths = []
+for pkg in ("cuda_nvrtc", "cuda_runtime", "cublas", "cusparse", "cufft", "curand", "cusolver", "nccl"):
+    try:
+        mod = __import__(f"nvidia.{pkg}", fromlist=["__file__"])
+        libdir = os.path.join(os.path.dirname(mod.__file__), "lib")
+        if os.path.isdir(libdir):
+            paths.append(libdir)
+    except ImportError:
+        pass
+print(":".join(paths))
+PY
+):${LD_LIBRARY_PATH:-}"
+
+/usr/bin/time -p "${PY}" -m molecule_synthesis.sample \
+  --run-dir "${RUN_DIR}" \
+  --n-samples 5000 \
+  --batch-size 100 \
+  --device cuda \
+  --mode-threshold 7.0 \
+  --similarity-threshold 0.5
+
+echo "SAMPLE_SUMMARY=${RUN_DIR}/samples/summary.json"

@@ -13,7 +13,7 @@ from pathlib import Path
 METHOD_ORDER = ("grpo", "count_ips_grpo", "mips_grpo", "rgfn")
 METHOD_LABELS = {
     "grpo": "GRPO",
-    "count_ips_grpo": "Count IPS-GRPO",
+    "count_ips_grpo": "IPS-GRPO",
     "mips_grpo": "MIPS-GRPO",
     "rgfn": "RGFN",
 }
@@ -32,6 +32,7 @@ METHOD_MARKERS = {
 
 SUITE_LABELS = {
     "seh_reduced_a100": "reduced-space sEH",
+    "seh_paper_medium": "medium-budget full-space sEH",
     "seh_paper_main": "paper-scale sEH",
 }
 
