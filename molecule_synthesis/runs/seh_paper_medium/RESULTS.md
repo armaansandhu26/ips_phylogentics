@@ -378,30 +378,31 @@ Key artifacts per run:
     └── modes.jsonl
 ```
 
-Seed-0 paper-style figures (all four methods; 500-iter checkpoint):
+Seed-0 interim paper package (all four methods; 500-update checkpoint):
 
 ```text
-molecule_synthesis/runs/seh_paper_medium/results/figures/
-├── main/
-│   └── main_figure.{png,pdf}          # 3-panel RGFN-style figure
-└── supplementary/
-    ├── supp_training_curves.{png,pdf}
-    ├── supp_ips_duplicate_fraction.{png,pdf}
-    ├── supp_sampling_discovery.{png,pdf}
-    ├── supp_top_molecules.{png,pdf}
-    ├── supp_log_proxy_vs_log_reward.{png,pdf}
-    └── supp_train_vs_sample_proxy.{png,pdf}
+molecule_synthesis/runs/seh_paper_medium/results/paper_500/
+├── README.md
+├── CAPTIONS.md
+├── metrics_500.json
+├── table1_seed0_500_updates.{md,csv}
+├── figure1_seed0_500_updates.{png,pdf}
+└── figureS1_sampling_convergence.{png,pdf}
 ```
 
-Regenerate paper figures:
+Regenerate the main table and figure:
 
 ```bash
-python -m molecule_synthesis.plot_seh_figures \
-  --suite-dir molecule_synthesis/runs/seh_paper_medium \
-  --checkpoint-iter 500
+python -m molecule_synthesis.plot_seh_checkpoint_paper \
+  --metrics-json molecule_synthesis/runs/seh_paper_medium/results/paper_500/metrics_500.json \
+  --output-dir molecule_synthesis/runs/seh_paper_medium/results/paper_500
 ```
 
-Sample-based panels use on-disk 5k samples for MIPS-GRPO and RGFN at iter 500. Train-vs-sample panel includes all four methods (GRPO / Count IPS sample values from their documented 500-iter 5k runs).
+The frozen snapshot is necessary because the live GRPO and Count IPS-GRPO
+sampling summaries were subsequently replaced by their 2,000-update
+evaluations. MIPS-GRPO and RGFN values are taken directly from their 500-update
+sampling summaries. The package is deliberately small: one main comparison
+figure, one main table, and one sampling-convergence supplement.
 
 ---
 
@@ -411,3 +412,4 @@ Sample-based panels use on-disk 5k samples for MIPS-GRPO and RGFN at iter 500. T
 |---|---|
 | 2026-08-27 | Seed 0: GRPO collapse documented at 500/1500/2000 iters; Count IPS collapse at 500/2000 iters (50k sample); MIPS/RGFN batch in progress |
 | 2026-08-27 | Seed 0 @500 iter: MIPS-GRPO and RGFN sampling complete (5k each); both healthy (no collapse); 500-iter figures regenerated |
+| 2026-08-27 | Pruned the interim 500-update paper package to one main figure, one main table, and one sampling-convergence supplement; removed redundant or misleading generated figures |
