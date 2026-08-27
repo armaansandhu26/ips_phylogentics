@@ -75,8 +75,21 @@ molecule_synthesis/runs/*
 !molecule_synthesis/runs/seh_paper_medium/
 molecule_synthesis/runs/seh_paper_medium/*
 !molecule_synthesis/runs/seh_paper_medium/RESULTS.md
+!molecule_synthesis/runs/seh_paper_medium/suite.json
 !molecule_synthesis/runs/seh_paper_medium/results/
 molecule_synthesis/runs/seh_paper_medium/results/**/.matplotlib/
+!molecule_synthesis/runs/seh_paper_medium/rgfn/
+!molecule_synthesis/runs/seh_paper_medium/grpo/
+!molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/
+!molecule_synthesis/runs/seh_paper_medium/mips_grpo/
+# Keep heavy/generated training outputs out of git for paper runs
+molecule_synthesis/runs/seh_paper_medium/**/wandb/
+molecule_synthesis/runs/seh_paper_medium/**/raw_samples/
+molecule_synthesis/runs/seh_paper_medium/**/checkpoints/*.pt
+molecule_synthesis/runs/seh_paper_medium/**/logs/*
+!molecule_synthesis/runs/seh_paper_medium/**/logs/
+!molecule_synthesis/runs/seh_paper_medium/**/logs/config.txt
+!molecule_synthesis/runs/seh_paper_medium/**/logs/operative_config.txt
 molecule_synthesis/toy/runs/
 
 # Nested repos / editor index junk inside vendored trees

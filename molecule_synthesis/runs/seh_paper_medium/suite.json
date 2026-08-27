@@ -1,0 +1,18 @@
+{
+  "suite": "seh_paper_medium",
+  "target_distribution": null,
+  "runs": {
+    "grpo": {
+      "0": "molecule_synthesis/runs/seh_paper_medium/grpo/seed_0/batch"
+    },
+    "count_ips_grpo": {
+      "0": "molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_0/batch"
+    },
+    "mips_grpo": {
+      "0": "molecule_synthesis/runs/seh_paper_medium/mips_grpo/seed_0/20260827_112154"
+    },
+    "rgfn": {
+      "0": "molecule_synthesis/runs/seh_paper_medium/rgfn/seed_0/batch"
+    }
+  }
+}
