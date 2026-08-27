@@ -71,7 +71,12 @@ wandb/
 
 # Molecule-synthesis external dependency and generated runs
 molecule_synthesis/external/RGFN/
-molecule_synthesis/runs/
+molecule_synthesis/runs/*
+!molecule_synthesis/runs/seh_paper_medium/
+molecule_synthesis/runs/seh_paper_medium/*
+!molecule_synthesis/runs/seh_paper_medium/RESULTS.md
+!molecule_synthesis/runs/seh_paper_medium/results/
+molecule_synthesis/runs/seh_paper_medium/results/**/.matplotlib/
 molecule_synthesis/toy/runs/
 
 # Nested repos / editor index junk inside vendored trees
