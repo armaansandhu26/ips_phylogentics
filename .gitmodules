@@ -1,0 +1,4 @@
+[submodule "phylogfn_paper"]
+	path = phylogfn_paper
+	url = https://github.com/armaansandhu26/ips_phylogentics.git
+	branch = phylogfn_paper
