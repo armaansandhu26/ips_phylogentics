@@ -1,0 +1,5 @@
+taxa,method,reverse_policy,linear_r,loglog_r,ess,unique_per_million
+10,mips_grpo,fitted,0.976,0.835,0.995,999986
+10,mips_grpo,uniform,0.000,0.969,0.995,999974
+10,gflownet_tb,uniform,0.881,0.698,0.977,1000000
+

@@ -1,0 +1,550 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{placeins}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\graphicspath{{figures/main/}{figures/appendix/}}
+\input{results_macros}
+
+\title{From Counts to Paths: Multiplicity-Corrected Inverse Probability
+Scaling for Reward-Proportional Sampling in Large DAGs}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Many scientific generators should represent a distribution of useful outcomes,
+not return one reward maximizer. Count-based inverse probability scaling (IPS)
+targets reward-proportional sampling only while outcomes repeat inside a sampled
+group. When the outcome space is large, the count estimate becomes constant and
+the correction degenerates to the original reward. Replacing counts by the
+known trajectory probability is also wrong in a directed acyclic graph (DAG):
+outcomes reachable by more paths are over-weighted. We introduce the path
+weight \(R(x)q(\tau\mid x)/P_F(\tau)\), where \(q\) is any normalized reverse
+policy. The path contributions sum to \(R(x)\) for every terminal, independent
+of path multiplicity and without requiring repeats. A controlled hypergrid
+shows both sides of the count boundary: count IPS recovers all four modes when
+the group is larger than the terminal space, but collapses to one when there
+are 128 terminals per group sample; MIPS-GRPO recovers all modes in both. We
+then observe the same support-preservation signature in two applications. At
+the headline 27-taxon phylogenetic scale, the recoverable MIPS-GRPO artifact
+contains 999,987 distinct signatures in one million draws and has pathwise
+probability--reward correlation \(r=0.977\). This result is preliminary while
+the matched multi-seed comparison finishes. In an
+interim full-space molecular-synthesis experiment, MIPS-GRPO produces 99.4\%
+distinct valid samples while GRPO and count IPS assign at least 98.6\% of their
+mass to one molecule. The applications support the mechanism beyond the toy
+setting while revealing a quality--diversity tradeoff against flow-based
+baselines.
+\end{abstract}
+
+\section{Introduction}
+
+Drug design, program synthesis, and Bayesian inference often have many useful
+answers. For such problems, returning only the highest-reward terminal is less
+useful than representing the full reward-weighted set. The desired target is
+\begin{equation}
+ p^*(x)=\frac{R(x)}{Z}, \qquad Z=\sum_x R(x).
+ \label{eq:target}
+\end{equation}
+Expected-return maximization does not target Eq.~\eqref{eq:target}; it rewards
+moving probability toward the best terminal and therefore encourages
+outcome-level collapse. IPS cancels the terminal-frequency factor in the
+policy gradient by dividing reward by terminal probability
+\citep{sinha2026ips}.
+
+Count IPS-GRPO estimates terminal probability from repeats inside a group of
+\(G\) samples. If the effective terminal space \(K\) is much larger than
+\(G\), almost every observed terminal appears once and \(\hat p(x)=1/G\).
+Group normalization removes the common factor, leaving essentially the GRPO
+update.
+
+A sampled trajectory has a known probability \(P_F(\tau)\), suggesting the
+weight \(R(x)/P_F(\tau)\). This works in a tree but not a DAG. If terminal
+\(x\) has \(m(x)\) construction paths, that weight assigns it total mass
+\(m(x)R(x)\), confounding reward with reachability. This is central in both
+applications studied here: a phylogenetic tree has many merge orders and a
+molecule may have many synthesis trajectories.
+
+Our paper follows a three-act evidence chain. First, a controlled hypergrid
+isolates when counting works and when it fails, while making path multiplicity
+exactly known. Second, Bayesian phylogenetic inference tests a combinatorial
+application where the outcome space rapidly becomes intractable. Third,
+full-space molecular synthesis tests a chemically structured generation DAG
+and a different flow-based baseline.
+
+\paragraph{Contributions.}
+\begin{itemize}
+ \item We identify \(K/G\), the effective number of terminals per group
+ sample, as the practical boundary for within-group count IPS.
+ \item We derive a count-free trajectory weight that is unbiased at the
+ terminal level for any finite DAG.
+ \item On one reward landscape, we show count IPS succeeding at
+ \(K/G=0.25\) and failing at \(K/G=128\), while MIPS-GRPO recovers all modes
+ in both regimes.
+ \item We demonstrate the same non-collapse signature at the 27-taxon scale in
+ Bayesian phylogenetic inference and in full-space molecular synthesis.
+ \item We keep the evidence boundary explicit: the current 27-taxon result is
+ a preliminary self-sampled pathwise diagnostic pending its matched multi-seed
+ replacement, and the molecular comparison is one seed at an interim
+ 500-update checkpoint.
+\end{itemize}
+
+\section{Multiplicity-corrected IPS}
+
+Let a forward policy generate trajectory
+\(\tau=(s_0,a_1,\ldots,a_T,s_T)\) and terminal \(x=s_T\). Its path
+probability is known,
+\begin{equation}
+ P_F(\tau)=\prod_{t=1}^{T}P_F(a_t\mid s_{t-1}),
+\end{equation}
+but the terminal probability is a sum over paths,
+\begin{equation}
+ P_F(x)=\sum_{\tau\in\mathcal T(x)}P_F(\tau).
+ \label{eq:marginal}
+\end{equation}
+Equation~\eqref{eq:marginal} becomes intractable in large DAGs.
+
+\subsection{Why naive path IPS is wrong}
+
+For \(w_{\mathrm{naive}}(\tau)=R(x)/P_F(\tau)\), the expected weighted mass
+assigned to terminal \(x\) is
+\begin{equation}
+ \sum_{\tau\in\mathcal T(x)}P_F(\tau)w_{\mathrm{naive}}(\tau)
+ =|\mathcal T(x)|R(x).
+\end{equation}
+The desired reward is multiplied by path count. This is structural bias, not
+merely high variance.
+
+\subsection{Reverse allocation across paths}
+
+Let \(q(\tau\mid x)\) be any normalized distribution over paths terminating
+at \(x\): \(\sum_{\tau\in\mathcal T(x)}q(\tau\mid x)=1\). Define
+\begin{equation}
+ w(\tau)=\frac{R(x)q(\tau\mid x)}{P_F(\tau)}.
+ \label{eq:mips}
+\end{equation}
+Then
+\begin{equation}
+ \sum_{\tau\in\mathcal T(x)}P_F(\tau)w(\tau)
+ =R(x)\sum_{\tau\in\mathcal T(x)}q(\tau\mid x)=R(x).
+ \label{eq:unbiased}
+\end{equation}
+Normalization of \(q\), not a particular learned model, establishes
+terminal-level correctness. A uniform backward policy is valid. If
+\(q(\tau\mid x)=P_F(\tau\mid x)\), the weight becomes the ideal
+\(R(x)/P_F(x)\) and is constant across paths to the same terminal. Learning a
+reverse model may reduce variance, but that is an empirical benefit rather
+than a correctness requirement.
+
+\subsection{Policy update and relationship to GFlowNets}
+
+For each on-policy batch we sample trajectories, score them with a frozen
+reverse policy, form
+\begin{equation}
+ \log w_i=\log R(x_i)+\log q(\tau_i\mid x_i)-\log P_F(\tau_i),
+\end{equation}
+normalize weights into advantages, and take a path-level PPO update. When
+\(q=q_\phi\) is fitted, maximum likelihood on observed reverse edges is
+performed only after scoring the batch. This freeze--score--fit order prevents
+the batch from first raising its own reverse probability and then its weight.
+
+GFlowNets also target reward-proportional terminal distributions
+\citep{bengio2021gflownet,bengio2023foundations}. Trajectory balance uses a
+backward policy and learned partition function in a squared balance residual
+\citep{malkin2022tb}; MIPS-GRPO uses the backward allocation inside an
+importance weight and updates the forward policy with PPO.
+
+\input{tables/methods}
+
+\section{Controlled proof: where counting works and fails}
+
+\subsection{Hypergrid and two regimes}
+
+We use a two-dimensional hypergrid with \(H^2\) terminals and four symmetric
+high-reward modes. Starting at \((0,0)\), each action increments one coordinate
+or terminates. The reward landscape follows \citet{sinha2026ips}, with
+\(R_0=0.1\), \(R_1=0.5\), and \(R_2=2.0\). Because
+\(p(x)\propto R(x)\) is enumerable, we measure exact empirical \(\ell_1\)
+distance to target, modes recovered, and terminal coverage.
+
+At \(H=8,G=256\), there are 64 terminals and repeats are plentiful
+(\(K/G=0.25\)). At \(H=64,G=32\), there are 4096 terminals and repeats are
+rare (\(K/G=128\)). The latter is also a multiplicity stress test: terminal
+\((a,b)\) has \(\binom{a+b}{a}\) paths, and the four equal-reward modes differ
+in path count by roughly 24 orders of magnitude.
+
+\input{tables/hypergrid_main}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figure1_hypergrid_regimes.pdf}
+ \caption{\textbf{The count estimator succeeds only while outcomes repeat.}
+ Left: exact \(\ell_1\) distance to target. Right: modes recovered. Small-grid
+ bars show mean and one standard deviation over three seeds; the large-grid
+ suite is one seed. GFlowNet TB was run only in the large-grid suite.}
+ \label{fig:hypergrid-summary}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figure2_hypergrid_h8_distributions.png}
+ \caption{\textbf{Positive control: counting works when outcomes repeat.}
+ Terminal distributions for \(H=8,G=256\) (seed 0). GRPO collapses, count IPS
+ recovers all four modes, and MIPS-GRPO most closely matches the target.}
+ \label{fig:h8-distributions}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figure3_hypergrid_h64_distributions.png}
+ \caption{\textbf{Stress test: counting fails without repeats.} Terminal
+ distributions for \(H=64,G=32\) (seed 0). GRPO and count IPS-GRPO recover one
+ mode; MIPS-GRPO and GFlowNet TB recover all four.}
+ \label{fig:h64-distributions}
+\end{figure}
+
+\subsection{Results}
+
+When counts are informative, count IPS-GRPO lowers \(\ell_1\) from
+\(1.768\) for GRPO to \(\SmallGridCountLone\) and recovers all modes. This is
+the positive control: count IPS works when its estimator has repeats.
+MIPS-GRPO also recovers all modes and reaches \(\SmallGridMIPSLone\), roughly
+four times lower error than count IPS.
+
+When counts are sparse, GRPO and count IPS-GRPO each recover one mode, with
+\(\ell_1=\LargeGridGRPOLone\) and \(\LargeGridCountLone\). MIPS-GRPO visits
+4056 of 4096 terminals, recovers all modes, and reaches
+\(\ell_1=\LargeGridMIPSLone\). GFlowNet TB also recovers all modes and reaches
+\(\LargeGridTBLone\). We do not claim a difference between MIPS-GRPO and TB in
+this single-seed comparison; their results are effectively tied.
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figure4_hypergrid_failure_diagnostics.png}
+ \caption{\textbf{The missing modes are collapse, not slow exploration.}
+ Left: additional samples do not reveal modes missed by GRPO or count IPS.
+ Right: those collapsed policies achieve the maximum mean terminal reward,
+ showing why reward alone selects the wrong sampler for distribution matching.}
+ \label{fig:hypergrid-diagnostics}
+\end{figure}
+
+Drawing up to 50,000 samples from GRPO and count IPS does not reveal missing
+modes, while both multiplicity-aware methods find all four within roughly
+\(10^2\) samples (Figure~\ref{fig:hypergrid-diagnostics}). The collapsed
+policies nevertheless achieve the highest possible mean reward: they succeed
+at expected-return maximization while failing at distribution matching.
+
+\FloatBarrier
+
+\section{Application I: Bayesian phylogenetic inference}
+
+A phylogenetic tree is built by repeatedly merging subtrees. The same terminal
+tree has many merge orders, making multiplicity intrinsic. We use the
+27-taxon DS1 benchmark with positive shifted log likelihood as terminal reward.
+A terminal signature contains both topology and branch lengths. PhyloGFN is
+the closest task-specific trajectory-balance baseline
+\citep{zhou2024phylogfn}.
+
+The current recoverable MIPS-GRPO artifact is a one-million-draw evaluation at
+the scale we ultimately care about. It contains 999,987 distinct signatures
+(99.9987\% non-repetition), with linear and log--log probability--reward
+correlations of 0.977 on its sampled support. Thus the method is not merely
+wandering through the large space: the mass assigned to visited outcomes
+tracks reward while retaining essentially maximal empirical support.
+
+\input{tables/phylo_27_main}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figure5_phylo_27taxa_preliminary.png}
+ \caption{\textbf{Phylogenetic application at 27 taxa.} Empirical signature
+ probability versus shifted likelihood for one million self-sampled
+ trajectories, displayed on identical linear and log--log transforms. The
+ recoverable MIPS-GRPO artifact shows strong pathwise reward alignment and
+ nearly complete non-repetition. The old GFlowNet panels are retained for
+ context, but their checkpoint is unavailable and therefore the between-method
+ contrast is \emph{preliminary}, not a validated superiority claim.}
+ \label{fig:phylo27}
+\end{figure}
+
+This figure is the main scale result, but not yet the final comparison. Each
+policy samples a different terminal set, and the original checkpoint behind
+the displayed GFlowNet panel is unavailable. A new no-replay, three-seed
+MIPS-GRPO--PhyloGFN evaluation is running and will replace this panel once
+complete. The appendix provides the smaller five-taxon exact-enumeration
+control, the ten-taxon scaling diagnostic, and all training curves. Those
+smaller experiments are supporting validation rather than the headline scale.
+
+\FloatBarrier
+
+\section{Application II: full-space molecular synthesis}
+
+We test a chemically structured construction DAG using the sEH proxy task. The
+available matched checkpoint has 500 policy updates (50,000 oracle calls), seed
+0, and 5,000 independent final-policy samples per method. We compare GRPO,
+count IPS-GRPO, MIPS-GRPO, and RGFN. This result is explicitly interim until
+the 2,000-update matched evaluation and additional seeds are complete.
+
+GRPO returns 3 unique molecules and assigns 98.6\% of its mass to one molecule;
+count IPS returns 2 and assigns 99.96\% to one. MIPS-GRPO returns 4,923 unique
+valid molecules (99.4\% non-repetition), assigns 0.081\% to its most common
+molecule, and finds three separated high-proxy modes. RGFN is also diverse and
+has higher mean proxy, but repeats more. The honest conclusion is a
+quality--diversity tradeoff: MIPS-GRPO strongly prevents collapse, while RGFN
+currently has better average quality.
+
+\input{tables/molecule_main}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figure6_molecule_seed0_500.pdf}
+ \caption{\textbf{Molecular-synthesis application, interim seed-0 checkpoint.}
+ MIPS-GRPO avoids catastrophic repetition and discovers separated high-proxy
+ modes. RGFN occupies a higher-quality, lower-diversity operating point. Bars
+ summarize final-policy samples, not run-to-run uncertainty.}
+ \label{fig:molecule500}
+\end{figure}
+
+\FloatBarrier
+
+\section{What the combined evidence supports}
+
+The controlled experiment supplies the proof: as repeats disappear, count IPS
+loses its correction, while a normalized reverse allocation removes both the
+repeat requirement and multiplicity bias. The applications add external
+validity. Phylogenetics reproduces the support failure in a domain with
+enormous path multiplicity. Molecular synthesis reproduces terminal collapse
+in a different state space and against a different flow-based baseline. The
+common result is support preservation; exact superiority to TB or RGFN is not
+established by the current evidence.
+
+\section{Limitations and conclusion}
+
+The large-grid stress test has one seed, and the molecular result is one seed
+at an interim checkpoint. The grid regimes change both \(H\) and \(G\); a
+sweep in \(K/G\) would locate the transition more precisely. The present
+27-taxon figure is a legacy self-sampled diagnostic: its MIPS-GRPO artifact is
+recoverable, but the old GFlowNet checkpoint is not, and neither method is
+evaluated on a shared fixed tree set. The running matched multi-seed experiment
+must replace it before submission. Equation~\eqref{eq:mips} assumes on-policy
+data, and replay requires an additional correction. We assume positive
+terminal rewards. The appendix 10-taxon ablation finds nearly identical
+effective sample size for fitted and uniform reverse policies, so the practical
+value of learning \(q_\phi\) remains open.
+
+Within those limits, MIPS provides a count-free answer to reward-proportional
+optimization when outcomes do not repeat and many trajectories reach one
+terminal. The toy task shows why it works; phylogenetics and molecular
+synthesis show why the problem matters.
+
+\clearpage
+\appendix
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+\renewcommand{\thetable}{A\arabic{table}}
+\renewcommand{\theHfigure}{appendix.\arabic{figure}}
+\renewcommand{\theHtable}{appendix.\arabic{table}}
+
+\section{Per-seed hypergrid results}
+
+The appendix retains the per-seed values, small-scale controls, optimization
+curves, and interim diagnostics supporting the main-paper evidence chain.
+
+\input{tables/hypergrid_per_seed}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS1_hypergrid_h8_distributions.png}
+ \caption{Terminal distributions for the small-grid positive-control regime,
+ \(H=8,G=256\) (seed 0). This raster was recovered from the previous compiled
+ draft because the original figure link pointed to another machine. Exact
+ values are in the accompanying tables and CSV files.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS2_hypergrid_h64_distributions.png}
+ \caption{Terminal distributions for the large-grid stress test,
+ \(H=64,G=32\) (seed 0). GRPO and count IPS-GRPO recover one mode; MIPS-GRPO
+ and GFlowNet TB recover all four.}
+\end{figure}
+
+\FloatBarrier
+\section{Small-scale phylogenetic validation}
+
+The 27-taxon experiment is the main-paper scale result. Here we retain the
+five-taxon exact-enumeration control and the ten-taxon scaling diagnostics. At
+five taxa all 105 unrooted binary topologies can be enumerated, so topology
+coverage supplies a direct collapse test that is unavailable at 27 taxa. The
+matched evaluation uses no replay and one million final-policy samples per
+method.
+
+\input{tables/phylo_main}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS3_phylo_5taxa_no_replay.pdf}
+ \caption{\textbf{Matched no-replay five-taxon control.} MIPS-GRPO is the only
+ method in this evaluation to cover all 105 exact topologies while retaining
+ 95.1\% distinct terminal signatures. GFlowNet TB has a similarly high
+ pathwise correlation but covers only 15 topologies, illustrating why
+ correlation must be interpreted together with support.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS4_phylo_5taxa_legacy_scatter.png}
+ \caption{\textbf{Five-taxon probability--reward scatter retained for visual
+ context.} This older four-method panel was generated under a mixed legacy
+ protocol (including a replay-based GFlowNet artifact), so it is not the source
+ of the matched no-replay numbers above and should not be used for quantitative
+ ranking.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS5_phylo_10taxa_four_methods.png}
+ \caption{\textbf{Ten-taxon scaling diagnostic.} The older four-method
+ probability--reward view shows the collapse signature for GRPO and count IPS
+ and broad sampled support for the multiplicity-aware methods. Because methods
+ sample different terminal sets, this is a within-policy diagnostic rather
+ than a shared-outcome benchmark.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS6_phylo_10taxa_matched_transform.png}
+ \caption{\textbf{Ten-taxon matched-transform view.} Linear and log--log
+ transforms are shown consistently across methods. Interpret each correlation
+ as a property of that policy's self-sampled support; a fixed-tree comparison
+ on identical outcomes remains pending.}
+\end{figure}
+
+\FloatBarrier
+\section{Additional phylogenetic diagnostics}
+
+\input{tables/phylo_diagnostic}
+\input{tables/reverse_ablation}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS7_phylo_27taxa_preliminary.png}
+ \caption{Full-size copy of the preliminary 27-taxon main-paper panel. The
+ MIPS-GRPO sample artifact is recoverable, but the old GFlowNet checkpoint is
+ not. The running no-replay, three-seed comparison will replace this figure.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS8_reverse_training.png}
+ \caption{Reverse-policy training diagnostics at 5, 10, and 27 taxa. These
+ curves describe optimization behavior; they do not by themselves establish
+ terminal-distribution fidelity.}
+\end{figure}
+
+\FloatBarrier
+\section{Interim molecular-generation result}
+
+This section freezes the sEH full-space result after 500 policy updates for
+seed 0. Each method receives 50,000 training oracle calls and 5,000 independent
+final-policy evaluation samples. The supported interim conclusion is that
+MIPS-GRPO avoids the catastrophic repetition of GRPO and count IPS-GRPO. RGFN
+has higher mean proxy score, while MIPS-GRPO has higher non-repetition. This is
+a quality--diversity tradeoff, not evidence that either diverse method is
+uniformly superior. The entire section must be refreshed after the matched
+2,000-update runs and additional seeds are complete.
+
+\input{tables/molecule_500}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS6_molecule_seed0_500.pdf}
+ \caption{Interim full-space sEH result at 500 updates (seed 0). MIPS-GRPO
+ avoids terminal collapse but occupies a lower-quality, higher-diversity
+ operating point than RGFN. Error bars across seeds are unavailable.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS7_molecule_sampling_convergence.pdf}
+ \caption{Sampling convergence for the two non-collapsed policies at the
+ interim checkpoint: accumulated distinct SMILES and running mean proxy score.}
+\end{figure}
+
+\FloatBarrier
+\clearpage
+\section{Training and additional diagnostics}
+
+The following plots document optimization behavior and stricter diagnostics.
+They are retained as supporting evidence rather than used as primary
+distributional results.
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS8_hypergrid_training_l1.png}
+ \caption{Evaluation \(\ell_1\) during training in both hypergrid regimes.
+ Panels have different scales and should not be compared numerically across
+ grid sizes. The final contrasts are stable rather than isolated checkpoint
+ fluctuations.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS9_phylo_5taxa_topology_ground_truth.png}
+ \caption{Five-taxa topology-level diagnostic against the exact 105-topology
+ target. This test is stricter than self-sampled signature correlation and
+ exposes topology-level differences hidden by pathwise fits.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS10_phylo_training_5taxa_mips.png}
+ \caption{MIPS-GRPO optimization diagnostics at five taxa.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS11_phylo_training_5taxa_tb.png}
+ \caption{GFlowNet trajectory-balance optimization diagnostics at five taxa.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS12_phylo_training_10taxa_mips.png}
+ \caption{MIPS-GRPO optimization diagnostics at ten taxa.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS13_phylo_training_10taxa_tb.png}
+ \caption{GFlowNet trajectory-balance optimization diagnostics at ten taxa.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS14_phylo_training_27taxa_mips.png}
+ \caption{Legacy MIPS-GRPO optimization diagnostics at 27 taxa. The dashed
+ line marks 10,000 epochs.}
+\end{figure}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{figureS15_phylo_training_27taxa_tb.png}
+ \caption{Legacy GFlowNet trajectory-balance optimization diagnostics at 27
+ taxa. Retained for provenance; the corresponding comparison is not a
+ headline result.}
+\end{figure}
+
+\FloatBarrier
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

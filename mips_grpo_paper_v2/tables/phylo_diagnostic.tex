@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\caption{Self-sampled pathwise diagnostics on DS1, one million draws per
+method. These are not fixed-terminal comparisons. The 27-taxa rows are legacy
+and preliminary.}
+\label{tab:phylo-diagnostic}
+\begin{tabular}{rlrrrr}
+\toprule
+Taxa & Method & Linear \(r\) & Log--log \(r\) & ESS & Unique / 1M \\
+\midrule
+5 & MIPS-GRPO & 0.994 & 0.992 & 1.000 & 951,180 \\
+5 & GFlowNet TB & 0.982 & 0.991 & --- & 100,508 \\
+5 & Count IPS-GRPO & --- & 0.565 & --- & 66,268 \\
+5 & GRPO & --- & --- & --- & 1 \\
+\addlinespace
+10 & MIPS-GRPO & 0.976 & 0.835 & 0.995 & 999,986 \\
+10 & GFlowNet TB & 0.881 & 0.698 & 0.977 & 1,000,000 \\
+\addlinespace
+27 & MIPS-GRPO & 0.977 & 0.977 & 0.999 & 999,987 \\
+27 & GFlowNet TB & 0.002 & 0.024 & 0.847 & 1,000,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+

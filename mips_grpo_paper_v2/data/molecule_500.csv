@@ -1,0 +1,5 @@
+method,checkpoint_updates,training_oracle_calls,n_sampled,valid_fraction,n_unique,unique_fraction,mean_proxy,n_mode_candidates,n_modes,top1_count,top1_share,status
+grpo,500,50000,5000,1.0,3,0.0006,4.15,0,0,4928,0.9856,collapsed
+count_ips_grpo,500,50000,5000,1.0,2,0.0004,6.04,0,0,4998,0.9996,collapsed
+mips_grpo,500,50000,5000,0.9906,4923,0.9939430648092066,4.109972116792202,4,3,4,0.0008075913587724611,diverse
+rgfn,500,50000,5000,1.0,3965,0.793,5.148858820450306,2,2,48,0.0096,diverse

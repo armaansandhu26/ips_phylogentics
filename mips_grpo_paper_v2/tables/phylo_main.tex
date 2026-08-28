@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\caption{Matched no-replay five-taxa phylogenetic evaluation, one million
+self-sampled trajectories per method. All 105 topologies are enumerable.
+Log--log \(r\) is the pathwise probability--reward diagnostic; support metrics
+are required because a high correlation can coexist with missing topologies.}
+\label{tab:phylo-main}
+\begin{tabular}{lrrr}
+\toprule
+Method & Log--log \(r\) & Unique signatures & Topologies \\
+\midrule
+GRPO & --- & 1 & 1/105 \\
+Count IPS-GRPO & 0.565 & 66,268 & 3/105 \\
+GFlowNet TB & 0.991 & 100,508 & 15/105 \\
+MIPS-GRPO & \textbf{0.992} & \textbf{951,180} & \textbf{105/105} \\
+\bottomrule
+\end{tabular}
+\end{table}

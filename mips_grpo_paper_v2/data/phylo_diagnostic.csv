@@ -1,0 +1,10 @@
+taxa,method,linear_r,loglog_r,ess,unique_per_million,status
+5,mips_grpo,0.994,0.992,1.000,951180,self_sampled
+5,gflownet_tb,0.982,0.991,,100508,self_sampled
+5,count_ips_grpo,,0.565,,66268,self_sampled
+5,grpo,,,,1,collapsed
+10,mips_grpo,0.976,0.835,0.995,999986,self_sampled
+10,gflownet_tb,0.881,0.698,0.977,1000000,self_sampled
+27,mips_grpo,0.977,0.977,0.999,999987,legacy_preliminary
+27,gflownet_tb,0.002,0.024,0.847,1000000,legacy_preliminary
+

@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\caption{Ten-taxa reverse-policy diagnostic, one million self-sampled
+trajectories. Fitted and uniform reverse policies have essentially identical
+ESS, so this experiment does not support a variance-reduction claim.}
+\begin{tabular}{llrrr}
+\toprule
+Method & Reverse policy & Linear \(r\) & Log--log \(r\) & ESS \\
+\midrule
+MIPS-GRPO & fitted \(q_\phi\) & 0.976 & 0.835 & 0.995 \\
+MIPS-GRPO & uniform & 0.000 & 0.969 & 0.995 \\
+GFlowNet TB & uniform & 0.881 & 0.698 & 0.977 \\
+\bottomrule
+\end{tabular}
+\end{table}
+

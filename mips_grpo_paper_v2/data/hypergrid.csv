@@ -1,0 +1,15 @@
+regime,H,G,K_over_G,seed,method,modes,l1,unique_terminals,eval_samples
+counting_works,8,256,0.25,0,grpo,1,1.768,1,10000
+counting_works,8,256,0.25,0,count_ips_grpo,4,0.221,64,10000
+counting_works,8,256,0.25,0,mips_grpo,4,0.049,64,10000
+counting_works,8,256,0.25,1,grpo,1,1.768,1,10000
+counting_works,8,256,0.25,1,count_ips_grpo,4,0.223,64,10000
+counting_works,8,256,0.25,1,mips_grpo,4,0.062,64,10000
+counting_works,8,256,0.25,2,grpo,1,1.768,1,10000
+counting_works,8,256,0.25,2,count_ips_grpo,4,0.234,64,10000
+counting_works,8,256,0.25,2,mips_grpo,4,0.061,64,10000
+counting_fails,64,32,128,0,grpo,1,1.966,17,50000
+counting_fails,64,32,128,0,count_ips_grpo,1,1.844,42,50000
+counting_fails,64,32,128,0,mips_grpo,4,0.262,4056,50000
+counting_fails,64,32,128,0,gflownet_tb,4,0.270,4043,50000
+

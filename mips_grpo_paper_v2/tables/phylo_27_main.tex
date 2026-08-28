@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{Current 27-taxon, one-million-draw self-sampled diagnostics. These
+numbers describe each method's own support, not a shared fixed-tree benchmark.
+The MIPS-GRPO sample artifact is recoverable; the legacy GFlowNet checkpoint is
+not, so that row is contextual and must be replaced by the running matched
+multi-seed evaluation.}
+\label{tab:phylo-27-main}
+\begin{tabular}{lrrrrl}
+\toprule
+Method & Linear \(r\) & Log--log \(r\) & ESS & Unique / 1M & Verification \\
+\midrule
+MIPS-GRPO & \textbf{0.977} & \textbf{0.977} & 0.999 & 999,987 & Artifact recovered \\
+GFlowNet TB & 0.002 & 0.024 & 0.847 & 1,000,000 & Checkpoint unavailable \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,6 @@
+method,loglog_r,unique_signatures,unique_fraction,topologies,total_topologies,eval_samples
+grpo,,1,0.000001,1,105,1000000
+count_ips_grpo,0.565,66268,0.066268,3,105,1000000
+gflownet_tb,0.991,100508,0.100508,15,105,1000000
+mips_grpo,0.992,951180,0.951180,105,105,1000000
+

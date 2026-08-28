@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\centering
+\caption{Full-space sEH proxy task, seed 0 at 500 policy updates. Every method
+uses 50,000 training oracle calls and 5,000 independent final-policy samples.
+Non-repeat is the fraction of valid samples that are distinct; Top-1 mass
+diagnoses collapse. A mode is a proxy-\(\geq7\) leader under Tanimoto
+separation 0.5.}
+\label{tab:molecule-main}
+\begin{tabular}{lrrrrr}
+\toprule
+Method & Valid & Non-repeat & Mean proxy & Modes & Top-1 mass \\
+\midrule
+GRPO & 1.000 & 0.0006 & 4.150 & 0 & 0.9856 \\
+Count IPS-GRPO & 1.000 & 0.0004 & 6.040 & 0 & 0.9996 \\
+MIPS-GRPO & 0.991 & \textbf{0.9939} & 4.110 & 3 & \textbf{0.0008} \\
+RGFN & 1.000 & 0.7930 & \textbf{5.149} & 2 & 0.0096 \\
+\bottomrule
+\end{tabular}
+\end{table}
