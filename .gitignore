@@ -95,5 +95,12 @@ molecule_synthesis/toy/runs/
 # Nested repos / editor index junk inside vendored trees
 **/.git/
 
+# Cluster job stdout/stderr (PBS/SLURM) — not run artifacts
+*.o[0-9]*
+
+# Local cluster submit helpers at repo root — not run artifacts
+/*.pbs
+/submit_*.sh
+
 # Plots (*.png / *.pdf) and code are intentionally tracked.
 # Add specific plot dumps above if they become too large for git.

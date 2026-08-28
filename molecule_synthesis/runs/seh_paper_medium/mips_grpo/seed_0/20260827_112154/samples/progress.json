@@ -1,9 +1,9 @@
 {
   "batch": 50,
-  "mean_proxy": 4.109972116792202,
+  "mean_proxy": 4.370428837870028,
   "n_batches": 50,
-  "n_requested": 5000,
-  "n_sampled": 5000,
-  "n_unique": 4923,
+  "n_requested": 50000,
+  "n_sampled": 50000,
+  "n_unique": 37186,
   "progress_fraction": 1.0
 }
