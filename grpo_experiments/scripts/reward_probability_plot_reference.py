@@ -42,18 +42,14 @@ def load_reference_spec(
     with np.load(samples_path) as payload:
         log_pf = payload["log_pf"].astype(np.float64)
         log_q_reverse = payload["log_q_reverse"].astype(np.float64)
-        metadata_path = samples_path.with_suffix(".json")
-        metadata = (
-            json.loads(metadata_path.read_text(encoding="utf-8"))
-            if metadata_path.exists()
-            else {}
-        )
-        shift = float(metadata.get("log_score_shift", 3600.0))
-        if "raw_log_likelihood" in payload:
-            log_reward = payload["raw_log_likelihood"].astype(np.float64)
-        else:
-            log_score = payload["log_score"].astype(np.float64)
-            log_reward = log_score - shift
+        # Learned-reverse diagnostics store the positive shifted-linear reward
+        # R(x) = shift + log L(x) in ``log_score``.  The plotting coordinate is
+        # therefore log R(x), not raw log L(x).  Using raw log likelihood here
+        # makes exp(log L) underflow to zero for the 27-taxa data.
+        log_score = payload["log_score"].astype(np.float64)
+        if np.any(log_score <= 0.0):
+            raise ValueError("shifted-linear scores must be positive")
+        log_reward = np.log(log_score)
 
     log_probability = log_pf - log_q_reverse
     reward = np.exp(log_reward)

@@ -1,0 +1,16 @@
+{
+  "samples": 100000,
+  "plotted_samples": 100000,
+  "observed_topologies": 100000,
+  "unique_observed_signatures": 100000,
+  "importance_ess": 99931.1376413891,
+  "importance_ess_fraction": 0.999311376413891,
+  "log_weight_std": 0.02628143235384231,
+  "log_weight_range": 0.35995866621902906,
+  "topology_total_variation": 0.010160218976346464,
+  "signature_total_variation_on_observed_support": 0.010160218976346464,
+  "loglikelihood_histogram_total_variation": 0.003150984954479947,
+  "log_model_probability_vs_log_reward_pearson_vs_ideal": 0.9778976548545512,
+  "model_probability_vs_reward_pearson_vs_ideal": 0.9778523554462959,
+  "estimated_log_partition": 314.8996585240252
+}

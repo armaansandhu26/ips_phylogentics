@@ -1,0 +1,36 @@
+{
+  "_comment": "Official PhyloGFN continuous-branch DS1 setup (published 40%/12.8M-trajectory configuration). Run this suite with --method phylgfn; the other method entries only satisfy the shared suite schema.",
+  "id": "27taxa_phylogfn_paper_40pct_seed1",
+  "taxa": 27,
+  "dataset": "dataset/benchmark_datasets/DS1.pickle",
+  "log_score_shift": 0,
+  "training": {
+    "epochs": 500,
+    "steps_per_epoch": 200,
+    "on_policy_batch_size": 64,
+    "replay_batch_size": 64,
+    "replay_buffer_size": 10000,
+    "disable_replay": false,
+    "checkpoint_every": 1,
+    "seed": 1
+  },
+  "sampling": {
+    "num_trees": 100000,
+    "batch_size": 256
+  },
+  "methods": {
+    "grpo": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml"
+    },
+    "count_ips": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml"
+    },
+    "learned_reverse": {
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml"
+    },
+    "phylgfn": {
+      "backend": "paper",
+      "cfg": "phylogfn_paper/src/configs/benchmark_dna_cfgs/continuous_branch_lengths_modeling/cfg_continuous_temperature_anneal_0.4.yaml"
+    }
+  }
+}

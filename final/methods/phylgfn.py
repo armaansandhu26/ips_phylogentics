@@ -54,6 +54,11 @@ class PhylgfnRunner:
             else str(cfg)
         )
         output_arg = self._output_arg(output_root, run_name, backend_root)
+        train_script = (
+            str(REPO_ROOT / "final" / "run_phylogfn_paper.py")
+            if self._backend(suite) == "paper"
+            else "train.py"
+        )
         if resume_from is not None:
             resolved = resume_from.resolve()
             resume_arg = (
@@ -64,7 +69,7 @@ class PhylgfnRunner:
             argv = [
                 str(PYTHON),
                 "-u",
-                "train.py",
+                train_script,
                 "resume",
                 resume_arg,
                 self._dataset_arg(suite),
@@ -76,7 +81,7 @@ class PhylgfnRunner:
             argv = [
                 str(PYTHON),
                 "-u",
-                "train.py",
+                train_script,
                 cfg_arg,
                 self._dataset_arg(suite),
                 output_arg,
@@ -95,22 +100,22 @@ class PhylgfnRunner:
         device: str,
     ) -> CommandSpec:
         if self._backend(suite) == "paper":
-            argv = [
-                str(PYTHON),
-                "-u",
-                "scripts/eval_reward_probability.py",
+            argv = repo_script(
+                "final/eval_phylogfn_paper.py",
                 "--run-dir",
                 str(run_dir),
                 "--dataset",
-                self._dataset_arg(suite),
+                str(suite.dataset),
                 "-n",
                 str(num_trees),
                 "--batch-size",
                 str(batch_size),
                 "--device",
                 device,
-            ]
-            return CommandSpec(argv=argv, cwd=PAPER_ROOT)
+                "--seed",
+                str(suite.training.seed),
+            )
+            return CommandSpec(argv=argv, cwd=REPO_ROOT)
 
         argv = repo_script(
             "grpo_experiments/scripts/eval_og_gflownet_reward_probability.py",

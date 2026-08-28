@@ -281,7 +281,11 @@ def main() -> None:
         "batch_size": int(args.batch_size),
         "seed": int(args.seed),
         "reward_target": reward_target,
-        "target": "R(x) = shifted_score = 3600 + terminal_log_likelihood",
+        "target": (
+            "R(x) = shifted_score = "
+            f"{float(getattr(env, 'log_score_shift', 3600.0)):g} "
+            "+ terminal_log_likelihood"
+        ),
         "log_score_shift": float(getattr(env, "log_score_shift", 3600.0)),
         "only_train_tree_model": bool(cfg.GFN.MODEL.ONLY_TRAIN_TREE_MODEL),
         "reverse_policy_type": reverse_policy_type,

@@ -32,3 +32,12 @@ For upstream paper reward, set:
   "cfg": "phylogfn_paper/src/configs/.../cfg_ds1_paper_27taxa_g1024_noreplay.yaml"
 }
 ```
+
+The checked-in paper-faithful DS1 suites are
+`27taxa_phylogfn_paper_40pct_seed{0,1,2}`. They use the official continuous-branch
+configuration unchanged: 500 epochs, 200 updates per epoch, 64 on-policy plus
+64 replay trajectories per update (12.8M total trajectories). Run only its
+`phylgfn` method; it is intentionally separate from the shifted-reward,
+no-replay comparison suites. After training, the pipeline uses the final
+checkpoint for both the paper-style terminal-density estimate and a 100,000
+forward-trajectory pathwise diagnostic.

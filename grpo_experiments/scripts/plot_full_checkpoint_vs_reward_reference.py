@@ -91,15 +91,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_terminal_log_likelihood(
+def load_log_target_reward(
     payload: np.lib.npyio.NpzFile,
-    *,
-    shift: float,
 ) -> np.ndarray:
-    if "raw_log_likelihood" in payload:
-        return payload["raw_log_likelihood"].astype(np.float64)
     log_score = payload["log_score"].astype(np.float64)
-    return log_score - shift
+    if np.any(log_score <= 0.0):
+        raise ValueError("shifted-linear scores must be positive")
+    return np.log(log_score)
 
 
 def normalized_reference_weights(
@@ -325,6 +323,7 @@ def save_og_scatter(
     seed: int,
     unique_signatures: int,
     title_prefix: str,
+    reward_shift: float,
     reference_log_partition: float | None = None,
     axis_spec: dict[str, float] | None = None,
 ) -> tuple[float, float]:
@@ -386,7 +385,9 @@ def save_og_scatter(
         ax.set_xlim(axis_spec["log_reward_min"], axis_spec["log_reward_max"])
     y_min, y_max = log_probability_limits(y, line_x, line_log_partition)
     ax.set_ylim(y_min, y_max)
-    ax.set_xlabel(r"Log terminal reward: $\log R(x)=\log L(x)$")
+    ax.set_xlabel(
+        rf"Log terminal reward: $\log R(x)=\log({reward_shift:g}+\log L(x))$"
+    )
     ax.set_ylabel("Pathwise implied log terminal probability")
     ax.set_title(f"{title_prefix}: terminal probability vs reward")
     ax.grid(True, alpha=0.2)
@@ -433,6 +434,7 @@ def save_linear_probability_reward_plots(
     seed: int,
     unique_signatures: int,
     title_prefix: str,
+    reward_shift: float,
     reference_log_partition: float | None = None,
     axis_spec: dict[str, float] | None = None,
 ) -> tuple[float, float]:
@@ -447,6 +449,7 @@ def save_linear_probability_reward_plots(
     selected_log_reward = log_target_reward[selected]
     model_probability = np.exp(selected_log_probability)
     target_reward = np.exp(selected_log_reward)
+    terminal_log_likelihood = target_reward - reward_shift
     estimated_log_partition = float(np.mean(log_target_reward - log_model_probability))
     line_log_partition = (
         reference_log_partition
@@ -468,7 +471,7 @@ def save_linear_probability_reward_plots(
 
     fig, ax = plt.subplots(figsize=(10, 10), dpi=220, constrained_layout=True)
     ax.scatter(
-        target_reward,
+        terminal_log_likelihood,
         model_probability,
         s=marker_size,
         alpha=alpha,
@@ -478,31 +481,43 @@ def save_linear_probability_reward_plots(
         label=sample_label,
     )
     if axis_spec is not None:
-        line_x = np.linspace(axis_spec["reward_min"], axis_spec["reward_max"], 200)
-    elif target_reward.size == 1:
-        center = float(target_reward[0])
+        line_x = np.linspace(
+            axis_spec["reward_min"] - reward_shift,
+            axis_spec["reward_max"] - reward_shift,
+            200,
+        )
+    elif terminal_log_likelihood.size == 1:
+        center = float(terminal_log_likelihood[0])
         line_x = np.linspace(center - 1.0, center + 1.0, 200)
     else:
         line_x = np.linspace(
-            float(target_reward.min()),
-            float(target_reward.max()),
+            float(terminal_log_likelihood.min()),
+            float(terminal_log_likelihood.max()),
             200,
         )
+    line_reward = line_x + reward_shift
     ax.plot(
         line_x,
-        line_x / partition,
+        line_reward / partition,
         color=GRAY,
         linestyle="--",
         linewidth=1.3,
         label=ideal_line_label(line_log_partition, show_log_z=False),
     )
     if axis_spec is not None:
-        ax.set_xlim(axis_spec["reward_min"], axis_spec["reward_max"])
-    y_min, y_max = linear_probability_limits(model_probability, line_x, partition)
+        ax.set_xlim(
+            axis_spec["reward_min"] - reward_shift,
+            axis_spec["reward_max"] - reward_shift,
+        )
+    y_min, y_max = linear_probability_limits(
+        model_probability,
+        line_reward,
+        partition,
+    )
     ax.set_ylim(y_min, y_max)
-    ax.set_xlabel(r"Terminal reward: $R(x)=L(x)$")
+    ax.set_xlabel("Terminal-tree log likelihood")
     ax.set_ylabel("Pathwise implied terminal probability")
-    ax.set_title(f"{title_prefix}: terminal probability vs reward")
+    ax.set_title(f"{title_prefix}: terminal probability vs log likelihood")
     ax.grid(True, alpha=0.2)
     ax.legend(frameon=False, loc="best")
     fig.savefig(raw_output, bbox_inches="tight")
@@ -534,7 +549,7 @@ def save_linear_probability_reward_plots(
     ax.set_xlim(lower - padding, upper + padding)
     ax.set_ylim(lower - padding, upper + padding)
     ax.set_aspect("equal", adjustable="box")
-    ax.set_xlabel(r"Terminal reward: $R(x)=L(x)$")
+    ax.set_xlabel(rf"Terminal reward: $R(x)={reward_shift:g}+\log L(x)$")
     ax.set_ylabel(r"Partition-calibrated terminal probability: $\hat ZP(x)$")
     ax.set_title(f"{title_prefix}: calibrated probability vs reward")
     ax.grid(True, alpha=0.2)
@@ -567,7 +582,7 @@ def main() -> None:
         log_q_reverse = payload["log_q_reverse"].astype(np.float64)
         topology_index = payload["topology_index"].astype(np.int64)
         topology_ids = payload["topology_ids"].astype(str)
-        log_likelihood = load_terminal_log_likelihood(payload, shift=shift)
+        log_target_reward = load_log_target_reward(payload)
 
     n = len(log_score)
     if not (len(log_pf) == len(log_q_reverse) == len(topology_index) == n):
@@ -657,8 +672,8 @@ def main() -> None:
     if axis_spec is not None:
         axis_spec = merge_reward_axis_bounds(
             axis_spec,
-            reward=np.exp(log_likelihood),
-            log_reward=log_likelihood,
+            reward=np.exp(log_target_reward),
+            log_reward=log_target_reward,
         )
         reference_run_dir = axis_spec["reference_run_dir"]
     if args.plot_method == "ppo":
@@ -669,11 +684,12 @@ def main() -> None:
     pearson, estimated_log_partition = save_og_scatter(
         args.output_dir / "log_model_probability_vs_log_reward.png",
         log_model_probability=log_model_probability,
-        log_target_reward=log_likelihood,
+        log_target_reward=log_target_reward,
         max_points=args.scatter_points,
         seed=args.seed,
         unique_signatures=len(unique_signatures),
         title_prefix=title_prefix,
+        reward_shift=shift,
         reference_log_partition=reference_log_partition,
         axis_spec=axis_spec,
     )
@@ -681,11 +697,12 @@ def main() -> None:
         args.output_dir / "model_probability_vs_reward.png",
         args.output_dir / "partition_calibrated_model_probability_vs_reward.png",
         log_model_probability=log_model_probability,
-        log_target_reward=log_likelihood,
+        log_target_reward=log_target_reward,
         max_points=args.scatter_points,
         seed=args.seed,
         unique_signatures=len(unique_signatures),
         title_prefix=title_prefix,
+        reward_shift=shift,
         reference_log_partition=reference_log_partition,
         axis_spec=axis_spec,
     )
