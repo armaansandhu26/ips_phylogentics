@@ -1,0 +1,11 @@
+{
+  "l1_distance": 0.47249602689978204,
+  "total_variation": 0.23624801344989102,
+  "num_samples": 10000,
+  "sampled_unique_terminals": 2761,
+  "num_modes_with_mass": 4.0,
+  "expected_num_modes": 4.0,
+  "peak_mode_mass": 0.2798,
+  "mean_reward": 1.0278000831604004,
+  "target_probs_path": "/home/armaan/phylogfn/final/datasets/hypergrid_64/target_distribution.npz"
+}

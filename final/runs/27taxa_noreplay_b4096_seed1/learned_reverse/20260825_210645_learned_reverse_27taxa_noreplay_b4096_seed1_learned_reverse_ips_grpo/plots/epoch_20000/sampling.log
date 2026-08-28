@@ -1,0 +1,45 @@
+[s1] sampling 100k @ epoch 20000...
+run: final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo
+checkpoint: final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/checkpoint_epoch19999.pt
+reverse state: final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/learned_reverse_epoch19999.pt
+device: cuda:0
+reverse policy: mlp
+sampling 100,000 full-model terminal trees
+/home/armaan/phylogfn/src/gfn/tb_gfn_phylo.py:126: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler()
+sampled 100,000/100,000; topologies=100000
+saved diagnostics: final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/sampled_full_diagnostics_100000.npz
+saved metadata: final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/sampled_full_diagnostics_100000.json
+reference-weight ESS: 99,931.1/100,000 (0.999311)
+[s1] plotting...
+/home/armaan/phylogfn/grpo_experiments/scripts/reward_probability_plot_reference.py:120: RuntimeWarning: overflow encountered in exp
+  ideal_prob = np.exp((log_target_reward - line_log_partition).astype(np.float64))
+/home/armaan/phylogfn/.venv/lib/python3.10/site-packages/numpy/core/_methods.py:173: RuntimeWarning: invalid value encountered in subtract
+  x = asanyarray(arr - arrmean)
+/home/armaan/phylogfn/.venv/lib/python3.10/site-packages/numpy/lib/function_base.py:2742: RuntimeWarning: invalid value encountered in subtract
+  X -= avg[:, None]
+/home/armaan/phylogfn/grpo_experiments/scripts/plot_full_checkpoint_vs_reward_reference.py:493: RuntimeWarning: invalid value encountered in divide
+  line_x / partition,
+/home/armaan/phylogfn/grpo_experiments/scripts/plot_full_checkpoint_vs_reward_reference.py:500: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
+  ax.set_xlim(axis_spec["reward_min"], axis_spec["reward_max"])
+/home/armaan/phylogfn/grpo_experiments/scripts/reward_probability_plot_reference.py:174: RuntimeWarning: invalid value encountered in divide
+  ideal_y = line_x / partition
+/home/armaan/phylogfn/grpo_experiments/scripts/plot_full_checkpoint_vs_reward_reference.py:534: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
+  ax.set_xlim(lower - padding, upper + padding)
+/home/armaan/phylogfn/grpo_experiments/scripts/plot_full_checkpoint_vs_reward_reference.py:535: UserWarning: Attempting to set identical low and high ylims makes transformation singular; automatically expanding.
+  ax.set_ylim(lower - padding, upper + padding)
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/comparison_metrics.json
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/log_model_probability_vs_log_reward.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/loglikelihood_checkpoint_vs_reward_reference.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/model_probability_vs_reward.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/observed_support_reward_reference.npz
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/partition_calibrated_model_probability_vs_reward.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/reward_reference_summary.json
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/sampled_full_diagnostics_100000.json
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/sampled_full_diagnostics_100000.npz
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/sampling.log
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/signature_checkpoint_vs_reward_reference_topk.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/signature_qhat_vs_loglikelihood_100k.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/signature_qhat_vs_loglikelihood_100k_logq.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed1/learned_reverse/20260825_210645_learned_reverse_27taxa_noreplay_b4096_seed1_learned_reverse_ips_grpo/plots/epoch_20000/topology_checkpoint_vs_reward_reference.png
+[s1] done

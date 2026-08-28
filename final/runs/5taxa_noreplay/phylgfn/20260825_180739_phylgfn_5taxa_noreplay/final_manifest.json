@@ -1,0 +1,8 @@
+{
+  "suite_id": "5taxa_noreplay",
+  "method": "phylgfn",
+  "run_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/phylgfn/20260825_180739_phylgfn_5taxa_noreplay",
+  "run_name": "phylgfn_5taxa_noreplay",
+  "comparison_metrics": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/phylgfn/20260825_180739_phylgfn_5taxa_noreplay/plots/reward_probability_eval_1000000/comparison_metrics.json",
+  "plots_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/phylgfn/20260825_180739_phylgfn_5taxa_noreplay/plots/reward_probability_eval_1000000"
+}

@@ -20,10 +20,12 @@
   },
   "methods": {
     "grpo": {
-      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml"
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml",
+      "mini_batch_splits": 4
     },
     "count_ips": {
-      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml"
+      "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml",
+      "mini_batch_splits": 4
     },
     "learned_reverse": {
       "cfg": "src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml",

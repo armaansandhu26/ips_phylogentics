@@ -1,0 +1,11 @@
+{
+  "plot": "/home/armaan/phylogfn/final/runs/hypergrid_64/plots/gt_vs_count_ips.png",
+  "l1_distance": 1.8438381091192364,
+  "total_variation": 0.9219190545596182,
+  "num_samples": 50000,
+  "sampled_unique_terminals": 42,
+  "num_modes_with_mass": 1.0,
+  "expected_num_modes": 4.0,
+  "peak_mode_mass": 0.9993000000000002,
+  "mean_reward": 2.598599910736084
+}

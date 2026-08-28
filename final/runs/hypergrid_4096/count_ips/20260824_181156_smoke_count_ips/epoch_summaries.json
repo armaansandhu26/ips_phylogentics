@@ -1,0 +1,16 @@
+[
+  {
+    "epoch": 0,
+    "method": "count_ips",
+    "mean_loss": 1.1734664440155029e-07,
+    "cumulative_unique_outcomes": 14.0,
+    "l1_distance": 1.999991556317141,
+    "total_variation": 0.9999957781585705,
+    "num_samples": 2000,
+    "sampled_unique_terminals": 36,
+    "num_modes_with_mass": 0.0,
+    "expected_num_modes": 4.0,
+    "peak_mode_mass": 0.0,
+    "mean_reward": 0.6000000238418579
+  }
+]

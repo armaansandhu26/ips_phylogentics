@@ -1,0 +1,33 @@
+[final] launching: /home/armaan/phylogfn/.venv/bin/python -u train.py src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_ds1_full_g1024_noreplay_27taxa_shift12000.yaml ../dataset/benchmark_datasets/DS1.pickle /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/phylgfn_27taxa_noreplay_b4096_seed2 --nb_device 1
+[final] running: /home/armaan/phylogfn/.venv/bin/python -u /home/armaan/phylogfn/grpo_experiments/scripts/eval_og_gflownet_reward_probability.py --run-dir /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2 --dataset dataset/benchmark_datasets/DS1.pickle -n 1000000 --batch-size 1024 --device cuda:0
+/home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/backup/src/gfn/tb_gfn_phylo.py:121: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler()
+run: /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2
+checkpoint: /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/checkpoints/checkpoint_031999.pt
+backed-up source: /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/backup
+device: cuda:0
+checkpoint log Z: 279.056885
+sampling 1,000,000 trajectories
+sampled 100,352/1,000,000
+sampled 200,704/1,000,000
+sampled 300,032/1,000,000
+sampled 400,384/1,000,000
+sampled 500,736/1,000,000
+sampled 600,064/1,000,000
+sampled 700,416/1,000,000
+sampled 800,768/1,000,000
+sampled 900,096/1,000,000
+sampled 1,000,000/1,000,000
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/plots/reward_probability_eval_1000000/comparison_metrics.json
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/plots/reward_probability_eval_1000000/og_gflownet_log_probability_vs_log_reward.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/plots/reward_probability_eval_1000000/og_gflownet_model_probability_vs_reward.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/plots/reward_probability_eval_1000000/og_gflownet_partition_calibrated_probability_vs_reward.png
+wrote /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/plots/reward_probability_eval_1000000/og_gflownet_reward_probability_samples.npz
+{
+  "suite_id": "27taxa_noreplay_b4096_seed2",
+  "method": "phylgfn",
+  "run_dir": "/home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2",
+  "run_name": "phylgfn_27taxa_noreplay_b4096_seed2",
+  "comparison_metrics": "/home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/plots/reward_probability_eval_1000000/comparison_metrics.json",
+  "plots_dir": "/home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/plots/reward_probability_eval_1000000"
+}

@@ -1,0 +1,22 @@
+{
+  "run_dir": "final/runs/27taxa_noreplay_b4096_seed0/learned_reverse/20260825_191559_learned_reverse_27taxa_noreplay_b4096_seed0_learned_reverse_ips_grpo",
+  "method": "learned_reverse_ips_grpo",
+  "checkpoint_path": "final/runs/27taxa_noreplay_b4096_seed0/learned_reverse/20260825_191559_learned_reverse_27taxa_noreplay_b4096_seed0_learned_reverse_ips_grpo/checkpoint_epoch19999.pt",
+  "reverse_state_path": "final/runs/27taxa_noreplay_b4096_seed0/learned_reverse/20260825_191559_learned_reverse_27taxa_noreplay_b4096_seed0_learned_reverse_ips_grpo/learned_reverse_epoch19999.pt",
+  "reverse_update_step": 80000,
+  "device": "cuda:0",
+  "num_trees": 100000,
+  "batch_size": 4096,
+  "seed": 0,
+  "reward_target": "shifted_linear",
+  "target": "R(x) = shifted_score = 3600 + terminal_log_likelihood",
+  "log_score_shift": 12000.0,
+  "only_train_tree_model": false,
+  "reverse_policy_type": "mlp",
+  "observed_topologies": 100000,
+  "importance_ess": 99936.35360477859,
+  "importance_ess_fraction": 0.9993635360477859,
+  "log_weight_min": 314.6926569711234,
+  "log_weight_max": 315.04452495173007,
+  "log_weight_std": 0.02526136918858727
+}

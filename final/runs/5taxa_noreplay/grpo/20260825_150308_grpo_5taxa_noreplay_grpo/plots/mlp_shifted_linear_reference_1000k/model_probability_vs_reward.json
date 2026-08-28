@@ -1,0 +1,10 @@
+{
+  "samples": 1000000,
+  "unique_signatures": 1,
+  "quantity": "empirical_signature_frequency",
+  "reward_min": 362.6189270019531,
+  "reward_max": 362.6189270019531,
+  "fit": null,
+  "samples_file": "final/runs/5taxa_noreplay/grpo/20260825_150308_grpo_5taxa_noreplay_grpo/sampled_full_diagnostics_1000000.npz",
+  "plot": "final/runs/5taxa_noreplay/grpo/20260825_150308_grpo_5taxa_noreplay_grpo/plots/mlp_shifted_linear_reference_1000k/model_probability_vs_reward.png"
+}

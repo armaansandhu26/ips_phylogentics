@@ -2,124 +2,154 @@
 
 Living checklist for paper/revision experiments. Update this file as runs finish.
 
-**Last updated:** Aug 27, 2026 ~20:57 — **71% primary path**; hg64 s2 + 27t LR-IPS co-scheduled on GPUs 0–2  
-**Related docs:** [`AUG25_COMPLETED_RUNS.md`](AUG25_COMPLETED_RUNS.md) · [`PAPER_REVISION_PRIORITIES.md`](PAPER_REVISION_PRIORITIES.md) · [`P1_RESULTS.md`](P1_RESULTS.md) · [`draft1/README.md`](draft1/README.md)
+**Last updated:** Aug 28, 2026 ~01:00 — **73% primary path**; hg64 MIPS+TB s2 + 27t LR-IPS on GPUs 0–3  
+**Related docs:** `[AUG25_COMPLETED_RUNS.md](AUG25_COMPLETED_RUNS.md)` · `[PAPER_REVISION_PRIORITIES.md](PAPER_REVISION_PRIORITIES.md)` · `[P1_RESULTS.md](P1_RESULTS.md)` · `[draft1/README.md](draft1/README.md)`
 
 ---
 
 ## Legend
 
-| Symbol | Meaning |
-|--------|---------|
-| ✅ | Done — train + eval + plots |
-| 🔄 | Active — training or eval in progress |
-| ⏳ | Planned — not started |
-| ❌ | Failed / blocked |
-| 🔸 | Partial — some steps done (e.g. train only, or seed 0 only) |
 
-Checkbox columns: `[x]` done · `[ ]` not done
+| Symbol | Meaning                                                     |
+| ------ | ----------------------------------------------------------- |
+| ✅      | Done — train + eval + plots                                 |
+| 🔄     | Active — training or eval in progress                       |
+| ⏳      | Planned — not started                                       |
+| ❌      | Failed / blocked                                            |
+| 🔸     | Partial — some steps done (e.g. train only, or seed 0 only) |
+
+
+Checkbox columns: `[x]` done · `[ ]` not done · **✅** / **[x]** cells with sampling plots link to `terminal_distribution_comparison.png` (hypergrid) or `model_probability_vs_reward.png` (phylo)
 
 ---
+
+
 
 ## Dashboard (at a glance)
 
+
+
 ### Primary
 
-| Section | Done | Active | Planned | Failed |
-|---------|-----:|-------:|--------:|-------:|
-| Hyper-Grid 64 | 8 | 3 | 1 | 0 |
-| Hyper-Grid 8 b256 | 9 | 0 | 0 | 0 |
-| Phylogenetics 27t | 2 | 4 | 0 | 1 |
-| Analysis / paper | 8 | 1 | 3 | 0 |
+
+| Section           | Done | Active | Planned | Failed |
+| ----------------- | ---- | ------ | ------- | ------ |
+| Hyper-Grid 64     | 10   | 2      | 0       | 0      |
+| Hyper-Grid 8 b256 | 9    | 0      | 0       | 0      |
+| Phylogenetics 27t | 3    | 3      | 0       | 1      |
+| Analysis / paper  | 8    | 1      | 3       | 0      |
+
+
+
 
 ### Extras
 
-| Section | Done | Active | Planned | Failed |
-|---------|-----:|-------:|--------:|-------:|
-| Hyper-Grid 4096 | 2 | 0 | 0 | 0 |
-| Phylogenetics 5t | 4 | 0 | 0 | 0 |
-| Phylogenetics 10t | 1 | 0 | 4 | 0 |
 
-<!-- PROGRESS_START -->
+| Section           | Done | Active | Planned | Failed |
+| ----------------- | ---- | ------ | ------- | ------ |
+| Hyper-Grid 4096   | 2    | 0      | 0       | 0      |
+| Phylogenetics 5t  | 4    | 0      | 0       | 0      |
+| Phylogenetics 10t | 1    | 0      | 0       | 0      |
+
+
+
 
 ## Overall progress
 
-**Primary path (paper-critical): 71%** `██████████████░░░░░░`
+**Primary path (paper-critical): 73%** `███████████████░░░░░`
 
-*Method: each run cell = 50% train + 25% eval + 25% plots. Active runs credit train fraction only. Refresh: `.venv/bin/python final/paper/progress_summary.py --patch`*
+*Method: each run cell = 50% train + 25% eval + 25% plots. Active runs credit train fraction only. Refresh:* `.venv/bin/python final/paper/progress_summary.py --patch`
 
-| Track | Weight | Progress | Bar |
-|-------|-------:|---------:|:---:|
-| Hyper-Grid 64 (4×3 seeds) | 12 | **68%** | `██████████████░░░░░░` |
-| Hyper-Grid 8 b256 | 9 | **100%** | `████████████████████` |
-| Phylo 27t (LR-IPS + PhyloGFN ×3) | 6 | **38%** | `████████░░░░░░░░░░░░` |
-| Analysis / paper deliverables | 12 | **67%** | `█████████████░░░░░░░` |
-| **Primary total** | **39** | **71%** | `██████████████░░░░░░` |
+
+| Track                            | Weight | Progress | Bar                    |
+| -------------------------------- | ------ | -------- | ---------------------- |
+| Hyper-Grid 64 (4×3 seeds)        | 12     | **76%**  | `███████████████░░░░░` |
+| Hyper-Grid 8 b256                | 9      | **100%** | `████████████████████` |
+| Phylo 27t (LR-IPS + PhyloGFN ×3) | 6      | **40%**  | `████████░░░░░░░░░░░░` |
+| Analysis / paper deliverables    | 12     | **67%**  | `█████████████░░░░░░░` |
+| **Primary total**                | **39** | **73%**  | `███████████████░░░░░` |
+
+
+
 
 ### Active training (epoch % only)
 
-| Run | Epoch progress |
-|-----|---------------:|
-| 27t LR-IPS s0 | 15,004 / 25,000 (**60.0%**) ⏸️ |
-| 27t LR-IPS s1 | 16,001 / 25,000 (**64.0%**) ⏸️ |
-| 27t LR-IPS s2 | 10,001 / 25,000 (**40.0%**) ⏸️ |
-| 27t PhyloGFN s0 | ✅ train + 1M eval + plots |
-| 27t PhyloGFN s1 | ✅ train + 1M eval + plots |
-| 27t PhyloGFN s2 | 30,999 / 32,000 (**96.9%**) |
-| hg64 GRPO s2 | 2,135 / 10,000 (**21.4%**) |
-| hg64 Count-IPS s2 | 1,626 / 10,000 (**16.3%**) |
-| hg64 MIPS-GRPO s2 | 494 / 10,000 (**4.9%**) |
-| *Avg across active jobs* | **63.9%** |
+
+| Run                      | Epoch progress               |
+| ------------------------ | ---------------------------- |
+| 27t LR-IPS s0            | 16,622 / 25,000 (**66.5%**)  |
+| 27t LR-IPS s1            | 17,396 / 25,000 (**69.6%**)  |
+| 27t LR-IPS s2            | 11,060 / 25,000 (**44.2%**)  |
+| 27t PhyloGFN s0          | ✅ train + 1M eval + plots    |
+| 27t PhyloGFN s1          | ✅ train + 1M eval + plots    |
+| 27t PhyloGFN s2          | 31,999 / 32,000 (**100.0%**) |
+| hg64 GRPO s2             | 9,999 / 10,000 (**100.0%**)  |
+| hg64 Count-IPS s2        | 9,999 / 10,000 (**100.0%**)  |
+| hg64 MIPS-GRPO s2        | 3,097 / 10,000 (**31.0%**)   |
+| *Avg across active jobs* | **82.8%**                    |
+
 
 **Extras** (5t, 10t ablation, hg4096 — not in primary): **64%** `█████████████░░░░░░░`
 
-<!-- PROGRESS_END -->
+
 
 ### Active training — rates & ETA (manual; refresh ~hourly)
 
-| Run | GPU | Progress | Rate | ETA |
-|-----|:---:|----------|-----:|:---:|
-| hg64 GRPO s2 + 27t LR-IPS s0 | 0 | hg64 ~12% · 27t ~60% (resumed @15k) | ~520 / ~280 ep/h | hg64 Aug 28 ~14h · 27t Aug 29 |
-| hg64 Count-IPS s2 + 27t LR-IPS s1 | 1 | hg64 ~9% · 27t ~66% (resumed @16k) | ~520 / ~280 ep/h | hg64 Aug 28 ~15h · 27t Aug 28 eve |
-| hg64 MIPS s2 + 27t LR-IPS s2 | 2 | hg64 ~4% · 27t ~41% (resumed @10k) | ~480 / ~280 ep/h | hg64 Aug 28 ~17h · 27t Aug 29 |
-| 27t PhyloGFN s2 | 3 | 29,999 / 32,000 (**93.7%**) | ~1,270 ep/h | **~22:20 tonight** |
-| hg64 seed1 (all 4) | — | ✅ complete | — | — |
-| 27t PhyloGFN s0/s1 | — | ✅ train + 1M eval + plots | — | — |
 
-**VRAM co-schedule:** ~11–12 GB / 40 GB per GPU (hg64 ~0.5 GB + 27t ~11 GB). GPU 0 already at 100% util.
+| Run                          | GPU | Progress                         | Rate             | ETA                           |
+| ---------------------------- | --- | -------------------------------- | ---------------- | ----------------------------- |
+| 27t LR-IPS s0                | 0   | 16,583 / 25k (**66.3%**)         | ~280 ep/h        | Aug 29 ~07h                   |
+| 27t LR-IPS s1                | 1   | 17,356 / 25k (**69.4%**)         | ~280 ep/h        | Aug 29 ~05h                   |
+| hg64 MIPS s2 + 27t LR-IPS s2 | 2   | hg64 ~31% · 27t ~44%             | ~480 / ~280 ep/h | hg64 Aug 28 ~12h · 27t Aug 30 |
+| hg64 GFlowNet TB s2          | 3   | 5,542 / 10k (**55.4%**)          | ~1,400 ep/h      | Aug 28 ~04h                   |
+| hg64 GRPO s2                 | —   | ✅ train + eval + plots (L1=1.97) | —                | —                             |
+| hg64 Count-IPS s2            | —   | ✅ train + eval + plots (L1=1.85) | —                | —                             |
+| 27t PhyloGFN s0/s1/s2        | —   | ✅ train + 1M eval + plots        | —                | —                             |
+| hg64 seed1 (all 4)           | —   | ✅ complete                       | —                | —                             |
 
-**Critical path:** PhyloGFN s2 (~1.5h) → parallel hg64 s2 + 27t LR-IPS finish over Aug 28–29.
+
+**VRAM:** GPUs 0–1: 27t only (~~11 GB). GPU 2: hg64 MIPS + 27t (~~11 GB). GPU 3: hg64 TB only (~0.5 GB).
+
+**Critical path:** hg64 TB s2 (~~3h) → hg64 MIPS s2 (~~11h) → 27t LR-IPS finish Aug 29–30.
 
 ---
+
+
 
 ## Hyper-Grid 64 (`hypergrid_64`)
 
 **Config:** `final/configs/suites/hypergrid_64.json` · **Grid:** H=64, D=2 (64×64 → 4096 terminals) · **G=32** (batch / GRPO group size) · **Target:** 25k epochs · **Eval:** 50k terminal samples  
-**Plots:** `final/runs/hypergrid_64/plots/epoch_24999/`
+**Plots:** `[epoch_24999/](../runs/hypergrid_64/plots/epoch_24999/terminal_distribution_comparison.png)`
 
 **Confirmed hyperparams (seed 0 runs):** `batch_size=32`, `steps_per_epoch=10`, `lr=0.001`, `clip_eps=0.2`, `checkpoint_every=200`, `eval_every=250`, `eval_samples=10000` (50k for final plots). See `resolved_config.json` in each run dir. *(Suite JSON lists 2000 epochs; actual headline runs were resumed/extended to 25k.)*
 
 ### Training grid
 
-| Method | S0 | S1 | S2 | Notes |
-|--------|:--:|:--:|:--:|-------|
-| GRPO | ✅ | ✅ | 🔄 | S0: 1/4 modes, L1=1.97 · S1: 1/4 modes, L1=1.97 · S2: ~9% @ 10k |
-| Count-IPS | ✅ | ✅ | 🔄 | S0: 1/4 modes, L1=1.84 · S1: 1/4 modes, L1=1.84 · S2: ~6% @ 10k |
-| Learned-Reverse IPS | ✅ | ✅ | 🔄 | S0: **4/4 modes**, L1=0.26 · S1: **4/4 modes**, L1=0.52 · S2: ~2% @ 10k |
-| GFlowNet TB | ✅ | ✅ | ⏳ | S0: **4/4 modes**, L1=0.27 · S1: **4/4 modes**, L1=0.32 |
+
+| Method              | S0                                                                               | S1                                                                                    | S2                                                                                                  | Notes                                                                    |
+| ------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| GRPO                | [✅](../runs/hypergrid_64/plots/epoch_24999/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_64_seed1/plots/epoch_9999/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_64_seed2/plots/epoch_9999_grpo_countips/terminal_distribution_comparison.png) | S0: 1/4 modes, L1=1.97 · S1: 1/4 modes, L1=1.97 · S2: 1/4 modes, L1=1.97 |
+| Count-IPS           | [✅](../runs/hypergrid_64/plots/epoch_24999/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_64_seed1/plots/epoch_9999/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_64_seed2/plots/epoch_9999_grpo_countips/terminal_distribution_comparison.png) | S0: 1/4 modes, L1=1.84 · S1: 1/4 modes, L1=1.84 · S2: 1/4 modes, L1=1.85 |
+| Learned-Reverse IPS | [✅](../runs/hypergrid_64/plots/epoch_24999/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_64_seed1/plots/epoch_9999/terminal_distribution_comparison.png) | 🔄                                                                                                  | S0: **4/4 modes**, L1=0.26 · S1: **4/4 modes**, L1=0.52 · S2: ~31% @ 10k |
+| GFlowNet TB         | [✅](../runs/hypergrid_64/plots/epoch_24999/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_64_seed1/plots/epoch_9999/terminal_distribution_comparison.png) | 🔄                                                                                                  | S0: **4/4 modes**, L1=0.27 · S1: **4/4 modes**, L1=0.32 · S2: ~60% @ 10k |
+
+
+
 
 ### Final sampling stats — mean ± std across seeds (50k samples)
 
 **Checkpoint:** S0 @ epoch 24999 · S1 @ epoch 9999 · **n = 2** (S2 pending — refresh when complete)
 
-| Method | Modes S0 | Modes S1 | Modes μ ± σ | L1 S0 | L1 S1 | L1 μ ± σ | Peak mass μ ± σ | Unique terminals μ ± σ |
-|--------|:--------:|:--------:|:-----------:|------:|------:|:--------:|:---------------:|:----------------------:|
-| GRPO | 1 | 1 | 1.0 ± 0.0 | 1.966 | 1.968 | **1.967 ± 0.002** | 1.000 ± 0.000 | 14.5 ± 3.5 |
-| Count-IPS | 1 | 1 | 1.0 ± 0.0 | 1.844 | 1.845 | **1.844 ± 0.001** | 1.000 ± 0.000 | 42.5 ± 0.7 |
-| LR-IPS | 4 | 4 | 4.0 ± 0.0 | 0.262 | 0.323 | **0.293 ± 0.044** | 0.275 ± 0.007 | 4040 ± 23 |
-| GFlowNet TB | 4 | 4 | 4.0 ± 0.0 | 0.270 | 0.324 | **0.297 ± 0.038** | 0.272 ± 0.008 | 4043 ± 0 |
 
-*Sources: S0 → `final/runs/hypergrid_64/plots/epoch_24999/recovery_summary.json` (50k). S1 GRPO/Count-IPS → `hypergrid_64_seed1/plots/epoch_9999_grpo_countips/`; S1 TB → `…/epoch_9999_grpo_countips_tb/`; S1 LR-IPS → CPU 50k resample @ `checkpoint_epoch9999.pt` (GPU `plots/epoch_9999/` corrupt — do not use). σ = sample std, ddof=1 (n−1).*
+| Method      | Modes S0 | Modes S1 | Modes μ ± σ | L1 S0 | L1 S1 | L1 μ ± σ          | Peak mass μ ± σ | Unique terminals μ ± σ |
+| ----------- | -------- | -------- | ----------- | ----- | ----- | ----------------- | --------------- | ---------------------- |
+| GRPO        | 1        | 1        | 1.0 ± 0.0   | 1.966 | 1.968 | **1.967 ± 0.002** | 1.000 ± 0.000   | 14.5 ± 3.5             |
+| Count-IPS   | 1        | 1        | 1.0 ± 0.0   | 1.844 | 1.845 | **1.844 ± 0.001** | 1.000 ± 0.000   | 42.5 ± 0.7             |
+| LR-IPS      | 4        | 4        | 4.0 ± 0.0   | 0.262 | 0.323 | **0.293 ± 0.044** | 0.275 ± 0.007   | 4040 ± 23              |
+| GFlowNet TB | 4        | 4        | 4.0 ± 0.0   | 0.270 | 0.324 | **0.297 ± 0.038** | 0.272 ± 0.008   | 4043 ± 0               |
+
+
+*Sources: S0 →* `final/runs/hypergrid_64/plots/epoch_24999/recovery_summary.json` *(50k). S1 GRPO/Count-IPS →* `hypergrid_64_seed1/plots/epoch_9999_grpo_countips/`*; S1 TB →* `…/epoch_9999_grpo_countips_tb/`*; S1 LR-IPS → CPU 50k resample @* `checkpoint_epoch9999.pt` *(GPU* `plots/epoch_9999/` *corrupt — do not use). σ = sample std, ddof=1 (n−1).*
 
 **Refresh when S2 finishes:** add S2 column from trusted 50k `recovery_summary.json`, recompute μ ± σ over S0–S2 (n=3).
 
@@ -130,16 +160,20 @@ Checkbox columns: `[x]` done · `[ ]` not done
 - [x] LR-IPS — `final/runs/hypergrid_64/learned_reverse_ips/20260824_212235_hypergrid_64_learned_reverse_ips`
 - [x] TB — `final/runs/hypergrid_64/trajectory_balance/20260824_224747_hypergrid_64_trajectory_balance`
 
+
+
 ### Seed 1 (Aug 27)
 
 **Config:** `final/configs/suites/hypergrid_64_seed1.json` · **10k epochs** · eval 10k@250 · seed 1
 
-| Method | GPU | Train | Eval | Plots | Status | Log |
-|--------|-----|:-----:|:----:|:-----:|--------|-----|
-| GRPO | 1 | [x] | [x] | [x] | ✅ 1/4 modes, L1=1.97 | `final/runs/hypergrid_64_seed1/grpo/pipeline.log` |
-| Count-IPS | 1 | [x] | [x] | [x] | ✅ 1/4 modes, L1=1.84 | `final/runs/hypergrid_64_seed1/count_ips/pipeline.log` |
-| LR-IPS | 3 | [x] | [x] | [x] | ✅ **4/4 modes**, L1=0.52 | `final/runs/hypergrid_64_seed1/learned_reverse_ips/pipeline.log` |
-| GFlowNet TB | 3 | [x] | [x] | [x] | ✅ **4/4 modes**, L1=0.32 | `final/runs/hypergrid_64_seed1/trajectory_balance/pipeline.log` |
+
+| Method      | GPU | Train | Eval | Plots                                                                                 | Status                   | Log                                                              |
+| ----------- | --- | ----- | ---- | ------------------------------------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------- |
+| GRPO        | 1   | [x]   | [x]  | [x](../runs/hypergrid_64_seed1/plots/epoch_9999/terminal_distribution_comparison.png) | ✅ 1/4 modes, L1=1.97     | `final/runs/hypergrid_64_seed1/grpo/pipeline.log`                |
+| Count-IPS   | 1   | [x]   | [x]  | [x](../runs/hypergrid_64_seed1/plots/epoch_9999/terminal_distribution_comparison.png) | ✅ 1/4 modes, L1=1.84     | `final/runs/hypergrid_64_seed1/count_ips/pipeline.log`           |
+| LR-IPS      | 3   | [x]   | [x]  | [x](../runs/hypergrid_64_seed1/plots/epoch_9999/terminal_distribution_comparison.png) | ✅ **4/4 modes**, L1=0.52 | `final/runs/hypergrid_64_seed1/learned_reverse_ips/pipeline.log` |
+| GFlowNet TB | 3   | [x]   | [x]  | [x](../runs/hypergrid_64_seed1/plots/epoch_9999/terminal_distribution_comparison.png) | ✅ **4/4 modes**, L1=0.32 | `final/runs/hypergrid_64_seed1/trajectory_balance/pipeline.log`  |
+
 
 - [x] Create suite config `hypergrid_64_seed1.json`
 - [x] Launch 4 runs (seed 1, 10k epochs)
@@ -147,21 +181,28 @@ Checkbox columns: `[x]` done · `[ ]` not done
 - [x] GRPO + Count-IPS + TB partial suite plots @ epoch 9999 (50k samples) → `final/runs/hypergrid_64_seed1/plots/epoch_9999_grpo_countips_tb/`
 - [x] Full 4-method `plot_comparison` @ epoch 9999 → `final/runs/hypergrid_64_seed1/plots/epoch_9999/`
 
+
+
 ### Seed 2 (Aug 27 — in progress)
 
 **Config:** `final/configs/suites/hypergrid_64_seed2.json` · **10k epochs** · eval 10k@250 · seed 2
 
-| Method | GPU | Train | Eval | Plots | Status | Log |
-|--------|-----|:-----:|:----:|:-----:|--------|-----|
-| GRPO | 0 | [ ] | [ ] | [ ] | 🔄 ~870 / 10k (**8.7%**) | `final/runs/hypergrid_64_seed2/grpo/pipeline.log` |
-| Count-IPS | 1 | [ ] | [ ] | [ ] | 🔄 ~620 / 10k (**6.2%**) | `final/runs/hypergrid_64_seed2/count_ips/pipeline.log` |
-| MIPS-GRPO | 2 | [ ] | [ ] | [ ] | 🔄 ~235 / 10k (**2.4%**) | `final/runs/hypergrid_64_seed2/learned_reverse_ips/pipeline.log` |
-| GFlowNet TB | — | [ ] | [ ] | [ ] | ⏳ not scheduled | — |
+
+| Method      | GPU | Train | Eval | Plots                                                                                               | Status                     | Log                                                              |
+| ----------- | --- | ----- | ---- | --------------------------------------------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------- |
+| GRPO        | —   | [x]   | [x]  | [x](../runs/hypergrid_64_seed2/plots/epoch_9999_grpo_countips/terminal_distribution_comparison.png) | ✅ 1/4 modes, L1=1.97       | `final/runs/hypergrid_64_seed2/grpo/pipeline.log`                |
+| Count-IPS   | —   | [x]   | [x]  | [x](../runs/hypergrid_64_seed2/plots/epoch_9999_grpo_countips/terminal_distribution_comparison.png) | ✅ 1/4 modes, L1=1.85       | `final/runs/hypergrid_64_seed2/count_ips/pipeline.log`           |
+| MIPS-GRPO   | —   | [x]   | [x]  | [ ]                                                                                                 | ✅ train+eval done          | `final/runs/hypergrid_64_seed2/learned_reverse_ips/pipeline.log` |
+| GFlowNet TB | —   | [x]   | [x]  | [ ]                                                                                                 | ✅ train+eval done          | `final/runs/hypergrid_64_seed2/trajectory_balance/pipeline.log`  |
+
 
 - [x] Create suite config `hypergrid_64_seed2.json`
-- [x] Launch 3 runs (GRPO + Count-IPS + MIPS-GRPO on GPUs 0–2)
-- [ ] Launch TB seed 2 when GPU available
-- [ ] Suite plots @ epoch 9999 when seed 2 training finishes
+- [x] Launch GRPO + Count-IPS + MIPS-GRPO (GPUs 0–2, Aug 27)
+- [x] Launch GFlowNet TB seed 2 on GPU 3 (Aug 27 ~21:33)
+- [x] GRPO + Count-IPS partial suite plots @ epoch 9999 (50k samples) → `final/runs/hypergrid_64_seed2/plots/epoch_9999_grpo_countips/`
+- [ ] Suite plots @ epoch 9999 — **🔄 running on GPU 2** → `final/runs/hypergrid_64_seed2/plots/epoch_9999/`
+
+
 
 ### Plots & analysis
 
@@ -174,31 +215,39 @@ Checkbox columns: `[x]` done · `[ ]` not done
 
 ---
 
+
+
 ## Hyper-Grid 8 (`hypergrid_8_b256`) — b256, 2k epochs ✅ COMPLETE
 
 **3 methods × 3 seeds = 9 runs.** Batch 256, eval **5k samples every 200 epochs**, stopped @ **2k epochs** (Aug 26).
 
 **Configs:** `hypergrid_8_b256_seed{0,1,2}.json`  
-**Run dirs:** `final/runs/hypergrid_8_b256_seed{0,1,2}/{grpo,count_ips,learned_reverse_ips}/20260826_*`  
-**Plots:** `final/runs/hypergrid_8_b256/plots/seed{0,1,2}/` (all generated)
+**Run dirs:** `final/runs/hypergrid_8_b256_seed{0,1,2}/{grpo,count_ips,learned_reverse_ips}/20260826_`*  
+**Plots:** `[seed0](../runs/hypergrid_8_b256/plots/seed0/terminal_distribution_comparison.png)` · `[seed1](../runs/hypergrid_8_b256/plots/seed1/terminal_distribution_comparison.png)` · `[seed2](../runs/hypergrid_8_b256/plots/seed2/terminal_distribution_comparison.png)`
 
-| Method | S0 | S1 | S2 | Notes |
-|--------|:--:|:--:|:--:|-------|
-| GRPO | ✅ | ✅ | ✅ | 1/4 modes, L1=1.768 (all seeds) |
-| Count-IPS | ✅ | ✅ | ✅ | **4/4 modes**, L1≈0.22–0.23 |
-| MIPS-GRPO | ✅ | ✅ | ✅ | **4/4 modes**, L1≈0.049–0.062 |
+
+| Method    | S0                                                                             | S1                                                                             | S2                                                                             | Notes                           |
+| --------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------------------- |
+| GRPO      | [✅](../runs/hypergrid_8_b256/plots/seed0/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_8_b256/plots/seed1/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_8_b256/plots/seed2/terminal_distribution_comparison.png) | 1/4 modes, L1=1.768 (all seeds) |
+| Count-IPS | [✅](../runs/hypergrid_8_b256/plots/seed0/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_8_b256/plots/seed1/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_8_b256/plots/seed2/terminal_distribution_comparison.png) | **4/4 modes**, L1≈0.22–0.23     |
+| MIPS-GRPO | [✅](../runs/hypergrid_8_b256/plots/seed0/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_8_b256/plots/seed1/terminal_distribution_comparison.png) | [✅](../runs/hypergrid_8_b256/plots/seed2/terminal_distribution_comparison.png) | **4/4 modes**, L1≈0.049–0.062   |
+
+
+
 
 ### Final sampling stats — mean ± std across seeds (10k samples)
 
 **Checkpoint:** all seeds @ epoch **1999** · **n = 3** (complete)
 
-| Method | Modes S0 | Modes S1 | Modes S2 | Modes μ ± σ | L1 S0 | L1 S1 | L1 S2 | L1 μ ± σ | Peak mass μ ± σ | Unique terminals μ ± σ |
-|--------|:--------:|:--------:|:--------:|:-----------:|------:|------:|------:|:--------:|:---------------:|:------------------------:|
-| GRPO | 1 | 1 | 1 | 1.0 ± 0.0 | 1.768 | 1.768 | 1.768 | **1.768 ± 0.000** | 1.000 ± 0.000 | 1 ± 0 |
-| Count-IPS | 4 | 4 | 4 | 4.0 ± 0.0 | 0.221 | 0.223 | 0.234 | **0.226 ± 0.007** | 0.532 ± 0.028 | 64 ± 0 |
-| MIPS-GRPO | 4 | 4 | 4 | 4.0 ± 0.0 | 0.049 | 0.062 | 0.061 | **0.057 ± 0.007** | 0.465 ± 0.003 | 64 ± 0 |
 
-*Sources: `final/runs/hypergrid_8_b256/plots/seed{0,1,2}/recovery_summary.json` (10k samples @ epoch 1999). σ = sample std, ddof=1 (n−1).*
+| Method    | Modes S0 | Modes S1 | Modes S2 | Modes μ ± σ | L1 S0 | L1 S1 | L1 S2 | L1 μ ± σ          | Peak mass μ ± σ | Unique terminals μ ± σ |
+| --------- | -------- | -------- | -------- | ----------- | ----- | ----- | ----- | ----------------- | --------------- | ---------------------- |
+| GRPO      | 1        | 1        | 1        | 1.0 ± 0.0   | 1.768 | 1.768 | 1.768 | **1.768 ± 0.000** | 1.000 ± 0.000   | 1 ± 0                  |
+| Count-IPS | 4        | 4        | 4        | 4.0 ± 0.0   | 0.221 | 0.223 | 0.234 | **0.226 ± 0.007** | 0.532 ± 0.028   | 64 ± 0                 |
+| MIPS-GRPO | 4        | 4        | 4        | 4.0 ± 0.0   | 0.049 | 0.062 | 0.061 | **0.057 ± 0.007** | 0.465 ± 0.003   | 64 ± 0                 |
+
+
+*Sources:* `final/runs/hypergrid_8_b256/plots/seed{0,1,2}/recovery_summary.json` *(10k samples @ epoch 1999). σ = sample std, ddof=1 (n−1).*
 
 **Key result:** With $G=256 > 64$ terminals, count IPS works (4/4 modes) but MIPS-GRPO still achieves ~4× lower $\ell_1$.
 
@@ -212,6 +261,8 @@ Checkbox columns: `[x]` done · `[ ]` not done
 
 ---
 
+
+
 ## Phylogenetics — 27 taxa (`27taxa_noreplay_b4096_seed*`)
 
 **Configs:** `final/configs/suites/27taxa_noreplay_b4096_seed{0,1,2}.json`  
@@ -219,21 +270,25 @@ Checkbox columns: `[x]` done · `[ ]` not done
 
 ### LR-IPS (3 seeds)
 
-| Seed | Train | Eval | Plots | Progress | GPU |
-|------|:-----:|:----:|:-----:|----------|-----|
-| 0 | 🔄 | [ ] | [ ] | ~15k / 25k (**60%**) — co-sched w/ hg64 GRPO | 0 |
-| 1 | 🔄 | [ ] | [ ] | ~16k / 25k (**66%**) — co-sched w/ hg64 Count-IPS | 1 |
-| 2 | 🔄 | [ ] | [ ] | ~10k / 25k (**41%**) — co-sched w/ hg64 MIPS | 2 |
 
-**Run dirs:** `final/runs/27taxa_noreplay_b4096_seed{0,1,2}/learned_reverse/20260825_*`
+| Seed | Train | Eval | Plots | Progress                 | GPU |
+| ---- | ----- | ---- | ----- | ------------------------ | --- |
+| 0    | 🔄    | [ ]  | [ ]   | 16,583 / 25k (**66.3%**) | 0   |
+| 1    | 🔄    | [ ]  | [ ]   | 17,356 / 25k (**69.4%**) | 1   |
+| 2    | 🔄    | [ ]  | [ ]   | 11,100 / 25k (**44.4%**) | 3   |
+
+
+**Run dirs:** `final/runs/27taxa_noreplay_b4096_seed{0,1,2}/learned_reverse/20260825_`*
 
 ### PhyloGFN / GFlowNet TB (3 seeds)
 
-| Seed | Train | Eval | Plots | Progress | GPU |
-|------|:-----:|:----:|:-----:|----------|-----|
-| 0 | [x] | [x] | [x] | ✅ train + 1M eval + plots | — |
-| 1 | [x] | [x] | [x] | ✅ train + 1M eval + plots | — |
-| 2 | 🔄 | [ ] | [ ] | ~30.0k / 32k (**93.7%**) | 3 |
+
+| Seed | Train | Eval | Plots                                                                                                                                                                                  | Progress                  | GPU |
+| ---- | ----- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | --- |
+| 0    | [x]   | [x]  | [x](../runs/27taxa_noreplay_b4096_seed0/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed0/plots/reward_probability_eval_1000000/og_gflownet_model_probability_vs_reward.png) | ✅ train + 1M eval + plots | —   |
+| 1    | [x]   | [x]  | [x](../runs/27taxa_noreplay_b4096_seed1/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed1/plots/reward_probability_eval_1000000/og_gflownet_model_probability_vs_reward.png) | ✅ train + 1M eval + plots | —   |
+| 2    | [x]   | [x]  | [x](../runs/27taxa_noreplay_b4096_seed2/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed2/plots/reward_probability_eval_1000000/og_gflownet_model_probability_vs_reward.png) | ✅ train + 1M eval + plots | —   |
+
 
 **Run dirs:** `final/runs/27taxa_noreplay_b4096_seed{0,1,2}/phylgfn/`  
 **Backend:** og_code (paper-faithful TB reproduction)
@@ -242,15 +297,20 @@ Checkbox columns: `[x]` done · `[ ]` not done
 
 ### Other methods — planned / failed
 
-| Method | Seed | Status | Notes |
-|--------|------|--------|-------|
-| GRPO | 0 | ❌ | OOM at epoch 0 (batch 4096); not restarted |
-| GRPO | 1, 2 | ⏳ | Not scheduled |
-| Count-IPS | 0, 1, 2 | ⏳ | Not in current seed configs |
+
+| Method    | Seed    | Status | Notes                               |
+| --------- | ------- | ------ | ----------------------------------- |
+| GRPO      | 0       | ❌      | OOM @ b1024 (Aug 28 retry on GPU 3) |
+| GRPO      | 1, 2    | ⏳      | Not scheduled                       |
+| Count-IPS | 0       | ❌      | OOM @ b1024 (Aug 28 retries GPU 3 + GPU 2) |
+| Count-IPS | 1, 2    | ⏳      | Not scheduled                       |
+
 
 - [ ] Decide whether to retry 27t GRPO with smaller batch (e.g. b1024 like LR-IPS)
-- [ ] Post-train eval + plots for all 6 active runs when training completes
+- [ ] Post-train eval + plots for 27t LR-IPS ×3 when training completes
 - [ ] Multi-seed aggregate Table 2 row for LR-IPS and PhyloGFN
+
+
 
 ### MLL validation (P1 Issue 4) — 🔸 partial
 
@@ -260,7 +320,11 @@ Checkbox columns: `[x]` done · `[ ]` not done
 
 ---
 
+
+
 ## Analysis & paper deliverables
+
+
 
 ### P0 — Same-transform comparisons (Issue 1)
 
@@ -269,16 +333,22 @@ Checkbox columns: `[x]` done · `[ ]` not done
 - [x] Draft bundle with tables + figures (`draft1/draft1.tex`, `draft1/figures/`, `draft1/tables/`)
 - [x] Matched-transform caption + Results paragraph in `draft1/draft1.tex`
 
+
+
 ### P1 — q_φ ablation (Issue 3)
 
 - [x] 10t uniform P_B run complete (train + eval + plots)
 - [x] Ablation table in draft (`draft1/tables/tab_uniform_ablation.tex`)
+
+
 
 ### P2 — Fixed-benchmark eval (Issue 2) — ⏳ not started
 
 - [ ] Run `eval_tree_logq_pearson.py` on frozen tree set — both methods, same trees
 - [ ] Primary or appendix table with multi-sample estimator
 - [ ] Demote 1M self-sampled scatter to "pathwise diagnostic" in text
+
+
 
 ### P3 — Writing & manifest
 
@@ -291,6 +361,8 @@ Checkbox columns: `[x]` done · `[ ]` not done
 
 ---
 
+
+
 ## Extras
 
 Supporting / smoke / ablation runs — not on the main experiment critical path.
@@ -299,10 +371,12 @@ Supporting / smoke / ablation runs — not on the main experiment critical path.
 
 **Config:** `final/configs/suites/hypergrid_4096.json` · **Target:** 100 epochs (smoke / pipeline validation only)
 
-| Method | Train | Eval | Plots | Status |
-|--------|:-----:|:----:|:-----:|--------|
-| GRPO | [x] | [x] | [x] | ✅ 0/4 modes |
-| Count-IPS | [x] | [x] | [x] | ✅ 0/4 modes |
+
+| Method    | Train | Eval | Plots                                                                  | Status      |
+| --------- | ----- | ---- | ---------------------------------------------------------------------- | ----------- |
+| GRPO      | [x]   | [x]  | [x](../runs/hypergrid_4096/plots/terminal_distribution_comparison.png) | ✅ 0/4 modes |
+| Count-IPS | [x]   | [x]  | [x](../runs/hypergrid_4096/plots/terminal_distribution_comparison.png) | ✅ 0/4 modes |
+
 
 **Notes:** Not comparable to 64-grid headline results. No multi-seed planned.
 
@@ -310,65 +384,83 @@ Supporting / smoke / ablation runs — not on the main experiment critical path.
 
 **Config:** `final/configs/suites/5taxa_noreplay.json` · **Target:** 10k epochs · **Eval:** 1M samples · **Seed:** 0 only
 
-| Method | Train | Eval | Plots | Status | Key result |
-|--------|:-----:|:----:|:-----:|--------|------------|
-| GRPO | [x] | [x] | [x] | ✅ | Mode collapse — 1 unique sig / 1M |
-| Count-IPS | [x] | [x] | [x] | ✅ | 66k unique; log-log r=0.565 (empirical) |
-| LR-IPS | [x] | [x] | [x] | ✅ | ESS 0.9998, log-log r=0.992, 951k unique |
-| PhyloGFN (TB) | [x] | [x] | [x] | ✅ | log-log r=0.991, ESS **0.13**, 100k unique; 1M eval plots |
 
-**Run dirs:** `final/runs/5taxa_noreplay/{grpo,count_ips,learned_reverse,phylgfn}/20260825_*`
+| Method        | Train | Eval | Plots                                                                                                                                                                                        | Status | Key result                                                |
+| ------------- | ----- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------------- |
+| GRPO          | [x]   | [x]  | [x](../runs/5taxa_noreplay/grpo/20260825_150308_grpo_5taxa_noreplay_grpo/plots/mlp_shifted_linear_reference_1000k/model_probability_vs_reward.png)                                           | ✅      | Mode collapse — 1 unique sig / 1M                         |
+| Count-IPS     | [x]   | [x]  | [x](../runs/5taxa_noreplay/count_ips/20260825_152552_count_ips_5taxa_noreplay_ips_grpo/plots/mlp_shifted_linear_reference_1000k/model_probability_vs_reward.png)                             | ✅      | 66k unique; log-log r=0.565 (empirical)                   |
+| LR-IPS        | [x]   | [x]  | [x](../runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k/model_probability_vs_reward.png) | ✅      | ESS 0.9998, log-log r=0.992, 951k unique                  |
+| PhyloGFN (TB) | [x]   | [x]  | [x](../runs/5taxa_noreplay/phylgfn/20260825_180739_phylgfn_5taxa_noreplay/plots/reward_probability_eval_1000000/paper_gflownet_model_probability_vs_reward.png)                              | ✅      | log-log r=0.991, ESS **0.13**, 100k unique; 1M eval plots |
+
+
+**Run dirs:** `final/runs/5taxa_noreplay/{grpo,count_ips,learned_reverse,phylgfn}/20260825_`*
 
 - [x] LR-IPS sample plots regenerated (8 PNGs; pipeline plot fix applied)
 - [x] PhyloGFN 1M reward-probability eval + plots
 - [x] 5t panels in draft (`draft1/figures/phylo/5taxa_*`)
 - [ ] Update Table 2 5t row to these `final/runs/` numbers (optional; legacy numbers in `table2.md`)
 
+
+
 ### Phylogenetics — 10 taxa
+
+
 
 #### Uniform q_φ ablation (`10taxa_uniform_reverse_ablation`) — P1 Issue 3 ✅
 
 **Config:** `final/configs/suites/10taxa_uniform_reverse_ablation.json` · **Target:** 10k epochs · **Seed:** 0
 
-| Method | Train | Eval | Plots | Status |
-|--------|:-----:|:----:|:-----:|--------|
-| LR-IPS (uniform P_B) | [x] | [x] | [x] | ✅ |
 
-**Run:** `final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_*`  
+| Method               | Train | Eval | Plots                                                                                                                                                                                                                          | Status |
+| -------------------- | ----- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| LR-IPS (uniform P_B) | [x]   | [x]  | [x](../runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k/model_probability_vs_reward.png) | ✅      |
+
+
+**Run:** `final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_`*  
 **Result:** ESS ~0.995 (same as fitted q_φ); linear r=0, log-log r=0.969
 
 - [x] Ablation table in draft (`tab_uniform_ablation.tex`)
 
-#### Full 10t comparison (`10taxa_noreplay`) — planned
 
-**Config:** `final/configs/suites/10taxa_noreplay.json` · **Target:** 10k epochs · **No runs yet under `final/runs/`**
 
-| Method | Train | Eval | Plots | Status |
-|--------|:-----:|:----:|:-----:|--------|
-| GRPO | [ ] | [ ] | [ ] | ⏳ |
-| Count-IPS | [ ] | [ ] | [ ] | ⏳ |
-| LR-IPS | [ ] | [ ] | [ ] | ⏳ |
-| PhyloGFN | [ ] | [ ] | [ ] | ⏳ |
+#### Full 10t comparison (`10taxa_noreplay`) — deferred (extras only, not scheduled)
 
-**Notes:** Fitted LR-IPS 10t baseline exists in legacy path (`grpo_experiments/learned_reverse_runs/20260803_*`); `final/runs/` reproduction not started.
+**Config:** `final/configs/suites/10taxa_noreplay.json` · **Target:** 10k epochs · **No runs under** `final/runs/`
+
+
+| Method    | Train | Eval | Plots | Status     |
+| --------- | ----- | ---- | ----- | ---------- |
+| GRPO      | [ ]   | [ ]  | [ ]   | — deferred |
+| Count-IPS | [ ]   | [ ]  | [ ]   | — deferred |
+| LR-IPS    | [ ]   | [ ]  | [ ]   | — deferred |
+| PhyloGFN  | [ ]   | [ ]  | [ ]   | — deferred |
+
+
+**Notes:** Fitted LR-IPS 10t baseline exists in legacy path (`grpo_experiments/learned_reverse_runs/20260803_`*). Full 10t reproduction deferred; uniform ablation above is sufficient for P1.
 
 - [ ] Optional: uniform q_φ ablation at 27t (after seed runs finish)
 
 ---
 
-## GPU allocation (Aug 27 eve)
 
-| GPU | Status | Jobs |
-|-----|--------|------|
-| 0 | 🔄 Busy | hg64 GRPO s2 + 27t LR-IPS s0 (~11 GB) |
-| 1 | 🔄 Busy | hg64 Count-IPS s2 + 27t LR-IPS s1 (~11 GB) |
-| 2 | 🔄 Busy | hg64 MIPS s2 + 27t LR-IPS s2 (~11 GB) |
-| 3 | 🔄 Busy | 27t PhyloGFN s2 (~94%) |
-| 4–7 | 🔄 Busy | External (qwenenv) |
 
-**Queued:** hg64 TB seed2 when a GPU opens
+## GPU allocation (Aug 28 ~12:05)
+
+
+| GPU | Status  | Jobs                                        |
+| --- | ------- | ------------------------------------------- |
+| 0   | 🔄 Busy | 27t LR-IPS s0 (~11 GB)                      |
+| 1   | 🔄 Busy | 27t LR-IPS s1 (~11 GB)                      |
+| 2   | 🔄 Busy | hg64 seed2 full suite plots @ epoch 9999 (50k resample) |
+| 3   | 🔄 Busy | 27t LR-IPS s2 (~11 GB)                      |
+| 4–7 | 🔄 Busy | External                                    |
+
+
+**Queued:** 27t LR-IPS post-train eval + plots (when s0/s1 finish ~hours); 27t Count-IPS/GRPO blocked on OOM
 
 ---
+
+
 
 ## How to update this doc
 
@@ -381,7 +473,7 @@ Supporting / smoke / ablation runs — not on the main experiment critical path.
 .venv/bin/python final/paper/progress_summary.py --patch
 ```
 
-5. For active runs, refresh inline progress % from `metrics.jsonl` or latest checkpoint:
+1. For active runs, refresh inline progress % from `metrics.jsonl` or latest checkpoint:
 
 ```bash
 # LR-IPS epoch
@@ -407,22 +499,32 @@ CUDA_VISIBLE_DEVICES=1 .venv/bin/python -m final.toy.plot_comparison \
 
 ---
 
+
+
 ## Changelog
 
-| Date | Change |
-|------|--------|
-| Aug 26, 2026 | Initial tracker created. Hypergrid S0 complete (25k, epoch_24999 plots). 27t seeds 0–2 active. |
-| Aug 26, 2026 | Added Hyper-Grid 8 (H=8, G=256): 3 methods × 3 seeds = 9 runs. Confirmed H=64 batch_size=32. |
-| Aug 26, 2026 | PhyloGFN seed2 paused on GPU 3; hypergrid_8 seed2 GRPO launched. Relaunch queue added. |
-| Aug 26, 2026 | GPU cleanup: paused PhyloGFN S0–S2 + LR-IPS S1; moved hypergrid off GPU 0→3. 9× b256 runs on GPUs 1–3 only. |
-| Aug 26, 2026 | Stop hypergrid @2k epochs; watcher auto-resumes 27t + queues plot_comparison per seed. |
-| Aug 26, 2026 (eve) | **Hypergrid b256 complete** (9/9 train + plots). 27t jobs resumed (6 active). **draft1/** bundle: H=64 + H=8 b256 + phylo tables/figures. 5t suite fully complete incl. PhyloGFN eval. 10t uniform ablation complete. P0/P1 draft items largely done. |
-| Aug 27, 2026 | **GPU 0 fix:** stopped 27t LR-IPS seed2 (was contending with seed0); launched `27taxa_lr_ips_seed2_gpu2_watcher.py` to relaunch on GPU 2 with `--resume-from` when PhyloGFN s0/s1 finish. Seed0 gets full GPU 0. |
-| Aug 27, 2026 | **hg64 seed1 GRPO + Count-IPS complete** (train + eval + 50k-sample plots). LR-IPS/TB ~67–75%. 27t LR-IPS ~38–51%, PhyloGFN ~87.5%. Plot watcher queued for full seed1 comparison. EXPERIMENT_TODO refreshed. |
-| Aug 27, 2026 | Added **Overall progress** section (66% primary) + `progress_summary.py --patch` auto-refresh. |
-| Aug 27, 2026 (pm) | Progress refresh: PhyloGFN s0/s1 @94%, hg64 TB/LR-IPS ~87–78%, 27t LR-IPS ~49–56%. Added rates/ETA table. |
-| Aug 27, 2026 16:10 | **67% primary.** PhyloGFN ~96%, hg64 TB ~92%, hg64 LR-IPS ~82%, 27t LR-IPS ~51–58%. hg64 TB finishes ~1.5h. |
-| Aug 27, 2026 18:05 | **hg64 TB s1 complete** (4/4 modes, L1=0.32 @ 50k). 3-method seed1 plots → `plots/epoch_9999_grpo_countips_tb/`. PhyloGFN s0/s1 train done, 1M eval started. LR-IPS s2 resumed GPU 2. |
-| Aug 27, 2026 20:37 | **hg64 seed2 launched** — GRPO/Count-IPS/MIPS on GPUs 0–2. 27t LR-IPS s0/s1/s2 paused. PhyloGFN s2 resumed GPU 3. |
-| Aug 27, 2026 20:44 | **70% primary.** hg64 seed1 fully complete (LR-IPS 4/4 modes L1=0.52 + 4-method plots). PhyloGFN s0/s1 ✅. hg64 s2 ~2–9%. PhyloGFN s2 ~94%. |
-| Aug 27, 2026 20:57 | **71% primary.** Co-scheduled 27t LR-IPS s0/s1/s2 on GPUs 0–2 alongside hg64 seed2 (~11 GB VRAM/GPU). All 3 resumed from checkpoint. |
+
+| Date                | Change                                                                                                                                                                                                                                                |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aug 26, 2026        | Initial tracker created. Hypergrid S0 complete (25k, epoch_24999 plots). 27t seeds 0–2 active.                                                                                                                                                        |
+| Aug 26, 2026        | Added Hyper-Grid 8 (H=8, G=256): 3 methods × 3 seeds = 9 runs. Confirmed H=64 batch_size=32.                                                                                                                                                          |
+| Aug 26, 2026        | PhyloGFN seed2 paused on GPU 3; hypergrid_8 seed2 GRPO launched. Relaunch queue added.                                                                                                                                                                |
+| Aug 26, 2026        | GPU cleanup: paused PhyloGFN S0–S2 + LR-IPS S1; moved hypergrid off GPU 0→3. 9× b256 runs on GPUs 1–3 only.                                                                                                                                           |
+| Aug 26, 2026        | Stop hypergrid @2k epochs; watcher auto-resumes 27t + queues plot_comparison per seed.                                                                                                                                                                |
+| Aug 26, 2026 (eve)  | **Hypergrid b256 complete** (9/9 train + plots). 27t jobs resumed (6 active). **draft1/** bundle: H=64 + H=8 b256 + phylo tables/figures. 5t suite fully complete incl. PhyloGFN eval. 10t uniform ablation complete. P0/P1 draft items largely done. |
+| Aug 27, 2026        | **GPU 0 fix:** stopped 27t LR-IPS seed2 (was contending with seed0); launched `27taxa_lr_ips_seed2_gpu2_watcher.py` to relaunch on GPU 2 with `--resume-from` when PhyloGFN s0/s1 finish. Seed0 gets full GPU 0.                                      |
+| Aug 27, 2026        | **hg64 seed1 GRPO + Count-IPS complete** (train + eval + 50k-sample plots). LR-IPS/TB ~67–75%. 27t LR-IPS ~38–51%, PhyloGFN ~87.5%. Plot watcher queued for full seed1 comparison. EXPERIMENT_TODO refreshed.                                         |
+| Aug 27, 2026        | Added **Overall progress** section (66% primary) + `progress_summary.py --patch` auto-refresh.                                                                                                                                                        |
+| Aug 27, 2026 (pm)   | Progress refresh: PhyloGFN s0/s1 @94%, hg64 TB/LR-IPS ~87–78%, 27t LR-IPS ~49–56%. Added rates/ETA table.                                                                                                                                             |
+| Aug 27, 2026 16:10  | **67% primary.** PhyloGFN ~96%, hg64 TB ~92%, hg64 LR-IPS ~82%, 27t LR-IPS ~51–58%. hg64 TB finishes ~1.5h.                                                                                                                                           |
+| Aug 27, 2026 18:05  | **hg64 TB s1 complete** (4/4 modes, L1=0.32 @ 50k). 3-method seed1 plots → `plots/epoch_9999_grpo_countips_tb/`. PhyloGFN s0/s1 train done, 1M eval started. LR-IPS s2 resumed GPU 2.                                                                 |
+| Aug 27, 2026 20:37  | **hg64 seed2 launched** — GRPO/Count-IPS/MIPS on GPUs 0–2. 27t LR-IPS s0/s1/s2 paused. PhyloGFN s2 resumed GPU 3.                                                                                                                                     |
+| Aug 27, 2026 20:44  | **70% primary.** hg64 seed1 fully complete (LR-IPS 4/4 modes L1=0.52 + 4-method plots). PhyloGFN s0/s1 ✅. hg64 s2 ~2–9%. PhyloGFN s2 ~94%.                                                                                                            |
+| Aug 27, 2026 20:57  | **71% primary.** Co-scheduled 27t LR-IPS s0/s1/s2 on GPUs 0–2 alongside hg64 seed2 (~11 GB VRAM/GPU). All 3 resumed from checkpoint.                                                                                                                  |
+| Aug 28, 2026 ~01:00 | **73% primary.** hg64 GRPO+Count-IPS s2 train+eval ✅. PhyloGFN s2 ✅. hg64 MIPS ~31%, GFlowNet TB s2 ~55% (GPU 3). 27t LR-IPS ~44–69%.                                                                                                                 |
+| Aug 28, 2026 ~01:23 | **hg64 GRPO+Count-IPS s2 complete** — 50k suite plots → `hypergrid_64_seed2/plots/epoch_9999_grpo_countips/`.                                                                                                                                         |
+| Aug 28, 2026 ~01:31 | **27t GRPO seed0 retry failed** — OOM @ b1024 on GPU 3 (existing suite config). 10t full comparison deferred to extras.                                                                                                                               |
+| Aug 28, 2026 ~01:40 | **GPU swap:** 27t LR-IPS s2 → GPU 3 (solo); hg64 TB s2 → GPU 2 (co-sched w/ MIPS). Keeps GPU 3 occupied after TB would have finished.                                                                                                                 |
+| Aug 28, 2026 ~12:05 | **hg64 seed2 complete** (MIPS+TB). **27t Count-IPS s0 failed** OOM on GPU 2. Launched **hg64 seed2 full 4-method plots** on GPU 2.                                                                                                                    |
+
+

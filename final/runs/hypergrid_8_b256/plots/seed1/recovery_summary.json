@@ -1,0 +1,31 @@
+{
+  "task": "hypergrid_8",
+  "expected_peak_modes": 4,
+  "methods": {
+    "GRPO": {
+      "run_dir": "/home/armaan/phylogfn/final/runs/hypergrid_8_b256_seed1/grpo/20260826_195840_hypergrid_8_b256_seed1_grpo",
+      "recovery_rate_pct": 25.0,
+      "modes_found": 1,
+      "l1_distance": 1.7678571492433548,
+      "peak_mode_mass": 1.0,
+      "sampled_unique_terminals": 1
+    },
+    "IPS-GRPO": {
+      "run_dir": "/home/armaan/phylogfn/final/runs/hypergrid_8_b256_seed1/count_ips/20260826_195841_hypergrid_8_b256_seed1_count_ips",
+      "recovery_rate_pct": 100.0,
+      "modes_found": 4,
+      "l1_distance": 0.2229428768336773,
+      "peak_mode_mass": 0.5272,
+      "sampled_unique_terminals": 64
+    },
+    "MIPS-GRPO": {
+      "run_dir": "/home/armaan/phylogfn/final/runs/hypergrid_8_b256_seed1/learned_reverse_ips/20260826_195841_hypergrid_8_b256_seed1_learned_reverse_ips",
+      "recovery_rate_pct": 100.0,
+      "modes_found": 4,
+      "l1_distance": 0.06224285541325808,
+      "peak_mode_mass": 0.46799999999999997,
+      "sampled_unique_terminals": 64
+    }
+  },
+  "table_plot": "/home/armaan/phylogfn/final/runs/hypergrid_8_b256/plots/seed1/recovery_summary.png"
+}

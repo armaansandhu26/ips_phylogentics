@@ -1,0 +1,45 @@
+{
+  "plot": "/home/armaan/phylogfn/final/runs/hypergrid_64/plots/terminal_distribution_comparison_all.png",
+  "methods": {
+    "GRPO": {
+      "l1_distance": 1.9662674183590712,
+      "total_variation": 0.9831337091795356,
+      "num_samples": 50000,
+      "sampled_unique_terminals": 13,
+      "num_modes_with_mass": 1.0,
+      "expected_num_modes": 4.0,
+      "peak_mode_mass": 1.0,
+      "mean_reward": 2.5999999046325684
+    },
+    "Count IPS-GRPO": {
+      "l1_distance": 1.841806045569889,
+      "total_variation": 0.9209030227849445,
+      "num_samples": 50000,
+      "sampled_unique_terminals": 45,
+      "num_modes_with_mass": 1.0,
+      "expected_num_modes": 4.0,
+      "peak_mode_mass": 0.9981000000000002,
+      "mean_reward": 2.5961999893188477
+    },
+    "Learned Reverse IPS": {
+      "l1_distance": 0.46697998908606353,
+      "total_variation": 0.23348999454303176,
+      "num_samples": 50000,
+      "sampled_unique_terminals": 4000,
+      "num_modes_with_mass": 4.0,
+      "expected_num_modes": 4.0,
+      "peak_mode_mass": 0.19839999999999988,
+      "mean_reward": 0.8541401624679565
+    },
+    "GFlowNet TB": {
+      "l1_distance": 1.2230647121421574,
+      "total_variation": 0.6115323560710787,
+      "num_samples": 50000,
+      "sampled_unique_terminals": 1711,
+      "num_modes_with_mass": 2.0,
+      "expected_num_modes": 4.0,
+      "peak_mode_mass": 0.26466000000000006,
+      "mean_reward": 1.0128402709960938
+    }
+  }
+}

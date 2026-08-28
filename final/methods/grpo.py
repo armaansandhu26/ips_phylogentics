@@ -37,6 +37,9 @@ class GrpoRunner:
             argv += ["--resume-from", str(resume_from)]
         if resume_checkpoint is not None:
             argv += ["--resume-checkpoint", resume_checkpoint]
+        mini_batch_splits = suite.method_cfg(self.name).get("mini_batch_splits")
+        if mini_batch_splits is not None:
+            argv += ["--mini-batch-splits", str(mini_batch_splits)]
         return CommandSpec(argv=argv, cwd=REPO_ROOT)
 
     def build_sample_command(

@@ -1,0 +1,16 @@
+[
+  {
+    "epoch": 0,
+    "method": "grpo",
+    "mean_loss": 0.0,
+    "cumulative_unique_outcomes": 15.0,
+    "l1_distance": 1.9999826437924213,
+    "total_variation": 0.9999913218962106,
+    "num_samples": 2000,
+    "sampled_unique_terminals": 74,
+    "num_modes_with_mass": 0.0,
+    "expected_num_modes": 4.0,
+    "peak_mode_mass": 0.0,
+    "mean_reward": 0.6000000238418579
+  }
+]

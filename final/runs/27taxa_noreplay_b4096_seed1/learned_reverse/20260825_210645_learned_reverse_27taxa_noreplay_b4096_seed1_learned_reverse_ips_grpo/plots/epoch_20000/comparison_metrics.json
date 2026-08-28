@@ -1,0 +1,18 @@
+{
+  "samples": 100000,
+  "plotted_samples": 100000,
+  "observed_topologies": 100000,
+  "unique_observed_signatures": 100000,
+  "importance_ess": 99931.13764138907,
+  "importance_ess_fraction": 0.9993113764138907,
+  "log_weight_std": 0.02628143235384231,
+  "log_weight_range": 0.35995866621902906,
+  "topology_total_variation": 0.010160218976346455,
+  "signature_total_variation_on_observed_support": 0.010160218976346455,
+  "loglikelihood_histogram_total_variation": 0.003150984954480169,
+  "log_model_probability_vs_log_reward_pearson_vs_ideal": 0.9794936393239325,
+  "model_probability_vs_reward_pearson_vs_ideal": NaN,
+  "estimated_log_partition": -9686.257823480377,
+  "reference_run_dir": "/home/armaan/phylogfn/grpo_experiments/learned_reverse_runs/20260730_160341_learned_reverse_5taxa_mlp_shifted_linear_b4096_learned_reverse_ips_grpo",
+  "shared_reward_axes": true
+}

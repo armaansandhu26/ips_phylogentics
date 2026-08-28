@@ -1,0 +1,8 @@
+{
+  "reverse_policy_type": "mlp",
+  "reverse_conditioning_level": "topology",
+  "reported_outcome_level": "signature",
+  "num_trajectories": null,
+  "num_structural_outcomes": null,
+  "entries": []
+}

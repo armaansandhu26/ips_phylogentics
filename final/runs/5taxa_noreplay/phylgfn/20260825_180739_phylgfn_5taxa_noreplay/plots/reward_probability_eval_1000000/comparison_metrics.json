@@ -1,0 +1,18 @@
+{
+  "samples": 1000000,
+  "plotted_samples": 1000000,
+  "unique_observed_signatures": 100508,
+  "log_probability_vs_log_likelihood_pearson_vs_ideal": 0.9909309612096037,
+  "likelihood_vs_probability_pearson_vs_ideal": 0.9896130358845775,
+  "checkpoint_log_partition": -3203.500244140625,
+  "importance_estimated_log_partition": -3203.4957312999572,
+  "importance_ess": 128804.40692593245,
+  "importance_ess_fraction": 0.12880440692593245,
+  "reward_target": "log_reward = (C + log L) / scale  (paper TB target)",
+  "run_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/phylgfn/20260825_180739_phylgfn_5taxa_noreplay",
+  "checkpoint": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/phylgfn/20260825_180739_phylgfn_5taxa_noreplay/checkpoints/checkpoint_009999.pt",
+  "dataset": "/home/armaan/phylogfn/phylogfn_paper/dataset/benchmark_datasets/DS1_reduced.pickle",
+  "device": "cuda:0",
+  "maximum_reward_definition_error": 0.0,
+  "observed_topologies": 15
+}

@@ -1,0 +1,8 @@
+{
+  "run_dir": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo",
+  "epochs": 10000,
+  "final_mean_log_score": 332.2728576660156,
+  "final_reverse_loss": 0.0,
+  "final_ips_ess_fraction": 0.99508874510794,
+  "output": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/plots/training_curves.png"
+}

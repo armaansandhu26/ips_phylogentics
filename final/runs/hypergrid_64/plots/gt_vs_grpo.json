@@ -1,0 +1,11 @@
+{
+  "plot": "/home/armaan/phylogfn/final/runs/hypergrid_64/plots/gt_vs_grpo.png",
+  "l1_distance": 1.9658274183590712,
+  "total_variation": 0.9829137091795356,
+  "num_samples": 50000,
+  "sampled_unique_terminals": 17,
+  "num_modes_with_mass": 1.0,
+  "expected_num_modes": 4.0,
+  "peak_mode_mass": 1.0,
+  "mean_reward": 2.5999999046325684
+}

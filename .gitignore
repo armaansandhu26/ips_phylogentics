@@ -104,3 +104,49 @@ molecule_synthesis/toy/runs/
 
 # Plots (*.png / *.pdf) and code are intentionally tracked.
 # Add specific plot dumps above if they become too large for git.
+
+# final/ paper runs — track interpretable artifacts; run final/prune_run_artifacts.py first
+!final/runs/
+!final/runs/**
+
+# Heavy / regenerable under final/runs
+final/runs/**/training_state.json
+final/runs/**/trainer_state.pt
+final/runs/**/learned_reverse_state.pt
+final/runs/**/metrics.jsonl
+final/runs/**/metrics_detailed.jsonl
+final/runs/**/eval_dumps/*.pending
+final/runs/**/tb_log/
+final/runs/**/backup/
+final/runs/**/wandb/
+final/runs/**/raw_samples/
+final/runs/**/plots/**/cache/
+final/runs/**/*.npz
+final/runs/**/logs/
+final/runs/*_watcher.*
+final/runs/*_watcher.py
+final/runs/*.pid
+
+# Keep selected logs (override *.log above for these paths)
+!final/runs/**/pipeline.log
+!final/runs/**/plots/**/plot.log
+!final/runs/**/plots/**/sampling.log
+
+# Final checkpoints only — prune intermediates before commit
+!final/runs/**/checkpoint_epoch*.pt
+!final/runs/**/learned_reverse_epoch*.pt
+!final/runs/**/checkpoints/checkpoint_*.pt
+final/runs/**/final_checkpoint.pt
+
+# Interpretable JSON summaries (exclude huge 1000k reference dumps >100MB)
+!final/**/epoch_summaries.json
+!final/**/reward_reference_summary.json
+final/runs/**/mlp_shifted_linear_reference_1000k/reward_reference_summary.json
+
+# Datasets (LFS) and aggregated results
+!final/datasets/
+!final/datasets/**
+!final/datasets/**/*.npz
+!final/datasets/**/*.npy
+!final/results/
+!final/results/**

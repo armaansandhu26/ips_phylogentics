@@ -1,0 +1,22 @@
+{
+  "run_dir": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo",
+  "method": "learned_reverse_ips_grpo",
+  "checkpoint_path": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/final_checkpoint.pt",
+  "reverse_state_path": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/learned_reverse_state.pt",
+  "reverse_update_step": -1,
+  "device": "cuda:0",
+  "num_trees": 1000000,
+  "batch_size": 4096,
+  "seed": 0,
+  "reward_target": "shifted_linear",
+  "target": "R(x) = shifted_score = 3600 + terminal_log_likelihood",
+  "log_score_shift": 5000.0,
+  "only_train_tree_model": false,
+  "reverse_policy_type": "uniform",
+  "observed_topologies": 984967,
+  "importance_ess": 995134.2923532536,
+  "importance_ess_fraction": 0.9951342923532536,
+  "log_weight_min": 63.59447408853218,
+  "log_weight_max": 87.43846212679895,
+  "log_weight_std": 0.21654381045508772
+}

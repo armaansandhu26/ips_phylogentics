@@ -1,0 +1,24 @@
+{
+  "runs": [
+    {
+      "label": "count_ips",
+      "run_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/count_ips/20260825_152552_count_ips_5taxa_noreplay_ips_grpo",
+      "method": "ips_grpo",
+      "checkpoint": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/count_ips/20260825_152552_count_ips_5taxa_noreplay_ips_grpo/final_checkpoint.pt",
+      "global_steps": 9999,
+      "final": {
+        "loss": 3.073364496231079e-08,
+        "mean_log_reward": 5.912632942199707,
+        "global_duplicate_fraction": 0.9595837158203125,
+        "global_duplicate_topology_fraction": 0.9999974365234375,
+        "cumulative_unique_outcomes": 1655451.0,
+        "global_unique_outcomes": 1655451.0,
+        "global_unique_topologies": 105.0
+      },
+      "initial": {
+        "global_duplicate_fraction": 0.000244140625,
+        "cumulative_unique_outcomes": 4095.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "run_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/grpo/20260825_150308_grpo_5taxa_noreplay_grpo",
+  "method": "ppo",
+  "checkpoint_path": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/grpo/20260825_150308_grpo_5taxa_noreplay_grpo/final_checkpoint.pt",
+  "device": "cuda:0",
+  "num_trees": 1000000,
+  "batch_size": 4096,
+  "seed": 0,
+  "target": "R(x) = 3600 + terminal_log_likelihood",
+  "log_score_shift": 3600.0,
+  "reverse_probability": "fixed environment P_B(tau | x)",
+  "only_train_tree_model": false,
+  "observed_topologies": 1
+}

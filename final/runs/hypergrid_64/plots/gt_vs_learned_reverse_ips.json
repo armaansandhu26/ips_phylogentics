@@ -1,0 +1,11 @@
+{
+  "plot": "/home/armaan/phylogfn/final/runs/hypergrid_64/plots/gt_vs_learned_reverse_ips.png",
+  "l1_distance": 0.26173936051930297,
+  "total_variation": 0.13086968025965148,
+  "num_samples": 50000,
+  "sampled_unique_terminals": 4056,
+  "num_modes_with_mass": 4.0,
+  "expected_num_modes": 4.0,
+  "peak_mode_mass": 0.27946,
+  "mean_reward": 1.0246102809906006
+}

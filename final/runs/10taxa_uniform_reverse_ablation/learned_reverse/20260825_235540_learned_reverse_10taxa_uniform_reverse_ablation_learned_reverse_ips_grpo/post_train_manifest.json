@@ -1,0 +1,6 @@
+{
+  "run_dir": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo",
+  "training_curves": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/plots/training_curves.png",
+  "training_curves_meta": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/plots/training_curves.json",
+  "samples": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/sampled_full_diagnostics_10000.npz"
+}

@@ -1,0 +1,9 @@
+{
+  "samples": 1000000,
+  "unique_observed_signatures": 1,
+  "empirical_fit_r_squared": null,
+  "empirical_fit_pearson_r": null,
+  "reward_min": 362.6189270019531,
+  "reward_max": 362.6189270019531,
+  "plot_type": "empirical_signature_frequency"
+}

@@ -1,0 +1,45 @@
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: Tracking run with wandb version 0.28.1
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /home/armaan/phylogfn/wandb/offline-run-20260825_164701-rchd8iek
+wandb: View this run in the terminal with `wandb leet`
+[final] launching: /home/armaan/phylogfn/.venv/bin/python -u -m learned_reverse_ips.train --run-name learned_reverse_5taxa_noreplay --cfg src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4.yaml --dataset dataset/benchmark_datasets/DS1_reduced.pickle --output final/runs/5taxa_noreplay/learned_reverse --seed 0 --epochs 10000 --steps-per-epoch 1 --on-policy-batch-size 4096 --replay-batch-size 0 --replay-buffer-size 4096 --checkpoint-every 500 --full-model --outcome-level signature --advantage-reward-mode log_reward --grpo-lr 1e-4 --grpo-entropy-coef 0.0 --grpo-num-iterations 1 --rollout-chunk-size 4096 --print-every 25 --disable-replay --reward-target shifted_linear --reverse-lr 0.001 --reverse-train-epochs 4 --reverse-hidden-size 128 --reverse-num-layers 2 --skip-post-train
+[final] running: /home/armaan/phylogfn/.venv/bin/python -u -m learned_reverse_ips.post_train --run-dir /home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo --skip-sampling --skip-sampling-plots
+/usr/lib/python3.10/runpy.py:126: RuntimeWarning: 'learned_reverse_ips.post_train' found in sys.modules after import of package 'learned_reverse_ips', but prior to execution of 'learned_reverse_ips.post_train'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+[post_train 2026-08-25 18:58:45] starting post-train pipeline for /home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo
+[post_train 2026-08-25 18:58:51] wrote training curves: /home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo/plots/training_curves.png
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/armaan/phylogfn/learned_reverse_ips/post_train.py", line 218, in <module>
+    main()
+  File "/home/armaan/phylogfn/learned_reverse_ips/post_train.py", line 205, in main
+    run_post_train_pipeline(
+  File "/home/armaan/phylogfn/learned_reverse_ips/post_train.py", line 152, in run_post_train_pipeline
+    raise FileNotFoundError(
+FileNotFoundError: --skip-sampling set but samples not found: /home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo/sampled_full_diagnostics_10000.npz
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/armaan/phylogfn/final/__main__.py", line 85, in <module>
+    main()
+  File "/home/armaan/phylogfn/final/__main__.py", line 35, in main
+    pipeline_main(argv)
+  File "/home/armaan/phylogfn/final/pipeline.py", line 306, in main
+    project=args.wandb_project,
+  File "/home/armaan/phylogfn/final/pipeline.py", line 169, in run_pipeline
+    checkpoint = runner.expected_checkpoint(run_dir)
+  File "/home/armaan/phylogfn/final/run_utils.py", line 71, in run_command
+    subprocess.run(spec.argv, cwd=spec.cwd, env=spec.env, check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/armaan/phylogfn/.venv/bin/python', '-u', '-m', 'learned_reverse_ips.post_train', '--run-dir', '/home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo', '--skip-sampling', '--skip-sampling-plots']' returned non-zero exit status 1.
+[1;34mwandb[0m: 
+[1;34mwandb[0m: You can sync this run to the cloud by running:
+[1;34mwandb[0m: [1mwandb sync /home/armaan/phylogfn/wandb/offline-run-20260825_164701-rchd8iek[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/offline-run-20260825_164701-rchd8iek/logs[0m

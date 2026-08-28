@@ -1,0 +1,10 @@
+{
+  "suite_id": "10taxa_uniform_reverse_ablation",
+  "method": "learned_reverse",
+  "run_dir": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo",
+  "run_name": "learned_reverse_10taxa_uniform_reverse_ablation",
+  "training_curves": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/plots/training_curves.png",
+  "samples": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+  "comparison_metrics": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k/comparison_metrics.json",
+  "plots_dir": "/home/armaan/phylogfn/final/runs/10taxa_uniform_reverse_ablation/learned_reverse/20260825_235540_learned_reverse_10taxa_uniform_reverse_ablation_learned_reverse_ips_grpo/plots/mlp_shifted_linear_reference_1000k"
+}

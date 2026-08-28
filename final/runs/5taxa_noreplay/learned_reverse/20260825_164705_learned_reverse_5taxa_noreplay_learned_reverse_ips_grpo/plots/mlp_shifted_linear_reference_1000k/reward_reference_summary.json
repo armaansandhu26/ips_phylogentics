@@ -1,0 +1,1472 @@
+{
+  "metadata": {
+    "run_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo",
+    "method": "learned_reverse_ips_grpo",
+    "checkpoint_path": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo/final_checkpoint.pt",
+    "reverse_state_path": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo/learned_reverse_state.pt",
+    "reverse_update_step": 10000,
+    "device": "cuda:0",
+    "num_trees": 1000000,
+    "batch_size": 4096,
+    "seed": 0,
+    "reward_target": "shifted_linear",
+    "target": "R(x) = shifted_score = 3600 + terminal_log_likelihood",
+    "log_score_shift": 3600.0,
+    "only_train_tree_model": false,
+    "reverse_policy_type": "mlp",
+    "observed_topologies": 105,
+    "importance_ess": 999769.882658014,
+    "importance_ess_fraction": 0.9997698826580139,
+    "log_weight_min": 37.71653190030776,
+    "log_weight_max": 38.258022569357514,
+    "log_weight_std": 0.015328683491148973,
+    "samples_file": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo/sampled_full_diagnostics_1000000.npz",
+    "reference_method": "self-normalized R(x) q_phi(tau|x) / P_F(tau)",
+    "samples": 1000000,
+    "unique_observed_signatures": 951180
+  },
+  "topologies": [
+    {
+      "rank": 1,
+      "topology_id": "e33a3c1a5b59e17a3840c6ffe200ae5f",
+      "checkpoint_count": 18121,
+      "checkpoint_frequency": 0.018121,
+      "reference_frequency": 0.01813074466744766,
+      "reference_expected_count_at_n": 18130.74466744766
+    },
+    {
+      "rank": 2,
+      "topology_id": "122153e78a57d2f79a978c635c841360",
+      "checkpoint_count": 18068,
+      "checkpoint_frequency": 0.018068,
+      "reference_frequency": 0.01808390133603781,
+      "reference_expected_count_at_n": 18083.901336037812
+    },
+    {
+      "rank": 3,
+      "topology_id": "257afd8c52d536d98b4706ce567ed17f",
+      "checkpoint_count": 17948,
+      "checkpoint_frequency": 0.017948,
+      "reference_frequency": 0.01793938786439026,
+      "reference_expected_count_at_n": 17939.387864390257
+    },
+    {
+      "rank": 4,
+      "topology_id": "b801229790cab3bdef6ee31810213c9e",
+      "checkpoint_count": 17864,
+      "checkpoint_frequency": 0.017864,
+      "reference_frequency": 0.01788490825460012,
+      "reference_expected_count_at_n": 17884.90825460012
+    },
+    {
+      "rank": 5,
+      "topology_id": "8241e762dfef7fba032b2e3b0dbca399",
+      "checkpoint_count": 17871,
+      "checkpoint_frequency": 0.017871,
+      "reference_frequency": 0.017866352849567575,
+      "reference_expected_count_at_n": 17866.352849567575
+    },
+    {
+      "rank": 6,
+      "topology_id": "aac8cb3b993258f3f4f9d1a3f95f1ee9",
+      "checkpoint_count": 17860,
+      "checkpoint_frequency": 0.01786,
+      "reference_frequency": 0.017822132452145322,
+      "reference_expected_count_at_n": 17822.13245214532
+    },
+    {
+      "rank": 7,
+      "topology_id": "9d7fcd0e58e3789c94b7172a0d33bef1",
+      "checkpoint_count": 17808,
+      "checkpoint_frequency": 0.017808,
+      "reference_frequency": 0.017790328574374636,
+      "reference_expected_count_at_n": 17790.328574374635
+    },
+    {
+      "rank": 8,
+      "topology_id": "ce4c9d9035a5cf6b9f967da2ceee5870",
+      "checkpoint_count": 17738,
+      "checkpoint_frequency": 0.017738,
+      "reference_frequency": 0.017767709922999433,
+      "reference_expected_count_at_n": 17767.709922999435
+    },
+    {
+      "rank": 9,
+      "topology_id": "6ab968245b8a0ee8927bd56ee7b43d15",
+      "checkpoint_count": 17769,
+      "checkpoint_frequency": 0.017769,
+      "reference_frequency": 0.017760953137868834,
+      "reference_expected_count_at_n": 17760.953137868833
+    },
+    {
+      "rank": 10,
+      "topology_id": "288b4c4f2129b7251430604945d8cc95",
+      "checkpoint_count": 17494,
+      "checkpoint_frequency": 0.017494,
+      "reference_frequency": 0.01752439687961704,
+      "reference_expected_count_at_n": 17524.39687961704
+    },
+    {
+      "rank": 11,
+      "topology_id": "cbb54174de90f745382e5c6a23b86960",
+      "checkpoint_count": 17130,
+      "checkpoint_frequency": 0.01713,
+      "reference_frequency": 0.017124911893971993,
+      "reference_expected_count_at_n": 17124.911893971992
+    },
+    {
+      "rank": 12,
+      "topology_id": "3da0fa393c610b1f7cb922eb3ed39b90",
+      "checkpoint_count": 16932,
+      "checkpoint_frequency": 0.016932,
+      "reference_frequency": 0.016923803746230755,
+      "reference_expected_count_at_n": 16923.803746230755
+    },
+    {
+      "rank": 13,
+      "topology_id": "f44a6469fc67c9476e5840b148986791",
+      "checkpoint_count": 16904,
+      "checkpoint_frequency": 0.016904,
+      "reference_frequency": 0.01691326936017873,
+      "reference_expected_count_at_n": 16913.26936017873
+    },
+    {
+      "rank": 14,
+      "topology_id": "2d805a73d69d8e5455cf469071fb7171",
+      "checkpoint_count": 16722,
+      "checkpoint_frequency": 0.016722,
+      "reference_frequency": 0.016753263379811614,
+      "reference_expected_count_at_n": 16753.263379811615
+    },
+    {
+      "rank": 15,
+      "topology_id": "a68dcf03969224c1194af8bcb26cc850",
+      "checkpoint_count": 16426,
+      "checkpoint_frequency": 0.016426,
+      "reference_frequency": 0.016398919557951683,
+      "reference_expected_count_at_n": 16398.91955795168
+    },
+    {
+      "rank": 16,
+      "topology_id": "04fa65ace8ea5d55749b7570ae77905b",
+      "checkpoint_count": 16273,
+      "checkpoint_frequency": 0.016273,
+      "reference_frequency": 0.01628468216202405,
+      "reference_expected_count_at_n": 16284.682162024048
+    },
+    {
+      "rank": 17,
+      "topology_id": "f51aa06264448e534beadce3acd7b669",
+      "checkpoint_count": 16269,
+      "checkpoint_frequency": 0.016269,
+      "reference_frequency": 0.016269794183970007,
+      "reference_expected_count_at_n": 16269.794183970007
+    },
+    {
+      "rank": 18,
+      "topology_id": "0d1a4836a6b7734e4b5bf560f8cdf760",
+      "checkpoint_count": 16256,
+      "checkpoint_frequency": 0.016256,
+      "reference_frequency": 0.016231946139384106,
+      "reference_expected_count_at_n": 16231.946139384105
+    },
+    {
+      "rank": 19,
+      "topology_id": "52f721a70b14c207e935883917533262",
+      "checkpoint_count": 16224,
+      "checkpoint_frequency": 0.016224,
+      "reference_frequency": 0.0162054390721437,
+      "reference_expected_count_at_n": 16205.4390721437
+    },
+    {
+      "rank": 20,
+      "topology_id": "20756eb1a0d51acc88426f3082b2aa99",
+      "checkpoint_count": 16120,
+      "checkpoint_frequency": 0.01612,
+      "reference_frequency": 0.016108703305138437,
+      "reference_expected_count_at_n": 16108.703305138437
+    },
+    {
+      "rank": 21,
+      "topology_id": "64bab4e512b8082fc252badadc31b3b5",
+      "checkpoint_count": 15857,
+      "checkpoint_frequency": 0.015857,
+      "reference_frequency": 0.015852821532027796,
+      "reference_expected_count_at_n": 15852.821532027796
+    },
+    {
+      "rank": 22,
+      "topology_id": "3ed23c1f9287751a6787340893b019a1",
+      "checkpoint_count": 15722,
+      "checkpoint_frequency": 0.015722,
+      "reference_frequency": 0.015724049125869978,
+      "reference_expected_count_at_n": 15724.049125869979
+    },
+    {
+      "rank": 23,
+      "topology_id": "def22e5180c76ed06320b69c9153a819",
+      "checkpoint_count": 15680,
+      "checkpoint_frequency": 0.01568,
+      "reference_frequency": 0.015691366582654014,
+      "reference_expected_count_at_n": 15691.366582654013
+    },
+    {
+      "rank": 24,
+      "topology_id": "1bd4fe0b7d85cfd7041baa9cdbbaa20e",
+      "checkpoint_count": 15630,
+      "checkpoint_frequency": 0.01563,
+      "reference_frequency": 0.015605341377798258,
+      "reference_expected_count_at_n": 15605.341377798259
+    },
+    {
+      "rank": 25,
+      "topology_id": "57a5b650a0e09e1fdb46543b94946783",
+      "checkpoint_count": 15601,
+      "checkpoint_frequency": 0.015601,
+      "reference_frequency": 0.015591892390639343,
+      "reference_expected_count_at_n": 15591.892390639343
+    },
+    {
+      "rank": 26,
+      "topology_id": "9fffeaf9436987ecbc5376db848b7fab",
+      "checkpoint_count": 15566,
+      "checkpoint_frequency": 0.015566,
+      "reference_frequency": 0.015534659193213151,
+      "reference_expected_count_at_n": 15534.65919321315
+    },
+    {
+      "rank": 27,
+      "topology_id": "97278a77cec5965b1cb1a3b0e9844ba9",
+      "checkpoint_count": 15511,
+      "checkpoint_frequency": 0.015511,
+      "reference_frequency": 0.015522036460587854,
+      "reference_expected_count_at_n": 15522.036460587853
+    },
+    {
+      "rank": 28,
+      "topology_id": "579a4bfbc6a46cbe821eedd8a4550e72",
+      "checkpoint_count": 15523,
+      "checkpoint_frequency": 0.015523,
+      "reference_frequency": 0.015511240781155074,
+      "reference_expected_count_at_n": 15511.240781155073
+    },
+    {
+      "rank": 29,
+      "topology_id": "d6809f6cee6b9b585db88c2c67c10577",
+      "checkpoint_count": 15441,
+      "checkpoint_frequency": 0.015441,
+      "reference_frequency": 0.015436539461938266,
+      "reference_expected_count_at_n": 15436.539461938266
+    },
+    {
+      "rank": 30,
+      "topology_id": "7fb813188de931cc0a5062f576ffde6e",
+      "checkpoint_count": 15379,
+      "checkpoint_frequency": 0.015379,
+      "reference_frequency": 0.015387495277777129,
+      "reference_expected_count_at_n": 15387.495277777129
+    },
+    {
+      "rank": 31,
+      "topology_id": "7d0b7818ffe2eafa37a5a47d164b00dc",
+      "checkpoint_count": 11942,
+      "checkpoint_frequency": 0.011942,
+      "reference_frequency": 0.011974082926661862,
+      "reference_expected_count_at_n": 11974.082926661862
+    },
+    {
+      "rank": 32,
+      "topology_id": "8c70d5aacf798bffbc76bc8477dd0d01",
+      "checkpoint_count": 11921,
+      "checkpoint_frequency": 0.011921,
+      "reference_frequency": 0.011939602095421012,
+      "reference_expected_count_at_n": 11939.602095421013
+    },
+    {
+      "rank": 33,
+      "topology_id": "3373d7308173d7ff0c90620abf0d7f9b",
+      "checkpoint_count": 11826,
+      "checkpoint_frequency": 0.011826,
+      "reference_frequency": 0.011825639820776022,
+      "reference_expected_count_at_n": 11825.639820776023
+    },
+    {
+      "rank": 34,
+      "topology_id": "18f4bccef4d8d4519f1f6d9c00e06174",
+      "checkpoint_count": 11825,
+      "checkpoint_frequency": 0.011825,
+      "reference_frequency": 0.0118243184044604,
+      "reference_expected_count_at_n": 11824.3184044604
+    },
+    {
+      "rank": 35,
+      "topology_id": "b6648d089c1745430f755841551ddac9",
+      "checkpoint_count": 11783,
+      "checkpoint_frequency": 0.011783,
+      "reference_frequency": 0.011754279487518197,
+      "reference_expected_count_at_n": 11754.279487518197
+    },
+    {
+      "rank": 36,
+      "topology_id": "57b6fc775eb64eba617b09fa7bda78c1",
+      "checkpoint_count": 11713,
+      "checkpoint_frequency": 0.011713,
+      "reference_frequency": 0.011716652090535306,
+      "reference_expected_count_at_n": 11716.652090535306
+    },
+    {
+      "rank": 37,
+      "topology_id": "0f32ae72948ebe6b96bd32186d83ed90",
+      "checkpoint_count": 11268,
+      "checkpoint_frequency": 0.011268,
+      "reference_frequency": 0.01129840424377868,
+      "reference_expected_count_at_n": 11298.40424377868
+    },
+    {
+      "rank": 38,
+      "topology_id": "e478c27ac3cf9c127545c2f14e8404c5",
+      "checkpoint_count": 10952,
+      "checkpoint_frequency": 0.010952,
+      "reference_frequency": 0.01093675458503578,
+      "reference_expected_count_at_n": 10936.75458503578
+    },
+    {
+      "rank": 39,
+      "topology_id": "b519f42af90527d183f5baa45c43453a",
+      "checkpoint_count": 10739,
+      "checkpoint_frequency": 0.010739,
+      "reference_frequency": 0.010740131908484952,
+      "reference_expected_count_at_n": 10740.131908484953
+    },
+    {
+      "rank": 40,
+      "topology_id": "64b098936096705c058e8c595fda5900",
+      "checkpoint_count": 10668,
+      "checkpoint_frequency": 0.010668,
+      "reference_frequency": 0.010658434519551578,
+      "reference_expected_count_at_n": 10658.434519551578
+    },
+    {
+      "rank": 41,
+      "topology_id": "cdb0091b1256966e46e6d4bb276c2dd1",
+      "checkpoint_count": 10642,
+      "checkpoint_frequency": 0.010642,
+      "reference_frequency": 0.010648781628632588,
+      "reference_expected_count_at_n": 10648.781628632589
+    },
+    {
+      "rank": 42,
+      "topology_id": "3d239cd2ae4fa1333047595e7899724d",
+      "checkpoint_count": 10544,
+      "checkpoint_frequency": 0.010544,
+      "reference_frequency": 0.010529829903405088,
+      "reference_expected_count_at_n": 10529.829903405087
+    },
+    {
+      "rank": 43,
+      "topology_id": "544490d7ac3aaf7ec8d16b6f7cd978a1",
+      "checkpoint_count": 10397,
+      "checkpoint_frequency": 0.010397,
+      "reference_frequency": 0.010392038576375856,
+      "reference_expected_count_at_n": 10392.038576375857
+    },
+    {
+      "rank": 44,
+      "topology_id": "dc35f37e1cdb39f578d35e8bc34eea81",
+      "checkpoint_count": 10308,
+      "checkpoint_frequency": 0.010308,
+      "reference_frequency": 0.010342881891756984,
+      "reference_expected_count_at_n": 10342.881891756984
+    },
+    {
+      "rank": 45,
+      "topology_id": "f39e9100929bcfaa312ba04fe8a5938e",
+      "checkpoint_count": 10336,
+      "checkpoint_frequency": 0.010336,
+      "reference_frequency": 0.010334259081613876,
+      "reference_expected_count_at_n": 10334.259081613876
+    },
+    {
+      "rank": 46,
+      "topology_id": "14761a2a24ab2882b2e087e0d9e0ff48",
+      "checkpoint_count": 6136,
+      "checkpoint_frequency": 0.006136,
+      "reference_frequency": 0.006135535343672116,
+      "reference_expected_count_at_n": 6135.535343672116
+    },
+    {
+      "rank": 47,
+      "topology_id": "579718db170a287100996e87fc7b4af6",
+      "checkpoint_count": 6104,
+      "checkpoint_frequency": 0.006104,
+      "reference_frequency": 0.006095014815118763,
+      "reference_expected_count_at_n": 6095.014815118762
+    },
+    {
+      "rank": 48,
+      "topology_id": "ff1942b5710612483cd776fd75a8a87d",
+      "checkpoint_count": 6044,
+      "checkpoint_frequency": 0.006044,
+      "reference_frequency": 0.006057962856276331,
+      "reference_expected_count_at_n": 6057.962856276331
+    },
+    {
+      "rank": 49,
+      "topology_id": "16b6a1d745837d3cf716d551e8102821",
+      "checkpoint_count": 6024,
+      "checkpoint_frequency": 0.006024,
+      "reference_frequency": 0.006022377482932648,
+      "reference_expected_count_at_n": 6022.377482932648
+    },
+    {
+      "rank": 50,
+      "topology_id": "a6420d0445d016c63632a3b32c253e5f",
+      "checkpoint_count": 6032,
+      "checkpoint_frequency": 0.006032,
+      "reference_frequency": 0.00602066034304791,
+      "reference_expected_count_at_n": 6020.66034304791
+    },
+    {
+      "rank": 51,
+      "topology_id": "10d6c9bb19a55fc0a43b16358f4b91f9",
+      "checkpoint_count": 5987,
+      "checkpoint_frequency": 0.005987,
+      "reference_frequency": 0.006003425981351227,
+      "reference_expected_count_at_n": 6003.425981351226
+    },
+    {
+      "rank": 52,
+      "topology_id": "fcc76566b252aa780275c18a34a9ebc7",
+      "checkpoint_count": 5978,
+      "checkpoint_frequency": 0.005978,
+      "reference_frequency": 0.005977424838849241,
+      "reference_expected_count_at_n": 5977.4248388492415
+    },
+    {
+      "rank": 53,
+      "topology_id": "b40094e4c01a510392b83e3386225958",
+      "checkpoint_count": 5951,
+      "checkpoint_frequency": 0.005951,
+      "reference_frequency": 0.005975357897804681,
+      "reference_expected_count_at_n": 5975.357897804681
+    },
+    {
+      "rank": 54,
+      "topology_id": "2d144dfe449ff53871defb9e4d426785",
+      "checkpoint_count": 5946,
+      "checkpoint_frequency": 0.005946,
+      "reference_frequency": 0.0059676624681688165,
+      "reference_expected_count_at_n": 5967.662468168816
+    },
+    {
+      "rank": 55,
+      "topology_id": "43a40eb8a4d0171b7a74f14acb2e26a9",
+      "checkpoint_count": 5985,
+      "checkpoint_frequency": 0.005985,
+      "reference_frequency": 0.005957358883363836,
+      "reference_expected_count_at_n": 5957.358883363836
+    },
+    {
+      "rank": 56,
+      "topology_id": "1de5a9a93a563ca75620b8e0af3e87c5",
+      "checkpoint_count": 5950,
+      "checkpoint_frequency": 0.00595,
+      "reference_frequency": 0.005948868602964541,
+      "reference_expected_count_at_n": 5948.8686029645405
+    },
+    {
+      "rank": 57,
+      "topology_id": "91850afd6a13f5bd03c239b3e52ffb25",
+      "checkpoint_count": 5949,
+      "checkpoint_frequency": 0.005949,
+      "reference_frequency": 0.005941491886910888,
+      "reference_expected_count_at_n": 5941.491886910888
+    },
+    {
+      "rank": 58,
+      "topology_id": "e39a22495041396b7ee037d55405d999",
+      "checkpoint_count": 5917,
+      "checkpoint_frequency": 0.005917,
+      "reference_frequency": 0.005931094269157262,
+      "reference_expected_count_at_n": 5931.094269157262
+    },
+    {
+      "rank": 59,
+      "topology_id": "13fcc5711f6c3e649f572e97e5ae0a12",
+      "checkpoint_count": 5919,
+      "checkpoint_frequency": 0.005919,
+      "reference_frequency": 0.0059190513727793185,
+      "reference_expected_count_at_n": 5919.051372779319
+    },
+    {
+      "rank": 60,
+      "topology_id": "a2f0e492a995303c8e96b6d53c9e26cb",
+      "checkpoint_count": 5909,
+      "checkpoint_frequency": 0.005909,
+      "reference_frequency": 0.0059186387082666905,
+      "reference_expected_count_at_n": 5918.638708266691
+    },
+    {
+      "rank": 61,
+      "topology_id": "4f532eb6584b71560951494ddbb65930",
+      "checkpoint_count": 5926,
+      "checkpoint_frequency": 0.005926,
+      "reference_frequency": 0.005904565310182815,
+      "reference_expected_count_at_n": 5904.565310182815
+    },
+    {
+      "rank": 62,
+      "topology_id": "c446102554e10930b7676100a2f3d621",
+      "checkpoint_count": 5920,
+      "checkpoint_frequency": 0.00592,
+      "reference_frequency": 0.0058945951600324915,
+      "reference_expected_count_at_n": 5894.595160032492
+    },
+    {
+      "rank": 63,
+      "topology_id": "fc6567e54ff59966ff1b0c5296907c09",
+      "checkpoint_count": 5859,
+      "checkpoint_frequency": 0.005859,
+      "reference_frequency": 0.005853910628360328,
+      "reference_expected_count_at_n": 5853.910628360328
+    },
+    {
+      "rank": 64,
+      "topology_id": "5bb30f2293ad60a4b1f5265a3a12c29f",
+      "checkpoint_count": 5829,
+      "checkpoint_frequency": 0.005829,
+      "reference_frequency": 0.005830774171568677,
+      "reference_expected_count_at_n": 5830.774171568677
+    },
+    {
+      "rank": 65,
+      "topology_id": "861aedb8d563abd274c03c925c45186c",
+      "checkpoint_count": 5778,
+      "checkpoint_frequency": 0.005778,
+      "reference_frequency": 0.005790093836503114,
+      "reference_expected_count_at_n": 5790.093836503113
+    },
+    {
+      "rank": 66,
+      "topology_id": "28a59afd08092489eebabdc2dfc04d6b",
+      "checkpoint_count": 5761,
+      "checkpoint_frequency": 0.005761,
+      "reference_frequency": 0.005738004957383905,
+      "reference_expected_count_at_n": 5738.004957383905
+    },
+    {
+      "rank": 67,
+      "topology_id": "6bceb995ebe4171b0a70ac20059e6017",
+      "checkpoint_count": 5733,
+      "checkpoint_frequency": 0.005733,
+      "reference_frequency": 0.005705402544779693,
+      "reference_expected_count_at_n": 5705.402544779693
+    },
+    {
+      "rank": 68,
+      "topology_id": "33a5b0562cbebb3d969875d84c49e766",
+      "checkpoint_count": 5721,
+      "checkpoint_frequency": 0.005721,
+      "reference_frequency": 0.0056920162735323975,
+      "reference_expected_count_at_n": 5692.0162735323975
+    },
+    {
+      "rank": 69,
+      "topology_id": "5bbb45aeeae3a82abe64a3679d717bb6",
+      "checkpoint_count": 5692,
+      "checkpoint_frequency": 0.005692,
+      "reference_frequency": 0.005691925402558867,
+      "reference_expected_count_at_n": 5691.925402558867
+    },
+    {
+      "rank": 70,
+      "topology_id": "89ba78ef5d76f74de32c31106154240e",
+      "checkpoint_count": 5675,
+      "checkpoint_frequency": 0.005675,
+      "reference_frequency": 0.005673201634061411,
+      "reference_expected_count_at_n": 5673.201634061411
+    },
+    {
+      "rank": 71,
+      "topology_id": "4cce9bc9748785b1b5e48baddb5964a0",
+      "checkpoint_count": 5661,
+      "checkpoint_frequency": 0.005661,
+      "reference_frequency": 0.005669461165612883,
+      "reference_expected_count_at_n": 5669.461165612884
+    },
+    {
+      "rank": 72,
+      "topology_id": "b36f91b63ef508c31b04d5017e0caaf3",
+      "checkpoint_count": 5635,
+      "checkpoint_frequency": 0.005635,
+      "reference_frequency": 0.0056322145416720796,
+      "reference_expected_count_at_n": 5632.21454167208
+    },
+    {
+      "rank": 73,
+      "topology_id": "90b1b2b5aaa42d86b2d49fbd37ccf6ae",
+      "checkpoint_count": 5561,
+      "checkpoint_frequency": 0.005561,
+      "reference_frequency": 0.005576696853510379,
+      "reference_expected_count_at_n": 5576.696853510379
+    },
+    {
+      "rank": 74,
+      "topology_id": "af45f3564eeec8a23fa6fd8d89bd6921",
+      "checkpoint_count": 5495,
+      "checkpoint_frequency": 0.005495,
+      "reference_frequency": 0.0055150274709938035,
+      "reference_expected_count_at_n": 5515.027470993803
+    },
+    {
+      "rank": 75,
+      "topology_id": "cefa1c6ec709a4ae6b65caaae9f20ce5",
+      "checkpoint_count": 5509,
+      "checkpoint_frequency": 0.005509,
+      "reference_frequency": 0.005489527485069638,
+      "reference_expected_count_at_n": 5489.527485069638
+    },
+    {
+      "rank": 76,
+      "topology_id": "2d8c3a5cb787b12f9ec155de461560bd",
+      "checkpoint_count": 5480,
+      "checkpoint_frequency": 0.00548,
+      "reference_frequency": 0.005480247347829494,
+      "reference_expected_count_at_n": 5480.247347829494
+    },
+    {
+      "rank": 77,
+      "topology_id": "b2a6ea47c61a221c8536a5778d238ea1",
+      "checkpoint_count": 5490,
+      "checkpoint_frequency": 0.00549,
+      "reference_frequency": 0.005480003453628061,
+      "reference_expected_count_at_n": 5480.003453628061
+    },
+    {
+      "rank": 78,
+      "topology_id": "3c48bc6df0691310fafcddceb6ba33f6",
+      "checkpoint_count": 5464,
+      "checkpoint_frequency": 0.005464,
+      "reference_frequency": 0.005475888560522202,
+      "reference_expected_count_at_n": 5475.888560522202
+    },
+    {
+      "rank": 79,
+      "topology_id": "b25dc124cd8d95495785ac27d17e59d8",
+      "checkpoint_count": 5475,
+      "checkpoint_frequency": 0.005475,
+      "reference_frequency": 0.00546163331280102,
+      "reference_expected_count_at_n": 5461.63331280102
+    },
+    {
+      "rank": 80,
+      "topology_id": "911ba2869b2bec32da43dc9d134ac984",
+      "checkpoint_count": 5410,
+      "checkpoint_frequency": 0.00541,
+      "reference_frequency": 0.005426106621093792,
+      "reference_expected_count_at_n": 5426.106621093792
+    },
+    {
+      "rank": 81,
+      "topology_id": "f1a289141ff12f815b3ea17a379c3726",
+      "checkpoint_count": 5397,
+      "checkpoint_frequency": 0.005397,
+      "reference_frequency": 0.005401195234490941,
+      "reference_expected_count_at_n": 5401.1952344909405
+    },
+    {
+      "rank": 82,
+      "topology_id": "e8d860703446c60a043c216175b7486b",
+      "checkpoint_count": 5384,
+      "checkpoint_frequency": 0.005384,
+      "reference_frequency": 0.005392921568413195,
+      "reference_expected_count_at_n": 5392.921568413195
+    },
+    {
+      "rank": 83,
+      "topology_id": "395566eb837e366f786fcf7cd374312d",
+      "checkpoint_count": 5388,
+      "checkpoint_frequency": 0.005388,
+      "reference_frequency": 0.005389847613926897,
+      "reference_expected_count_at_n": 5389.847613926897
+    },
+    {
+      "rank": 84,
+      "topology_id": "58e3c7e8775117878764641e73d96fbf",
+      "checkpoint_count": 5376,
+      "checkpoint_frequency": 0.005376,
+      "reference_frequency": 0.005382344138304891,
+      "reference_expected_count_at_n": 5382.344138304891
+    },
+    {
+      "rank": 85,
+      "topology_id": "b075b7a2d7db5da7c938213df1f1bbd4",
+      "checkpoint_count": 5321,
+      "checkpoint_frequency": 0.005321,
+      "reference_frequency": 0.005345820355021361,
+      "reference_expected_count_at_n": 5345.82035502136
+    },
+    {
+      "rank": 86,
+      "topology_id": "dc5fd121da6e27df5a8dcbb48d22de3f",
+      "checkpoint_count": 5301,
+      "checkpoint_frequency": 0.005301,
+      "reference_frequency": 0.005300331662360979,
+      "reference_expected_count_at_n": 5300.331662360979
+    },
+    {
+      "rank": 87,
+      "topology_id": "3ae255e047d70ba4531227f145eb8b2a",
+      "checkpoint_count": 5282,
+      "checkpoint_frequency": 0.005282,
+      "reference_frequency": 0.005295821812702911,
+      "reference_expected_count_at_n": 5295.821812702911
+    },
+    {
+      "rank": 88,
+      "topology_id": "933d6ef6c8f8d430433ab6b22291fd36",
+      "checkpoint_count": 5264,
+      "checkpoint_frequency": 0.005264,
+      "reference_frequency": 0.005267409798081409,
+      "reference_expected_count_at_n": 5267.409798081409
+    },
+    {
+      "rank": 89,
+      "topology_id": "c7452c5bfdbcc74f19145b02eb5c787a",
+      "checkpoint_count": 5256,
+      "checkpoint_frequency": 0.005256,
+      "reference_frequency": 0.005257613054997894,
+      "reference_expected_count_at_n": 5257.613054997893
+    },
+    {
+      "rank": 90,
+      "topology_id": "9fddbc729e526d378ea9a5bb9974f452",
+      "checkpoint_count": 5223,
+      "checkpoint_frequency": 0.005223,
+      "reference_frequency": 0.005228600562302402,
+      "reference_expected_count_at_n": 5228.600562302401
+    },
+    {
+      "rank": 91,
+      "topology_id": "30bbf1ccbe8d6687b696cbe890a11534",
+      "checkpoint_count": 5197,
+      "checkpoint_frequency": 0.005197,
+      "reference_frequency": 0.005204678714475297,
+      "reference_expected_count_at_n": 5204.678714475297
+    },
+    {
+      "rank": 92,
+      "topology_id": "fdf4d131b6f774f66b2cc48095def84b",
+      "checkpoint_count": 5195,
+      "checkpoint_frequency": 0.005195,
+      "reference_frequency": 0.005203356840351331,
+      "reference_expected_count_at_n": 5203.356840351331
+    },
+    {
+      "rank": 93,
+      "topology_id": "bd46d9601e957211c5e5c7f1132e154e",
+      "checkpoint_count": 5192,
+      "checkpoint_frequency": 0.005192,
+      "reference_frequency": 0.005200586645423276,
+      "reference_expected_count_at_n": 5200.5866454232755
+    },
+    {
+      "rank": 94,
+      "topology_id": "e21d264fb7adac3b6845dd7dc6c0a64f",
+      "checkpoint_count": 5209,
+      "checkpoint_frequency": 0.005209,
+      "reference_frequency": 0.0051976257142206895,
+      "reference_expected_count_at_n": 5197.62571422069
+    },
+    {
+      "rank": 95,
+      "topology_id": "dc1ea7cfe675862d856bd98df7249a24",
+      "checkpoint_count": 5178,
+      "checkpoint_frequency": 0.005178,
+      "reference_frequency": 0.005183983581164806,
+      "reference_expected_count_at_n": 5183.983581164806
+    },
+    {
+      "rank": 96,
+      "topology_id": "0a5e3794ab3a6e9368d2cc98eadd6ffe",
+      "checkpoint_count": 5145,
+      "checkpoint_frequency": 0.005145,
+      "reference_frequency": 0.00516737576646489,
+      "reference_expected_count_at_n": 5167.37576646489
+    },
+    {
+      "rank": 97,
+      "topology_id": "18af002de65f1902972e511c226de97f",
+      "checkpoint_count": 5155,
+      "checkpoint_frequency": 0.005155,
+      "reference_frequency": 0.005154921557665527,
+      "reference_expected_count_at_n": 5154.921557665527
+    },
+    {
+      "rank": 98,
+      "topology_id": "82dee8142e0f185c075249fbbef8be04",
+      "checkpoint_count": 5168,
+      "checkpoint_frequency": 0.005168,
+      "reference_frequency": 0.005153586350288854,
+      "reference_expected_count_at_n": 5153.586350288854
+    },
+    {
+      "rank": 99,
+      "topology_id": "c74f756e9770161c194826ab5c150fa8",
+      "checkpoint_count": 5146,
+      "checkpoint_frequency": 0.005146,
+      "reference_frequency": 0.005149279241432057,
+      "reference_expected_count_at_n": 5149.2792414320575
+    },
+    {
+      "rank": 100,
+      "topology_id": "a530798a0ea8ab202b5b015f6523083f",
+      "checkpoint_count": 5155,
+      "checkpoint_frequency": 0.005155,
+      "reference_frequency": 0.005145846179386572,
+      "reference_expected_count_at_n": 5145.846179386573
+    },
+    {
+      "rank": 101,
+      "topology_id": "f3d01bc6d49769ba8efd9bc2d3f5e645",
+      "checkpoint_count": 5130,
+      "checkpoint_frequency": 0.00513,
+      "reference_frequency": 0.005142101017836966,
+      "reference_expected_count_at_n": 5142.101017836966
+    },
+    {
+      "rank": 102,
+      "topology_id": "0380c7da6de8e7ed16bcae1007db0249",
+      "checkpoint_count": 5152,
+      "checkpoint_frequency": 0.005152,
+      "reference_frequency": 0.005141814113707453,
+      "reference_expected_count_at_n": 5141.814113707453
+    },
+    {
+      "rank": 103,
+      "topology_id": "b3e76074f4b3e3d80c47c1486b6fe57d",
+      "checkpoint_count": 5119,
+      "checkpoint_frequency": 0.005119,
+      "reference_frequency": 0.005112571264694431,
+      "reference_expected_count_at_n": 5112.571264694431
+    },
+    {
+      "rank": 104,
+      "topology_id": "2139a16098ee9f570b0427cebd9f07a7",
+      "checkpoint_count": 5132,
+      "checkpoint_frequency": 0.005132,
+      "reference_frequency": 0.00511034450134037,
+      "reference_expected_count_at_n": 5110.344501340371
+    },
+    {
+      "rank": 105,
+      "topology_id": "78ba86810baf056d23489fad3344ca9d",
+      "checkpoint_count": 5059,
+      "checkpoint_frequency": 0.005059,
+      "reference_frequency": 0.005057718141060419,
+      "reference_expected_count_at_n": 5057.718141060419
+    }
+  ],
+  "loglikelihood_bins": [
+    {
+      "left": -3514.644744873047,
+      "right": -3511.697092895508,
+      "checkpoint_frequency": 1e-06,
+      "reference_frequency": 6.911993979994738e-07
+    },
+    {
+      "left": -3511.697092895508,
+      "right": -3508.749440917969,
+      "checkpoint_frequency": 0.0,
+      "reference_frequency": 0.0
+    },
+    {
+      "left": -3508.749440917969,
+      "right": -3505.8017889404296,
+      "checkpoint_frequency": 2e-06,
+      "reference_frequency": 1.3932514725691454e-06
+    },
+    {
+      "left": -3505.8017889404296,
+      "right": -3502.8541369628906,
+      "checkpoint_frequency": 0.0,
+      "reference_frequency": 0.0
+    },
+    {
+      "left": -3502.8541369628906,
+      "right": -3499.9064849853517,
+      "checkpoint_frequency": 1e-06,
+      "reference_frequency": 7.263171560554604e-07
+    },
+    {
+      "left": -3499.9064849853517,
+      "right": -3496.9588330078127,
+      "checkpoint_frequency": 3e-06,
+      "reference_frequency": 2.1748340055085013e-06
+    },
+    {
+      "left": -3496.9588330078127,
+      "right": -3494.0111810302733,
+      "checkpoint_frequency": 4e-06,
+      "reference_frequency": 3.307104946484662e-06
+    },
+    {
+      "left": -3494.0111810302733,
+      "right": -3491.0635290527343,
+      "checkpoint_frequency": 4e-06,
+      "reference_frequency": 3.2985027250602803e-06
+    },
+    {
+      "left": -3491.0635290527343,
+      "right": -3488.1158770751954,
+      "checkpoint_frequency": 1e-06,
+      "reference_frequency": 9.086205543718304e-07
+    },
+    {
+      "left": -3488.1158770751954,
+      "right": -3485.1682250976564,
+      "checkpoint_frequency": 8e-06,
+      "reference_frequency": 6.638990988702407e-06
+    },
+    {
+      "left": -3485.1682250976564,
+      "right": -3482.220573120117,
+      "checkpoint_frequency": 6e-06,
+      "reference_frequency": 4.977428881943208e-06
+    },
+    {
+      "left": -3482.220573120117,
+      "right": -3479.272921142578,
+      "checkpoint_frequency": 7e-06,
+      "reference_frequency": 5.758228807572022e-06
+    },
+    {
+      "left": -3479.272921142578,
+      "right": -3476.325269165039,
+      "checkpoint_frequency": 1.8e-05,
+      "reference_frequency": 1.5910032348196013e-05
+    },
+    {
+      "left": -3476.325269165039,
+      "right": -3473.3776171875,
+      "checkpoint_frequency": 2.3e-05,
+      "reference_frequency": 2.0239539353468484e-05
+    },
+    {
+      "left": -3473.3776171875,
+      "right": -3470.4299652099608,
+      "checkpoint_frequency": 2.5e-05,
+      "reference_frequency": 2.218291100566732e-05
+    },
+    {
+      "left": -3470.4299652099608,
+      "right": -3467.482313232422,
+      "checkpoint_frequency": 5.7e-05,
+      "reference_frequency": 5.179261312685381e-05
+    },
+    {
+      "left": -3467.482313232422,
+      "right": -3464.534661254883,
+      "checkpoint_frequency": 6.9e-05,
+      "reference_frequency": 6.19234898262798e-05
+    },
+    {
+      "left": -3464.534661254883,
+      "right": -3461.587009277344,
+      "checkpoint_frequency": 7.5e-05,
+      "reference_frequency": 6.88374763790026e-05
+    },
+    {
+      "left": -3461.587009277344,
+      "right": -3458.6393572998045,
+      "checkpoint_frequency": 9.4e-05,
+      "reference_frequency": 8.806035884116646e-05
+    },
+    {
+      "left": -3458.6393572998045,
+      "right": -3455.6917053222655,
+      "checkpoint_frequency": 0.000136,
+      "reference_frequency": 0.00012572744326669804
+    },
+    {
+      "left": -3455.6917053222655,
+      "right": -3452.7440533447266,
+      "checkpoint_frequency": 0.00015,
+      "reference_frequency": 0.00014160690634472135
+    },
+    {
+      "left": -3452.7440533447266,
+      "right": -3449.7964013671876,
+      "checkpoint_frequency": 0.000204,
+      "reference_frequency": 0.00019269653463810355
+    },
+    {
+      "left": -3449.7964013671876,
+      "right": -3446.848749389648,
+      "checkpoint_frequency": 0.000255,
+      "reference_frequency": 0.00024239809795046697
+    },
+    {
+      "left": -3446.848749389648,
+      "right": -3443.9010974121093,
+      "checkpoint_frequency": 0.000346,
+      "reference_frequency": 0.00033204995589521287
+    },
+    {
+      "left": -3443.9010974121093,
+      "right": -3440.9534454345703,
+      "checkpoint_frequency": 0.000421,
+      "reference_frequency": 0.0004053920323127836
+    },
+    {
+      "left": -3440.9534454345703,
+      "right": -3438.0057934570314,
+      "checkpoint_frequency": 0.000526,
+      "reference_frequency": 0.0005081753464513011
+    },
+    {
+      "left": -3438.0057934570314,
+      "right": -3435.0581414794924,
+      "checkpoint_frequency": 0.000664,
+      "reference_frequency": 0.0006451028090317086
+    },
+    {
+      "left": -3435.0581414794924,
+      "right": -3432.110489501953,
+      "checkpoint_frequency": 0.000799,
+      "reference_frequency": 0.0007775680942185763
+    },
+    {
+      "left": -3432.110489501953,
+      "right": -3429.162837524414,
+      "checkpoint_frequency": 0.000951,
+      "reference_frequency": 0.000930504946966454
+    },
+    {
+      "left": -3429.162837524414,
+      "right": -3426.215185546875,
+      "checkpoint_frequency": 0.001242,
+      "reference_frequency": 0.0012179581739336798
+    },
+    {
+      "left": -3426.215185546875,
+      "right": -3423.267533569336,
+      "checkpoint_frequency": 0.001537,
+      "reference_frequency": 0.001509645855575419
+    },
+    {
+      "left": -3423.267533569336,
+      "right": -3420.3198815917967,
+      "checkpoint_frequency": 0.001849,
+      "reference_frequency": 0.00182394763070868
+    },
+    {
+      "left": -3420.3198815917967,
+      "right": -3417.372229614258,
+      "checkpoint_frequency": 0.00228,
+      "reference_frequency": 0.0022524635494216
+    },
+    {
+      "left": -3417.372229614258,
+      "right": -3414.424577636719,
+      "checkpoint_frequency": 0.002695,
+      "reference_frequency": 0.002667915078696107
+    },
+    {
+      "left": -3414.424577636719,
+      "right": -3411.47692565918,
+      "checkpoint_frequency": 0.003074,
+      "reference_frequency": 0.0030429517543451943
+    },
+    {
+      "left": -3411.47692565918,
+      "right": -3408.5292736816405,
+      "checkpoint_frequency": 0.003702,
+      "reference_frequency": 0.003672887384638897
+    },
+    {
+      "left": -3408.5292736816405,
+      "right": -3405.5816217041015,
+      "checkpoint_frequency": 0.004275,
+      "reference_frequency": 0.004248308197450996
+    },
+    {
+      "left": -3405.5816217041015,
+      "right": -3402.6339697265626,
+      "checkpoint_frequency": 0.004989,
+      "reference_frequency": 0.004965812690524842
+    },
+    {
+      "left": -3402.6339697265626,
+      "right": -3399.6863177490236,
+      "checkpoint_frequency": 0.005744,
+      "reference_frequency": 0.005722292421105557
+    },
+    {
+      "left": -3399.6863177490236,
+      "right": -3396.738665771484,
+      "checkpoint_frequency": 0.006561,
+      "reference_frequency": 0.0065403610408690666
+    },
+    {
+      "left": -3396.738665771484,
+      "right": -3393.7910137939452,
+      "checkpoint_frequency": 0.007464,
+      "reference_frequency": 0.0074511304110056464
+    },
+    {
+      "left": -3393.7910137939452,
+      "right": -3390.8433618164063,
+      "checkpoint_frequency": 0.008454,
+      "reference_frequency": 0.008441216484267058
+    },
+    {
+      "left": -3390.8433618164063,
+      "right": -3387.8957098388673,
+      "checkpoint_frequency": 0.009467,
+      "reference_frequency": 0.009462056195570688
+    },
+    {
+      "left": -3387.8957098388673,
+      "right": -3384.948057861328,
+      "checkpoint_frequency": 0.010726,
+      "reference_frequency": 0.01072548424613877
+    },
+    {
+      "left": -3384.948057861328,
+      "right": -3382.000405883789,
+      "checkpoint_frequency": 0.012045,
+      "reference_frequency": 0.01204779597808496
+    },
+    {
+      "left": -3382.000405883789,
+      "right": -3379.05275390625,
+      "checkpoint_frequency": 0.013178,
+      "reference_frequency": 0.01318569835189426
+    },
+    {
+      "left": -3379.05275390625,
+      "right": -3376.105101928711,
+      "checkpoint_frequency": 0.014473,
+      "reference_frequency": 0.014489642762525262
+    },
+    {
+      "left": -3376.105101928711,
+      "right": -3373.1574499511717,
+      "checkpoint_frequency": 0.015954,
+      "reference_frequency": 0.015976026965728904
+    },
+    {
+      "left": -3373.1574499511717,
+      "right": -3370.2097979736327,
+      "checkpoint_frequency": 0.017377,
+      "reference_frequency": 0.017406626366697348
+    },
+    {
+      "left": -3370.2097979736327,
+      "right": -3367.2621459960938,
+      "checkpoint_frequency": 0.018787,
+      "reference_frequency": 0.018828095626774122
+    },
+    {
+      "left": -3367.2621459960938,
+      "right": -3364.314494018555,
+      "checkpoint_frequency": 0.019998,
+      "reference_frequency": 0.020035871752612594
+    },
+    {
+      "left": -3364.314494018555,
+      "right": -3361.366842041016,
+      "checkpoint_frequency": 0.021552,
+      "reference_frequency": 0.021599820098045563
+    },
+    {
+      "left": -3361.366842041016,
+      "right": -3358.4191900634764,
+      "checkpoint_frequency": 0.022838,
+      "reference_frequency": 0.022893468841940295
+    },
+    {
+      "left": -3358.4191900634764,
+      "right": -3355.4715380859375,
+      "checkpoint_frequency": 0.024471,
+      "reference_frequency": 0.02452638089932707
+    },
+    {
+      "left": -3355.4715380859375,
+      "right": -3352.5238861083985,
+      "checkpoint_frequency": 0.025583,
+      "reference_frequency": 0.025642714701883673
+    },
+    {
+      "left": -3352.5238861083985,
+      "right": -3349.5762341308596,
+      "checkpoint_frequency": 0.026626,
+      "reference_frequency": 0.026683697758473623
+    },
+    {
+      "left": -3349.5762341308596,
+      "right": -3346.62858215332,
+      "checkpoint_frequency": 0.02799,
+      "reference_frequency": 0.028049147979913702
+    },
+    {
+      "left": -3346.62858215332,
+      "right": -3343.680930175781,
+      "checkpoint_frequency": 0.029186,
+      "reference_frequency": 0.0292507037757736
+    },
+    {
+      "left": -3343.680930175781,
+      "right": -3340.7332781982423,
+      "checkpoint_frequency": 0.029735,
+      "reference_frequency": 0.02979414308042322
+    },
+    {
+      "left": -3340.7332781982423,
+      "right": -3337.7856262207033,
+      "checkpoint_frequency": 0.030673,
+      "reference_frequency": 0.030731797583401332
+    },
+    {
+      "left": -3337.7856262207033,
+      "right": -3334.837974243164,
+      "checkpoint_frequency": 0.031098,
+      "reference_frequency": 0.031154812781104213
+    },
+    {
+      "left": -3334.837974243164,
+      "right": -3331.890322265625,
+      "checkpoint_frequency": 0.031449,
+      "reference_frequency": 0.03150495574416151
+    },
+    {
+      "left": -3331.890322265625,
+      "right": -3328.942670288086,
+      "checkpoint_frequency": 0.031623,
+      "reference_frequency": 0.03167694343058486
+    },
+    {
+      "left": -3328.942670288086,
+      "right": -3325.995018310547,
+      "checkpoint_frequency": 0.031594,
+      "reference_frequency": 0.031634400812427965
+    },
+    {
+      "left": -3325.995018310547,
+      "right": -3323.0473663330076,
+      "checkpoint_frequency": 0.031341,
+      "reference_frequency": 0.03137680201687276
+    },
+    {
+      "left": -3323.0473663330076,
+      "right": -3320.0997143554687,
+      "checkpoint_frequency": 0.030932,
+      "reference_frequency": 0.030961996704468198
+    },
+    {
+      "left": -3320.0997143554687,
+      "right": -3317.1520623779297,
+      "checkpoint_frequency": 0.030817,
+      "reference_frequency": 0.030842225297296855
+    },
+    {
+      "left": -3317.1520623779297,
+      "right": -3314.2044104003908,
+      "checkpoint_frequency": 0.029826,
+      "reference_frequency": 0.02984655584188023
+    },
+    {
+      "left": -3314.2044104003908,
+      "right": -3311.2567584228514,
+      "checkpoint_frequency": 0.029099,
+      "reference_frequency": 0.029106642097234126
+    },
+    {
+      "left": -3311.2567584228514,
+      "right": -3308.3091064453124,
+      "checkpoint_frequency": 0.027976,
+      "reference_frequency": 0.0279775115731139
+    },
+    {
+      "left": -3308.3091064453124,
+      "right": -3305.3614544677735,
+      "checkpoint_frequency": 0.02674,
+      "reference_frequency": 0.026739262206672
+    },
+    {
+      "left": -3305.3614544677735,
+      "right": -3302.4138024902345,
+      "checkpoint_frequency": 0.025318,
+      "reference_frequency": 0.025305775479270487
+    },
+    {
+      "left": -3302.4138024902345,
+      "right": -3299.466150512695,
+      "checkpoint_frequency": 0.023899,
+      "reference_frequency": 0.02388140722788812
+    },
+    {
+      "left": -3299.466150512695,
+      "right": -3296.518498535156,
+      "checkpoint_frequency": 0.022244,
+      "reference_frequency": 0.0222234341648887
+    },
+    {
+      "left": -3296.518498535156,
+      "right": -3293.570846557617,
+      "checkpoint_frequency": 0.021048,
+      "reference_frequency": 0.02102252783891001
+    },
+    {
+      "left": -3293.570846557617,
+      "right": -3290.6231945800782,
+      "checkpoint_frequency": 0.019474,
+      "reference_frequency": 0.01944632736449159
+    },
+    {
+      "left": -3290.6231945800782,
+      "right": -3287.6755426025393,
+      "checkpoint_frequency": 0.017806,
+      "reference_frequency": 0.017774233274429174
+    },
+    {
+      "left": -3287.6755426025393,
+      "right": -3284.727890625,
+      "checkpoint_frequency": 0.015956,
+      "reference_frequency": 0.015923226816726643
+    },
+    {
+      "left": -3284.727890625,
+      "right": -3281.780238647461,
+      "checkpoint_frequency": 0.014551,
+      "reference_frequency": 0.014511730350355023
+    },
+    {
+      "left": -3281.780238647461,
+      "right": -3278.832586669922,
+      "checkpoint_frequency": 0.012832,
+      "reference_frequency": 0.012798707637783013
+    },
+    {
+      "left": -3278.832586669922,
+      "right": -3275.884934692383,
+      "checkpoint_frequency": 0.011484,
+      "reference_frequency": 0.01145018542125209
+    },
+    {
+      "left": -3275.884934692383,
+      "right": -3272.9372827148436,
+      "checkpoint_frequency": 0.009971,
+      "reference_frequency": 0.0099373710637366
+    },
+    {
+      "left": -3272.9372827148436,
+      "right": -3269.9896307373047,
+      "checkpoint_frequency": 0.008649,
+      "reference_frequency": 0.00861720279249778
+    },
+    {
+      "left": -3269.9896307373047,
+      "right": -3267.0419787597657,
+      "checkpoint_frequency": 0.007311,
+      "reference_frequency": 0.007283538808636414
+    },
+    {
+      "left": -3267.0419787597657,
+      "right": -3264.0943267822267,
+      "checkpoint_frequency": 0.006161,
+      "reference_frequency": 0.0061361056400262015
+    },
+    {
+      "left": -3264.0943267822267,
+      "right": -3261.1466748046873,
+      "checkpoint_frequency": 0.005099,
+      "reference_frequency": 0.005076350302619104
+    },
+    {
+      "left": -3261.1466748046873,
+      "right": -3258.1990228271484,
+      "checkpoint_frequency": 0.004107,
+      "reference_frequency": 0.004086548169732307
+    },
+    {
+      "left": -3258.1990228271484,
+      "right": -3255.2513708496094,
+      "checkpoint_frequency": 0.003263,
+      "reference_frequency": 0.003245920967652527
+    },
+    {
+      "left": -3255.2513708496094,
+      "right": -3252.3037188720705,
+      "checkpoint_frequency": 0.002477,
+      "reference_frequency": 0.002465579255340078
+    },
+    {
+      "left": -3252.3037188720705,
+      "right": -3249.356066894531,
+      "checkpoint_frequency": 0.001955,
+      "reference_frequency": 0.0019440661169346507
+    },
+    {
+      "left": -3249.356066894531,
+      "right": -3246.408414916992,
+      "checkpoint_frequency": 0.001451,
+      "reference_frequency": 0.0014437795514192775
+    },
+    {
+      "left": -3246.408414916992,
+      "right": -3243.460762939453,
+      "checkpoint_frequency": 0.001004,
+      "reference_frequency": 0.0009985365673179647
+    },
+    {
+      "left": -3243.460762939453,
+      "right": -3240.513110961914,
+      "checkpoint_frequency": 0.000759,
+      "reference_frequency": 0.0007549106077419099
+    },
+    {
+      "left": -3240.513110961914,
+      "right": -3237.565458984375,
+      "checkpoint_frequency": 0.000525,
+      "reference_frequency": 0.0005223708443344854
+    },
+    {
+      "left": -3237.565458984375,
+      "right": -3234.617807006836,
+      "checkpoint_frequency": 0.000364,
+      "reference_frequency": 0.00036192582975802523
+    },
+    {
+      "left": -3234.617807006836,
+      "right": -3231.670155029297,
+      "checkpoint_frequency": 0.00019,
+      "reference_frequency": 0.00018920636948582814
+    },
+    {
+      "left": -3231.670155029297,
+      "right": -3228.722503051758,
+      "checkpoint_frequency": 0.000121,
+      "reference_frequency": 0.00012035869084181527
+    },
+    {
+      "left": -3228.722503051758,
+      "right": -3225.7748510742185,
+      "checkpoint_frequency": 5.9e-05,
+      "reference_frequency": 5.8688084099478566e-05
+    },
+    {
+      "left": -3225.7748510742185,
+      "right": -3222.8271990966796,
+      "checkpoint_frequency": 3.9e-05,
+      "reference_frequency": 3.881002075289963e-05
+    },
+    {
+      "left": -3222.8271990966796,
+      "right": -3219.8795471191406,
+      "checkpoint_frequency": 1.3e-05,
+      "reference_frequency": 1.295953061897226e-05
+    }
+  ]
+}

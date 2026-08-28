@@ -1,0 +1,30 @@
+[
+  {
+    "epoch": 0,
+    "method": "learned_reverse_ips",
+    "mean_loss": 2.9802322387695314e-09,
+    "cumulative_unique_outcomes": 59.0,
+    "l1_distance": 1.6643730193797968,
+    "total_variation": 0.8321865096898984,
+    "num_samples": 2000,
+    "sampled_unique_terminals": 345,
+    "num_modes_with_mass": 1.0,
+    "expected_num_modes": 4.0,
+    "peak_mode_mass": 0.11700000000000006,
+    "mean_reward": 0.780750036239624
+  },
+  {
+    "epoch": 1,
+    "method": "learned_reverse_ips",
+    "mean_loss": -7.450580596923828e-09,
+    "cumulative_unique_outcomes": 141.0,
+    "l1_distance": 1.623879636197933,
+    "total_variation": 0.8119398180989665,
+    "num_samples": 2000,
+    "sampled_unique_terminals": 729,
+    "num_modes_with_mass": 1.0,
+    "expected_num_modes": 4.0,
+    "peak_mode_mass": 0.09150000000000003,
+    "mean_reward": 0.5015000104904175
+  }
+]

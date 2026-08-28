@@ -1,0 +1,22 @@
+{
+  "run_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo",
+  "method": "learned_reverse_ips_grpo",
+  "checkpoint_path": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo/final_checkpoint.pt",
+  "reverse_state_path": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/learned_reverse/20260825_164705_learned_reverse_5taxa_noreplay_learned_reverse_ips_grpo/learned_reverse_state.pt",
+  "reverse_update_step": 10000,
+  "device": "cuda:0",
+  "num_trees": 1000000,
+  "batch_size": 4096,
+  "seed": 0,
+  "reward_target": "shifted_linear",
+  "target": "R(x) = shifted_score = 3600 + terminal_log_likelihood",
+  "log_score_shift": 3600.0,
+  "only_train_tree_model": false,
+  "reverse_policy_type": "mlp",
+  "observed_topologies": 105,
+  "importance_ess": 999769.8826580134,
+  "importance_ess_fraction": 0.9997698826580134,
+  "log_weight_min": 37.71653190030776,
+  "log_weight_max": 38.258022569357514,
+  "log_weight_std": 0.015328683491148973
+}

@@ -1,0 +1,11 @@
+{
+  "plot": "/home/armaan/phylogfn/final/runs/hypergrid_64/plots/gt_vs_gflownet_tb.png",
+  "l1_distance": 0.27017200308762024,
+  "total_variation": 0.13508600154381012,
+  "num_samples": 50000,
+  "sampled_unique_terminals": 4043,
+  "num_modes_with_mass": 4.0,
+  "expected_num_modes": 4.0,
+  "peak_mode_mass": 0.27808000000000005,
+  "mean_reward": 1.025090217590332
+}

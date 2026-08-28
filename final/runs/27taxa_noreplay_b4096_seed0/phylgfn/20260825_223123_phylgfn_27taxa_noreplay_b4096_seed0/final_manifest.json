@@ -1,0 +1,8 @@
+{
+  "suite_id": "27taxa_noreplay_b4096_seed0",
+  "method": "phylgfn",
+  "run_dir": "/home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed0/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed0",
+  "run_name": "phylgfn_27taxa_noreplay_b4096_seed0",
+  "comparison_metrics": "/home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed0/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed0/plots/reward_probability_eval_1000000/comparison_metrics.json",
+  "plots_dir": "/home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed0/phylgfn/20260825_223123_phylgfn_27taxa_noreplay_b4096_seed0/plots/reward_probability_eval_1000000"
+}

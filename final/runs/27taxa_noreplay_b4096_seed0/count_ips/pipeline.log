@@ -1,0 +1,46 @@
+[final] launching: /home/armaan/phylogfn/.venv/bin/python -u -m grpo_experiments.ips_grpo.train --run-name count_ips_27taxa_noreplay_b4096_seed0 --cfg src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml --ips-propensity-mode count --ips-prob-floor 1e-6 --policy-loss-mode ppo --dataset dataset/benchmark_datasets/DS1.pickle --output final/runs/27taxa_noreplay_b4096_seed0/count_ips --seed 0 --epochs 25000 --steps-per-epoch 1 --on-policy-batch-size 1024 --replay-batch-size 0 --replay-buffer-size 512 --checkpoint-every 1000 --full-model --outcome-level signature --advantage-reward-mode log_reward --grpo-lr 1e-4 --grpo-entropy-coef 0.0 --grpo-num-iterations 1 --rollout-chunk-size 1024 --print-every 25 --disable-replay
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/armaan/phylogfn/final/__main__.py", line 85, in <module>
+    main()
+  File "/home/armaan/phylogfn/final/__main__.py", line 35, in main
+    pipeline_main(argv)
+  File "/home/armaan/phylogfn/final/pipeline.py", line 318, in main
+    manifest = run_pipeline(
+  File "/home/armaan/phylogfn/final/pipeline.py", line 158, in run_pipeline
+    raise RuntimeError(f"training failed with exit code {exit_code}: {run_dir}")
+RuntimeError: training failed with exit code 1: /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed0/count_ips/20260828_012826_count_ips_27taxa_noreplay_b4096_seed0_ips_grpo
+[final] launching: /home/armaan/phylogfn/.venv/bin/python -u -m grpo_experiments.ips_grpo.train --run-name count_ips_27taxa_noreplay_b4096_seed0 --cfg src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml --ips-propensity-mode count --ips-prob-floor 1e-6 --policy-loss-mode ppo --dataset dataset/benchmark_datasets/DS1.pickle --output final/runs/27taxa_noreplay_b4096_seed0/count_ips --seed 0 --epochs 25000 --steps-per-epoch 1 --on-policy-batch-size 1024 --replay-batch-size 0 --replay-buffer-size 512 --checkpoint-every 1000 --full-model --outcome-level signature --advantage-reward-mode log_reward --grpo-lr 1e-4 --grpo-entropy-coef 0.0 --grpo-num-iterations 1 --rollout-chunk-size 1024 --print-every 25 --disable-replay
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/armaan/phylogfn/final/__main__.py", line 85, in <module>
+    main()
+  File "/home/armaan/phylogfn/final/__main__.py", line 35, in main
+    pipeline_main(argv)
+  File "/home/armaan/phylogfn/final/pipeline.py", line 318, in main
+    manifest = run_pipeline(
+  File "/home/armaan/phylogfn/final/pipeline.py", line 158, in run_pipeline
+    raise RuntimeError(f"training failed with exit code {exit_code}: {run_dir}")
+RuntimeError: training failed with exit code 1: /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed0/count_ips/20260828_120439_count_ips_27taxa_noreplay_b4096_seed0_ips_grpo
+[final] launching: /home/armaan/phylogfn/.venv/bin/python -u -m grpo_experiments.ips_grpo.train --run-name count_ips_27taxa_noreplay_b4096_seed0 --cfg src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml --ips-propensity-mode count --ips-prob-floor 1e-6 --policy-loss-mode ppo --dataset dataset/benchmark_datasets/DS1.pickle --output final/runs/27taxa_noreplay_b4096_seed0/count_ips --seed 0 --epochs 25000 --steps-per-epoch 1 --on-policy-batch-size 1024 --replay-batch-size 0 --replay-buffer-size 512 --checkpoint-every 1000 --full-model --outcome-level signature --advantage-reward-mode log_reward --grpo-lr 1e-4 --grpo-entropy-coef 0.0 --grpo-num-iterations 1 --rollout-chunk-size 1024 --print-every 25 --disable-replay
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/armaan/phylogfn/final/__main__.py", line 85, in <module>
+    main()
+  File "/home/armaan/phylogfn/final/__main__.py", line 35, in main
+    pipeline_main(argv)
+  File "/home/armaan/phylogfn/final/pipeline.py", line 318, in main
+    manifest = run_pipeline(
+  File "/home/armaan/phylogfn/final/pipeline.py", line 158, in run_pipeline
+    raise RuntimeError(f"training failed with exit code {exit_code}: {run_dir}")
+RuntimeError: training failed with exit code 1: /home/armaan/phylogfn/final/runs/27taxa_noreplay_b4096_seed0/count_ips/20260828_121122_count_ips_27taxa_noreplay_b4096_seed0_ips_grpo
+[final] launching: /home/armaan/phylogfn/.venv/bin/python -u -m grpo_experiments.ips_grpo.train --run-name count_ips_27taxa_noreplay_b4096_seed0 --cfg src/configs/benchmark_dna_cfgs/discrete_branch_lengths/cfg_0.001binsize_50bins_temperature_anneal_0.4_27taxa_shift12000.yaml --ips-propensity-mode count --ips-prob-floor 1e-6 --policy-loss-mode ppo --dataset dataset/benchmark_datasets/DS1.pickle --output final/runs/27taxa_noreplay_b4096_seed0/count_ips --seed 0 --epochs 25000 --steps-per-epoch 1 --on-policy-batch-size 1024 --replay-batch-size 0 --replay-buffer-size 512 --checkpoint-every 1000 --full-model --outcome-level signature --advantage-reward-mode log_reward --grpo-lr 1e-4 --grpo-entropy-coef 0.0 --grpo-num-iterations 1 --rollout-chunk-size 1024 --print-every 25 --disable-replay --mini-batch-splits 4

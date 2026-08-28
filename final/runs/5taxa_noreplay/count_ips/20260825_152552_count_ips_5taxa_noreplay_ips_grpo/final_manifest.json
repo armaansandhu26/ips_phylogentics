@@ -1,0 +1,10 @@
+{
+  "suite_id": "5taxa_noreplay",
+  "method": "count_ips",
+  "run_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/count_ips/20260825_152552_count_ips_5taxa_noreplay_ips_grpo",
+  "run_name": "count_ips_5taxa_noreplay",
+  "training_curves": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/count_ips/20260825_152552_count_ips_5taxa_noreplay_ips_grpo/plots/training_curves.png",
+  "samples": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/count_ips/20260825_152552_count_ips_5taxa_noreplay_ips_grpo/sampled_full_diagnostics_1000000.npz",
+  "comparison_metrics": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/count_ips/20260825_152552_count_ips_5taxa_noreplay_ips_grpo/plots/mlp_shifted_linear_reference_1000k/comparison_metrics.json",
+  "plots_dir": "/home/armaan/phylogfn/final/runs/5taxa_noreplay/count_ips/20260825_152552_count_ips_5taxa_noreplay_ips_grpo/plots/mlp_shifted_linear_reference_1000k"
+}
