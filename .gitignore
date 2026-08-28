@@ -122,6 +122,7 @@ final/runs/**/wandb/
 final/runs/**/raw_samples/
 final/runs/**/plots/**/cache/
 final/runs/**/*.npz
+!final/runs/**/plots/**/*.npz
 final/runs/**/logs/
 final/runs/*_watcher.*
 final/runs/*_watcher.py
