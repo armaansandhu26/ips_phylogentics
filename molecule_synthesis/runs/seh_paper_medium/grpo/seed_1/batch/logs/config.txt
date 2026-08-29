@@ -1,0 +1,251 @@
+import gin_config
+import rgfn
+
+# Macros:
+# ==============================================================================
+action_embedding_fn = @action_embedding_fn/gin.singleton()
+backward_policy = @backward_policy/gin.singleton()
+beta = 8
+data_factory = @data_factory/gin.singleton()
+evaluation_step = 500
+forward_policy = @forward_policy/gin.singleton()
+hidden_dim = 64
+logger = @logger/gin.singleton()
+objective = @objective/gin.singleton()
+run_dir = @run_dir/get_str()
+run_name = 'seh_paper_medium/grpo/seed_1/batch'
+train_backward_policy = %backward_policy
+train_backward_sampler = @train_backward_sampler/gin.singleton()
+train_env = @env/gin.singleton()
+train_forward_policy = @train_forward_policy/gin.singleton()
+train_forward_sampler = @train_forward_sampler/gin.singleton()
+train_metrics = \
+    [@StandardGFNMetrics(),
+     @NumScaffoldsFound(),
+     @UniqueMolecules(),
+     @AllMolecules(),
+     @FractionEarlyTerminate(),
+     @QED(),
+     @TanimotoSimilarityModes()]
+train_proxy = @proxy/gin.singleton()
+train_replay_buffer = @train_replay_buffer/gin.singleton()
+train_reward = @train_reward/gin.singleton()
+user_root_dir = '/nfs/home/svu/ophv165/ips_phylogentics/molecule_synthesis/runs'
+valid_env = %train_env
+valid_proxy = %train_proxy
+valid_reward = @valid_reward/gin.singleton()
+valid_sampler = @valid_sampler/gin.singleton()
+
+# Parameters for AllMolecules:
+# ==============================================================================
+AllMolecules.dump_every_n = %evaluation_step
+AllMolecules.run_dir = %run_dir
+
+# Parameters for ExploratoryPolicy:
+# ==============================================================================
+ExploratoryPolicy.first_policy = %forward_policy
+ExploratoryPolicy.first_policy_weight = 0.95
+ExploratoryPolicy.second_policy = @UniformPolicy()
+
+# Parameters for FragmentOneHotEmbedding:
+# ==============================================================================
+FragmentOneHotEmbedding.data_factory = %data_factory
+FragmentOneHotEmbedding.hidden_dim = %hidden_dim
+
+# Parameters for logdir/get_str:
+# ==============================================================================
+logdir/get_str.format = '{}/{}'
+logdir/get_str.values = [%run_dir, 'logs']
+
+# Parameters for run_dir/get_str:
+# ==============================================================================
+run_dir/get_str.format = '{}/{}'
+run_dir/get_str.values = [%user_root_dir, %run_name]
+
+# Parameters for GRPOObjective:
+# ==============================================================================
+GRPOObjective.backward_policy = @UniformPolicy()
+GRPOObjective.clip_eps = 0.2
+GRPOObjective.forward_policy = %forward_policy
+GRPOObjective.reward_mode = 'linear'
+
+# Parameters for NumScaffoldsFound:
+# ==============================================================================
+NumScaffoldsFound.proxy_component_name = None
+NumScaffoldsFound.proxy_value_threshold_list = [5, 6, 7, 8]
+
+# Parameters for train/backward/RandomSampler:
+# ==============================================================================
+train/backward/RandomSampler.env = @reverse()
+train/backward/RandomSampler.policy = %train_backward_policy
+
+# Parameters for train/forward/RandomSampler:
+# ==============================================================================
+train/forward/RandomSampler.env = %train_env
+train/forward/RandomSampler.policy = %forward_policy
+
+# Parameters for train/RandomSampler:
+# ==============================================================================
+train/RandomSampler.reward = %train_reward
+
+# Parameters for valid/RandomSampler:
+# ==============================================================================
+valid/RandomSampler.env = %valid_env
+valid/RandomSampler.policy = %forward_policy
+valid/RandomSampler.reward = %valid_reward
+
+# Parameters for ReactionBackwardPolicy:
+# ==============================================================================
+ReactionBackwardPolicy.data_factory = %data_factory
+ReactionBackwardPolicy.hidden_dim = %hidden_dim
+
+# Parameters for ReactionDataFactory:
+# ==============================================================================
+ReactionDataFactory.docking = False
+ReactionDataFactory.reaction_path = 'data/chemistry.xlsx'
+
+# Parameters for ReactionEnv:
+# ==============================================================================
+ReactionEnv.data_factory = %data_factory
+ReactionEnv.max_num_reactions = 4
+
+# Parameters for ReactionForwardPolicy:
+# ==============================================================================
+ReactionForwardPolicy.action_embedding_fn = %action_embedding_fn
+ReactionForwardPolicy.data_factory = %data_factory
+ReactionForwardPolicy.hidden_dim = %hidden_dim
+
+# Parameters for reverse:
+# ==============================================================================
+reverse.env = %train_env
+
+# Parameters for Reward:
+# ==============================================================================
+Reward.beta = %beta
+Reward.min_reward = 1e-08
+Reward.reward_boosting = 'exponential'
+
+# Parameters for train/Reward:
+# ==============================================================================
+train/Reward.proxy = %train_proxy
+
+# Parameters for valid/Reward:
+# ==============================================================================
+valid/Reward.proxy = %valid_proxy
+
+# Parameters for RewardPrioritizedReplayBuffer:
+# ==============================================================================
+RewardPrioritizedReplayBuffer.max_size = 1000000.0
+RewardPrioritizedReplayBuffer.sampler = %train_backward_sampler
+RewardPrioritizedReplayBuffer.temperature = %beta
+
+# Parameters for action_embedding_fn/singleton:
+# ==============================================================================
+action_embedding_fn/singleton.constructor = @FragmentOneHotEmbedding
+
+# Parameters for backward_policy/singleton:
+# ==============================================================================
+backward_policy/singleton.constructor = @ReactionBackwardPolicy
+
+# Parameters for data_factory/singleton:
+# ==============================================================================
+data_factory/singleton.constructor = @ReactionDataFactory
+
+# Parameters for env/singleton:
+# ==============================================================================
+env/singleton.constructor = @ReactionEnv
+
+# Parameters for forward_policy/singleton:
+# ==============================================================================
+forward_policy/singleton.constructor = @ReactionForwardPolicy
+
+# Parameters for logger/singleton:
+# ==============================================================================
+logger/singleton.constructor = @WandbLogger
+
+# Parameters for objective/singleton:
+# ==============================================================================
+objective/singleton.constructor = @GRPOObjective
+
+# Parameters for proxy/singleton:
+# ==============================================================================
+proxy/singleton.constructor = @SehMoleculeProxy
+
+# Parameters for train_backward_sampler/singleton:
+# ==============================================================================
+train_backward_sampler/singleton.constructor = @train/backward/RandomSampler
+
+# Parameters for train_forward_policy/singleton:
+# ==============================================================================
+train_forward_policy/singleton.constructor = @ExploratoryPolicy
+
+# Parameters for train_forward_sampler/singleton:
+# ==============================================================================
+train_forward_sampler/singleton.constructor = @train/forward/RandomSampler
+
+# Parameters for train_replay_buffer/singleton:
+# ==============================================================================
+train_replay_buffer/singleton.constructor = @RewardPrioritizedReplayBuffer
+
+# Parameters for train_reward/singleton:
+# ==============================================================================
+train_reward/singleton.constructor = @train/Reward
+
+# Parameters for valid_reward/singleton:
+# ==============================================================================
+valid_reward/singleton.constructor = @valid/Reward
+
+# Parameters for valid_sampler/singleton:
+# ==============================================================================
+valid_sampler/singleton.constructor = @valid/RandomSampler
+
+# Parameters for TanimotoSimilarityModes:
+# ==============================================================================
+TanimotoSimilarityModes.compute_every_n = %evaluation_step
+TanimotoSimilarityModes.max_modes = 5000
+TanimotoSimilarityModes.proxy = %train_proxy
+TanimotoSimilarityModes.proxy_term_threshold = 8.0
+TanimotoSimilarityModes.run_dir = %run_dir
+TanimotoSimilarityModes.similarity_threshold = 0.5
+
+# Parameters for Trainer:
+# ==============================================================================
+Trainer.device = 'cuda'
+Trainer.logger = %logger
+Trainer.lr_scheduler = None
+Trainer.n_iterations = 2500
+Trainer.objective = @objective/gin.singleton()
+Trainer.optimizer = @TrajectoryBalanceOptimizer()
+Trainer.run_dir = %run_dir
+Trainer.train_backward_n_trajectories = 0
+Trainer.train_batch_size = 100
+Trainer.train_forward_n_trajectories = 100
+Trainer.train_forward_sampler = %train_forward_sampler
+Trainer.train_metrics = %train_metrics
+Trainer.train_replay_buffer = %train_replay_buffer
+Trainer.train_replay_n_trajectories = 0
+Trainer.trajectory_filter = @RGFNTrajectoryFilter()
+
+# Parameters for TrajectoryBalanceObjective:
+# ==============================================================================
+TrajectoryBalanceObjective.backward_policy = %backward_policy
+TrajectoryBalanceObjective.forward_policy = %forward_policy
+TrajectoryBalanceObjective.z_dim = 16
+
+# Parameters for TrajectoryBalanceOptimizer:
+# ==============================================================================
+TrajectoryBalanceOptimizer.cls_name = 'Adam'
+TrajectoryBalanceOptimizer.logZ_multiplier = 100.0
+TrajectoryBalanceOptimizer.lr = 0.001
+
+# Parameters for UniqueMolecules:
+# ==============================================================================
+UniqueMolecules.dump_every_n = %evaluation_step
+UniqueMolecules.run_dir = %run_dir
+
+# Parameters for WandbLogger:
+# ==============================================================================
+WandbLogger.experiment_name = %run_name
+WandbLogger.logdir = @logdir/get_str()
+WandbLogger.mode = 'offline'
+WandbLogger.project_name = 'RGFN'

@@ -1,0 +1,265 @@
+import gin_config
+import rgfn
+
+# Macros:
+# ==============================================================================
+action_embedding_fn = @action_embedding_fn/gin.singleton()
+backward_policy = @backward_policy/gin.singleton()
+beta = 8
+data_factory = @data_factory/gin.singleton()
+evaluation_step = 500
+forward_policy = @forward_policy/gin.singleton()
+hidden_dim = 64
+logger = @logger/gin.singleton()
+run_dir = @run_dir/get_str()
+run_name = 'seh_paper_medium/mips_grpo/seed_1/batch'
+train_backward_policy = %backward_policy
+train_backward_sampler = @train_backward_sampler/gin.singleton()
+train_env = @env/gin.singleton()
+train_forward_sampler = @train_forward_sampler/gin.singleton()
+train_metrics = \
+    [@StandardGFNMetrics(),
+     @NumScaffoldsFound(),
+     @UniqueMolecules(),
+     @AllMolecules(),
+     @FractionEarlyTerminate(),
+     @QED(),
+     @TanimotoSimilarityModes()]
+train_proxy = @proxy/gin.singleton()
+train_replay_buffer = @train_replay_buffer/gin.singleton()
+train_reward = @train_reward/gin.singleton()
+user_root_dir = '/nfs/home/svu/ophv165/ips_phylogentics/molecule_synthesis/runs'
+
+# Parameters for train_metrics/AllMolecules:
+# ==============================================================================
+train_metrics/AllMolecules.dump_every_n = %evaluation_step
+train_metrics/AllMolecules.run_dir = %run_dir
+
+# Parameters for train_metrics/FractionEarlyTerminate:
+# ==============================================================================
+# None.
+
+# Parameters for action_embedding_fn/FragmentOneHotEmbedding:
+# ==============================================================================
+action_embedding_fn/FragmentOneHotEmbedding.data_factory = %data_factory
+action_embedding_fn/FragmentOneHotEmbedding.hidden_dim = %hidden_dim
+
+# Parameters for logdir/get_str:
+# ==============================================================================
+logdir/get_str.format = '{}/{}'
+logdir/get_str.values = [%run_dir, 'logs']
+
+# Parameters for run_dir/get_str:
+# ==============================================================================
+run_dir/get_str.format = '{}/{}'
+run_dir/get_str.values = [%user_root_dir, %run_name]
+
+# Parameters for objective/MIPSGRPOObjective:
+# ==============================================================================
+objective/MIPSGRPOObjective.advantage_clip = 10.0
+objective/MIPSGRPOObjective.advantage_eps = 1e-08
+objective/MIPSGRPOObjective.advantage_normalization = 'running'
+objective/MIPSGRPOObjective.backward_policy = %backward_policy
+objective/MIPSGRPOObjective.clip_eps = 0.2
+objective/MIPSGRPOObjective.exploration_rate = 0.0
+objective/MIPSGRPOObjective.forward_policy = %forward_policy
+objective/MIPSGRPOObjective.log_ratio_clip = 20.0
+objective/MIPSGRPOObjective.reverse_loss_weight = 1.0
+objective/MIPSGRPOObjective.reward_mode = 'linear'
+objective/MIPSGRPOObjective.running_scale_decay = 0.9
+objective/MIPSGRPOObjective.separate_reverse_updates = True
+
+# Parameters for MIPSOptimizer:
+# ==============================================================================
+MIPSOptimizer.forward_lr = 0.0001
+MIPSOptimizer.reverse_grad_clip_norm = 1.0
+MIPSOptimizer.reverse_lr = 0.001
+MIPSOptimizer.reverse_train_epochs = 4
+
+# Parameters for train_metrics/NumScaffoldsFound:
+# ==============================================================================
+train_metrics/NumScaffoldsFound.proxy_component_name = None
+train_metrics/NumScaffoldsFound.proxy_higher_better = True
+train_metrics/NumScaffoldsFound.proxy_value_threshold_list = [5, 6, 7, 8]
+
+# Parameters for OptimizerBase:
+# ==============================================================================
+# None.
+
+# Parameters for train_metrics/QED:
+# ==============================================================================
+# None.
+
+# Parameters for train/backward/RandomSampler:
+# ==============================================================================
+train/backward/RandomSampler.env = @reverse()
+train/backward/RandomSampler.policy = %train_backward_policy
+train/backward/RandomSampler.reward = %train_reward
+
+# Parameters for train/forward/RandomSampler:
+# ==============================================================================
+train/forward/RandomSampler.env = %train_env
+train/forward/RandomSampler.policy = %forward_policy
+train/forward/RandomSampler.reward = %train_reward
+
+# Parameters for backward_policy/ReactionBackwardPolicy:
+# ==============================================================================
+backward_policy/ReactionBackwardPolicy.backbone_policy = None
+backward_policy/ReactionBackwardPolicy.data_factory = %data_factory
+backward_policy/ReactionBackwardPolicy.hidden_dim = %hidden_dim
+backward_policy/ReactionBackwardPolicy.linear_output = False
+backward_policy/ReactionBackwardPolicy.num_heads = 4
+backward_policy/ReactionBackwardPolicy.num_layers = 5
+
+# Parameters for data_factory/ReactionDataFactory:
+# ==============================================================================
+data_factory/ReactionDataFactory.docking = False
+data_factory/ReactionDataFactory.fragment_path = None
+data_factory/ReactionDataFactory.reaction_path = 'data/chemistry.xlsx'
+
+# Parameters for env/ReactionEnv:
+# ==============================================================================
+env/ReactionEnv.data_factory = %data_factory
+env/ReactionEnv.max_num_reactions = 4
+env/ReactionEnv.share_cache_with_reversed = True
+
+# Parameters for forward_policy/ReactionForwardPolicy:
+# ==============================================================================
+forward_policy/ReactionForwardPolicy.action_embedding_fn = %action_embedding_fn
+forward_policy/ReactionForwardPolicy.data_factory = %data_factory
+forward_policy/ReactionForwardPolicy.hidden_dim = %hidden_dim
+forward_policy/ReactionForwardPolicy.linear_output = False
+forward_policy/ReactionForwardPolicy.num_heads = 4
+forward_policy/ReactionForwardPolicy.num_layers = 5
+forward_policy/ReactionForwardPolicy.random_c = False
+
+# Parameters for train/backward/reverse:
+# ==============================================================================
+train/backward/reverse.env = %train_env
+
+# Parameters for train/Reward:
+# ==============================================================================
+train/Reward.beta = %beta
+train/Reward.min_reward = 1e-08
+train/Reward.proxy = %train_proxy
+train/Reward.reward_boosting = 'exponential'
+
+# Parameters for train_replay_buffer/RewardPrioritizedReplayBuffer:
+# ==============================================================================
+train_replay_buffer/RewardPrioritizedReplayBuffer.max_size = 1000000.0
+train_replay_buffer/RewardPrioritizedReplayBuffer.proxy_term = None
+train_replay_buffer/RewardPrioritizedReplayBuffer.sampler = %train_backward_sampler
+train_replay_buffer/RewardPrioritizedReplayBuffer.temperature = %beta
+
+# Parameters for RGFNTrajectoryFilter:
+# ==============================================================================
+# None.
+
+# Parameters for proxy/SehMoleculeProxy:
+# ==============================================================================
+proxy/SehMoleculeProxy.batch_size = 128
+
+# Parameters for action_embedding_fn/singleton:
+# ==============================================================================
+action_embedding_fn/singleton.constructor = @FragmentOneHotEmbedding
+
+# Parameters for backward_policy/singleton:
+# ==============================================================================
+backward_policy/singleton.constructor = @ReactionBackwardPolicy
+
+# Parameters for data_factory/singleton:
+# ==============================================================================
+data_factory/singleton.constructor = @ReactionDataFactory
+
+# Parameters for env/singleton:
+# ==============================================================================
+env/singleton.constructor = @ReactionEnv
+
+# Parameters for forward_policy/singleton:
+# ==============================================================================
+forward_policy/singleton.constructor = @ReactionForwardPolicy
+
+# Parameters for logger/singleton:
+# ==============================================================================
+logger/singleton.constructor = @WandbLogger
+
+# Parameters for objective/singleton:
+# ==============================================================================
+objective/singleton.constructor = @MIPSGRPOObjective
+
+# Parameters for proxy/singleton:
+# ==============================================================================
+proxy/singleton.constructor = @SehMoleculeProxy
+
+# Parameters for train_backward_sampler/singleton:
+# ==============================================================================
+train_backward_sampler/singleton.constructor = @train/backward/RandomSampler
+
+# Parameters for train_forward_sampler/singleton:
+# ==============================================================================
+train_forward_sampler/singleton.constructor = @train/forward/RandomSampler
+
+# Parameters for train_replay_buffer/singleton:
+# ==============================================================================
+train_replay_buffer/singleton.constructor = @RewardPrioritizedReplayBuffer
+
+# Parameters for train_reward/singleton:
+# ==============================================================================
+train_reward/singleton.constructor = @train/Reward
+
+# Parameters for train_metrics/StandardGFNMetrics:
+# ==============================================================================
+# None.
+
+# Parameters for train_metrics/TanimotoSimilarityModes:
+# ==============================================================================
+train_metrics/TanimotoSimilarityModes.compute_every_n = %evaluation_step
+train_metrics/TanimotoSimilarityModes.max_modes = 5000
+train_metrics/TanimotoSimilarityModes.proxy = %train_proxy
+train_metrics/TanimotoSimilarityModes.proxy_term_threshold = 8.0
+train_metrics/TanimotoSimilarityModes.run_dir = %run_dir
+train_metrics/TanimotoSimilarityModes.similarity_threshold = 0.5
+train_metrics/TanimotoSimilarityModes.term_name = 'value'
+
+# Parameters for Trainer:
+# ==============================================================================
+Trainer.best_metric = 'loss'
+Trainer.checkpoint_mode = 'best'
+Trainer.device = 'cuda'
+Trainer.gradient_clipping_norm = 10.0
+Trainer.logger = %logger
+Trainer.lr_scheduler = None
+Trainer.metric_direction = 'auto'
+Trainer.n_iterations = 2500
+Trainer.objective = @objective/gin.singleton()
+Trainer.optimizer = @MIPSOptimizer()
+Trainer.run_dir = %run_dir
+Trainer.sanity_check_evaluation = False
+Trainer.train_artifacts = ()
+Trainer.train_backward_n_trajectories = 0
+Trainer.train_backward_sampler = None
+Trainer.train_batch_size = 100
+Trainer.train_forward_n_trajectories = 100
+Trainer.train_forward_sampler = %train_forward_sampler
+Trainer.train_metrics = %train_metrics
+Trainer.train_replay_buffer = %train_replay_buffer
+Trainer.train_replay_n_trajectories = 0
+Trainer.trajectory_filter = @RGFNTrajectoryFilter()
+Trainer.valid_artifacts = ()
+Trainer.valid_batch_size = -1
+Trainer.valid_every_n_iterations = 10
+Trainer.valid_metrics = ()
+Trainer.valid_n_trajectories = 0
+Trainer.valid_sampler = None
+
+# Parameters for train_metrics/UniqueMolecules:
+# ==============================================================================
+train_metrics/UniqueMolecules.dump_every_n = %evaluation_step
+train_metrics/UniqueMolecules.run_dir = %run_dir
+
+# Parameters for logger/WandbLogger:
+# ==============================================================================
+logger/WandbLogger.experiment_name = %run_name
+logger/WandbLogger.logdir = @logdir/get_str()
+logger/WandbLogger.mode = 'offline'
+logger/WandbLogger.project_name = 'RGFN'
