@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\caption{Compared learning signals. Multiplicity correction means that the
+terminal target does not acquire an extra factor equal to its number of paths.}
+\label{tab:methods}
+\begin{tabular}{lll}
+\toprule
+Method & Learning signal & Needs repeats? \\
+\midrule
+GRPO & group-normalized \(R(x)\) & no \\
+Count IPS-GRPO & \(R(x)/\hat p(x)\), group counts & yes \\
+GFlowNet TB & trajectory-balance residual & no \\
+MIPS-GRPO & \(R(x)q(\tau\mid x)/P_F(\tau)\), PPO & no \\
+\bottomrule
+\end{tabular}
+\end{table}
+

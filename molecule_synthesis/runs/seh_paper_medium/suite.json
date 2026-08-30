@@ -3,16 +3,24 @@
   "target_distribution": null,
   "runs": {
     "grpo": {
-      "0": "molecule_synthesis/runs/seh_paper_medium/grpo/seed_0/batch"
+      "0": "molecule_synthesis/runs/seh_paper_medium/grpo/seed_0/batch",
+      "1": "molecule_synthesis/runs/seh_paper_medium/grpo/seed_1/batch",
+      "2": "molecule_synthesis/runs/seh_paper_medium/grpo/seed_2/batch"
     },
     "count_ips_grpo": {
-      "0": "molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_0/batch"
+      "0": "molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_0/batch",
+      "1": "molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_1/batch",
+      "2": "molecule_synthesis/runs/seh_paper_medium/count_ips_grpo/seed_2/batch"
     },
     "mips_grpo": {
-      "0": "molecule_synthesis/runs/seh_paper_medium/mips_grpo/seed_0/20260827_112154"
+      "0": "molecule_synthesis/runs/seh_paper_medium/mips_grpo/seed_0/20260827_112154",
+      "1": "molecule_synthesis/runs/seh_paper_medium/mips_grpo/seed_1/batch",
+      "2": "molecule_synthesis/runs/seh_paper_medium/mips_grpo/seed_2/batch"
     },
     "rgfn": {
-      "0": "molecule_synthesis/runs/seh_paper_medium/rgfn/seed_0/batch"
+      "0": "molecule_synthesis/runs/seh_paper_medium/rgfn/seed_0/batch",
+      "1": "molecule_synthesis/runs/seh_paper_medium/rgfn/seed_1/batch",
+      "2": "molecule_synthesis/runs/seh_paper_medium/rgfn/seed_2/batch"
     }
   }
 }

@@ -1,0 +1,26 @@
+\begin{table}[t]
+\centering
+\caption{Hypergrid results in the informative-count and sparse-count regimes.
+Modes is out of four and \(\ell_1\) is the unnormalized distance to
+\(p(x)\propto R(x)\), so values are comparable within but not across grid
+sizes. Small-grid entries are mean \(\pm\) standard deviation over three
+seeds; large-grid entries are seed 0 only.}
+\label{tab:hypergrid}
+\begin{tabular}{lrrr}
+\toprule
+Method & Modes & \(\ell_1\) & Terminals visited \\
+\midrule
+\multicolumn{4}{l}{\emph{Counting works: \(H=8,G=256,K/G=0.25\)}}\\
+GRPO & \(1.0\pm0.0\) & \(1.768\pm0.000\) & \(1/64\) \\
+Count IPS-GRPO & \(4.0\pm0.0\) & \(0.226\pm0.007\) & \(64/64\) \\
+MIPS-GRPO & \(4.0\pm0.0\) & \(\mathbf{0.057\pm0.007}\) & \(64/64\) \\
+\midrule
+\multicolumn{4}{l}{\emph{Counting fails: \(H=64,G=32,K/G=128\)}}\\
+GRPO & 1 & 1.966 & 17/4096 \\
+Count IPS-GRPO & 1 & 1.844 & 42/4096 \\
+MIPS-GRPO & 4 & \textbf{0.262} & 4056/4096 \\
+GFlowNet TB & 4 & 0.270 & 4043/4096 \\
+\bottomrule
+\end{tabular}
+\end{table}
+

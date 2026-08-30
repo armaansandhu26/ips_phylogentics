@@ -1,0 +1,3 @@
+method,seeds,eval_samples_per_seed,linear_r_mean,linear_r_sd,loglog_r_mean,loglog_r_sd,ess_fraction_mean,ess_fraction_sd,unique_signatures_mean,unique_signatures_sd,provenance
+mips_grpo,1,1000000,0.977,,0.977,,0.999,,999987,,legacy_recoverable_artifact
+phylgfn,3,1000000,0.000543974,0.000920485,0.020721638,0.012548248,0.669984411,0.260486535,1000000,0,final_runs_27taxa_noreplay_b4096_seed0_seed1_seed2

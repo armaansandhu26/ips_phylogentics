@@ -3,7 +3,25 @@
 Living results document for the full-chemistry sEH comparison (`seh_paper_medium`).
 Update this file as each method/seed completes. Intended for paper tables and figures.
 
-**Last updated:** 2026-08-27
+**Last updated:** 2026-08-29
+
+## Final three-seed result
+
+All 12 runs completed 2,500 updates (250,000 forward training trajectories)
+and 50,000 final-policy samples. The final paper artifacts are in
+`results/final_2500/`.
+
+| Method | Valid (%) | Unique (%) | Mean proxy | Modes | Scaffolds >7 |
+|---|---:|---:|---:|---:|---:|
+| GRPO | 100.00 ± 0.00 | 0.011 ± 0.010 | 4.261 ± 0.424 | 0.0 ± 0.0 | 0.0 ± 0.0 |
+| Count IPS-GRPO | 100.00 ± 0.00 | 0.173 ± 0.286 | 3.816 ± 1.374 | 0.0 ± 0.0 | 0.0 ± 0.0 |
+| MIPS-GRPO | 99.64 ± 0.14 | 93.591 ± 2.427 | 4.281 ± 0.177 | 22.3 ± 17.0 | 32.0 ± 25.5 |
+| RGFN | 99.94 ± 0.09 | 74.540 ± 3.994 | 4.227 ± 0.421 | 14.0 ± 9.2 | 32.3 ± 24.2 |
+
+Values are mean ± sample standard deviation across seeds 0, 1, and 2.
+Modes use proxy > 7 and maximum Tanimoto similarity ≤ 0.5 under greedy
+leader selection. See `results/final_2500/REPORTING_GUIDE.md` for the proposed
+results text, interpretation, caveats, and figure caption.
 
 ---
 
@@ -48,7 +66,7 @@ Healthy runs (MIPS/RGFN expected): `n_unique` in the hundreds+ at 20k–50k samp
 
 ---
 
-## Summary table — seed 0 (final-checkpoint sampling)
+## Historical interim summary — seed 0
 
 Quick-check samples (5k) and paper-scale samples (50k) where available.
 
@@ -295,20 +313,12 @@ Both methods pass the operational collapse test. RGFN delivers higher proxy mass
 
 ## Seeds 1 and 2
 
-*Not yet started.*
-
-| Method | Seed 1 | Seed 2 |
-|---|---|---|
-| GRPO | TBD | TBD |
-| Count IPS-GRPO | TBD | TBD |
-| MIPS-GRPO | TBD | TBD |
-| RGFN | TBD | TBD |
-
-When complete, add mean ± std rows here for paper tables.
+Complete at 2,500 updates and 50,000 final-policy samples for every method.
+The per-seed results are in `results/final_2500/per_seed_results.csv`.
 
 ---
 
-## Hypothesis checklist (seed 0, in progress)
+## Historical hypothesis checklist (seed 0 interim)
 
 | Prediction | GRPO | Count IPS | MIPS | RGFN |
 |---|---|---|---|---|
@@ -413,3 +423,4 @@ figure, one main table, and one sampling-convergence supplement.
 | 2026-08-27 | Seed 0: GRPO collapse documented at 500/1500/2000 iters; Count IPS collapse at 500/2000 iters (50k sample); MIPS/RGFN batch in progress |
 | 2026-08-27 | Seed 0 @500 iter: MIPS-GRPO and RGFN sampling complete (5k each); both healthy (no collapse); 500-iter figures regenerated |
 | 2026-08-27 | Pruned the interim 500-update paper package to one main figure, one main table, and one sampling-convergence supplement; removed redundant or misleading generated figures |
+| 2026-08-29 | All four methods × three seeds complete at 2,500 updates and 50,000 final-policy samples; generated final aggregate table and best-run figure |
